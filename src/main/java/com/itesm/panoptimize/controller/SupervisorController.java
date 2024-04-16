@@ -1,0 +1,67 @@
+package com.itesm.panoptimize.controller;
+
+import com.itesm.panoptimize.dto.supervisor.AllDTO;
+import com.itesm.panoptimize.dto.supervisor.SupervisorDTO;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.annotation.Resource;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
+
+@RestController
+public class SupervisorController {
+    @Operation(
+            summary = "Get all the supervisors",
+            description = "Get the supervisor name and details without passwords or sensitive data"
+    )
+    @ApiResponses(value={
+            @ApiResponse(responseCode = "200",
+                    description = "Supervisors found",
+                    content = {
+                            @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = AllDTO.class))
+                    }),
+            @ApiResponse(responseCode = "404",
+                    description = "Supervisors not found",
+                    content = @Content),
+    })
+    @GetMapping("/supervisors/all")
+    public ResponseEntity<List<AllDTO>> getController(){
+        List<AllDTO> posts = new ArrayList<>();
+        SupervisorDTO supervisorDto= new SupervisorDTO ();
+        supervisorDto.setName("Caligula de Argona");
+        supervisorDto.setFloor("Sales_Floor");
+        supervisorDto.setVerified(true);
+        supervisorDto.setPicture("https://example.com/Caligula.jpg");
+        AllDTO post1 = new AllDTO();
+        AllDTO post2 = new AllDTO();
+        SupervisorDTO superDto = new SupervisorDTO();
+        superDto.setName("Steven Smith");
+        superDto.setFloor("CostumerSupport_Floor");
+        superDto.setVerified(true);
+        superDto.setPicture("https://example.com/StevenSmith.jpg");
+
+
+        post1.setSupervisor(supervisorDto);
+        post2.setSupervisor(superDto);
+        posts.add(post1);
+        posts.add(post2);
+
+        return ResponseEntity.ok(posts);
+    }
+
+
+
+}
