@@ -1,11 +1,11 @@
-package com.tec.panoptimize.dto.agent;
+package com.itesm.panoptimize.dto.agent;
 
-public class DashboardAgentsDTO {
+public class DashboardAgentDTO {
     private String name;
     private AgentStatus status;
 
     // Constructor
-    public DashboardAgentsDTO(String name, AgentStatus status) {
+    public DashboardAgentDTO(String name, AgentStatus status) {
         this.name = name;
         this.status = status;
     }

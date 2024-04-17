@@ -1,13 +1,13 @@
-package com.tec.panoptimize.service;
+package com.itesm.panoptimize.service;
 import org.springframework.stereotype.Service;
-import com.tec.panoptimize.dto.agent.DashboardAgentsDTO;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 @Service
 public class DashboardAgentsService {
 
-    public Map<String, Integer> calculateStatusCounts(List<DashboardAgentsDTO> agents) {
+    public Map<String, Integer> calculateStatusCounts(List<com.itesm.panoptimize.dto.agent.DashboardAgentDTO> agents) {
         Map<String, Integer> statusCounts = new HashMap<>();
 
         // Initialize counts
@@ -17,7 +17,7 @@ public class DashboardAgentsService {
         statusCounts.put("OFFLINE", 0);
 
         // Count agents by status
-        for (DashboardAgentsDTO agent : agents) {
+        for (com.itesm.panoptimize.dto.agent.DashboardAgentDTO agent : agents) {
             switch (agent.getStatus()) {
                 case AVAILABLE:
                     statusCounts.put("AVAILABLE", statusCounts.get("AVAILABLE") + 1);
