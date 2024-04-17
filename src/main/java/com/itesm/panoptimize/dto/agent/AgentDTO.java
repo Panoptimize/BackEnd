@@ -6,6 +6,13 @@ public class AgentDTO {
     private String currentContactM;
     private int intTemperature;
 
+    public AgentDTO(String name, String workspace, String currentContactM, int intTemperature) {
+        this.name = name;
+        this.workspace = workspace;
+        this.currentContactM = currentContactM;
+        this.intTemperature = intTemperature;
+    }
+
     public String getName() {
         return name;
     }

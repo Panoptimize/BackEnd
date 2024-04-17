@@ -19,22 +19,22 @@ public class AgentController {
     ) {
         List<AgentDTO> allAgents= new ArrayList<>();
 
-        AgentDTO agent1 = createAgent("Dave Lombardo", "Sales", (int) (Math.random() * 101), "Call");
+        AgentDTO agent1 = new AgentDTO("Dave Lombardo", "Sales", "Call", (int) (Math.random() * 101));
         allAgents.add(agent1);
 
-        AgentDTO agent2 = createAgent("Trevor Strnad", "Sales", (int) (Math.random() * 101), "Call");
+        AgentDTO agent2 = new AgentDTO("Trevor Strnad", "Sales", "Call", (int) (Math.random() * 101));
         allAgents.add(agent2);
 
-        AgentDTO agent3 = createAgent("Mikael Akerfeldt", "Sales", (int) (Math.random() * 101), "Call");
+        AgentDTO agent3 = new AgentDTO("Mikael Akerfeldt", "Sales", "Call", (int) (Math.random() * 101));
         allAgents.add(agent3);
 
-        AgentDTO agent4 = createAgent("George Fisher", "Sales", (int) (Math.random() * 101), "Call");
+        AgentDTO agent4 = new AgentDTO("George Fisher", "Sales", "Call", (int) (Math.random() * 101));
         allAgents.add(agent4);
 
-        AgentDTO agent5 = createAgent("Angela Gossow", "Sales", (int) (Math.random() * 101), "Call");
+        AgentDTO agent5 = new AgentDTO("Angela Gossow", "Sales", "Call", (int) (Math.random() * 101));
         allAgents.add(agent5);
 
-        AgentDTO agent6 = createAgent("Phil Bozeman", "Sales", (int) (Math.random() * 101), "Call");
+        AgentDTO agent6 = new AgentDTO("Phil Bozeman", "Sales", "Call", (int) (Math.random() * 101));
         allAgents.add(agent6);
 
 
@@ -47,15 +47,6 @@ public class AgentController {
 
         return ResponseEntity.ok(agentsPage);
 
-    }
-
-    private AgentDTO createAgent(String name, String workspace, int temperature, String currentContactM) {
-        AgentDTO agent = new AgentDTO();
-        agent.setName(name);
-        agent.setWorkspace(workspace);
-        agent.setIntTemperature(temperature);
-        agent.setCurrentContactM(currentContactM);
-        return agent;
     }
 
 }
