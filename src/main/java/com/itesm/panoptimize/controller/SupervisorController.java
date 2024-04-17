@@ -1,6 +1,5 @@
 package com.itesm.panoptimize.controller;
 
-import com.itesm.panoptimize.dto.supervisor.AllDTO;
 import com.itesm.panoptimize.dto.supervisor.SupervisorDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,22 +30,20 @@ public class SupervisorController {
                     description = "Supervisors found",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = AllDTO.class))
+                                    schema = @Schema(implementation = SupervisorDTO.class))
                     }),
             @ApiResponse(responseCode = "404",
                     description = "Supervisors not found",
                     content = @Content),
     })
     @GetMapping("/supervisors/all")
-    public ResponseEntity<List<AllDTO>> getController(){
-        List<AllDTO> posts = new ArrayList<>();
+    public ResponseEntity<List<SupervisorDTO>> getController(){
+        List<SupervisorDTO> posts = new ArrayList<>();
         SupervisorDTO supervisorDto= new SupervisorDTO ();
         supervisorDto.setName("Caligula de Argona");
         supervisorDto.setFloor("Sales_Floor");
         supervisorDto.setVerified(true);
         supervisorDto.setPicture("https://example.com/Caligula.jpg");
-        AllDTO post1 = new AllDTO();
-        AllDTO post2 = new AllDTO();
         SupervisorDTO superDto = new SupervisorDTO();
         superDto.setName("Steven Smith");
         superDto.setFloor("CostumerSupport_Floor");
@@ -54,10 +51,8 @@ public class SupervisorController {
         superDto.setPicture("https://example.com/StevenSmith.jpg");
 
 
-        post1.setSupervisor(supervisorDto);
-        post2.setSupervisor(superDto);
-        posts.add(post1);
-        posts.add(post2);
+        posts.add(supervisorDto);
+        posts.add(superDto);
 
         return ResponseEntity.ok(posts);
     }
