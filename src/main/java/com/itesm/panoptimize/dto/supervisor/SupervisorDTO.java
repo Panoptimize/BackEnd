@@ -13,7 +13,7 @@ public class SupervisorDTO {
     private boolean verified;
     private String picture;
 
-    // Getters y setters para todos los campos
+    // Getters and setters for all fields
     public int getId() {
         return id;
     }
