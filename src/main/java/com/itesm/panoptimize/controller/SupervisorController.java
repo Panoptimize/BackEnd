@@ -2,8 +2,7 @@ package com.itesm.panoptimize.controller;
 
 import com.itesm.panoptimize.dto.supervisor.SupervisorDTO;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +56,19 @@ public class SupervisorController {
         return ResponseEntity.ok(posts);
     }
 
+    @Operation(summary = "Deleting a supervisor", description = "Director deletes a supervisor.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Supervisor deleted",
+                    content = @Content),
+            @ApiResponse(responseCode = "404",
+                    description = "Unable to delete",
+                    content = @Content)
+    })
+    @DeleteMapping("/supervisor/{id}")
+    public ResponseEntity<String> deleteSupervisorResponse(@PathVariable Long id){
+        return ResponseEntity.ok("Supervisor " + id + " was deleted.");
+    }
 
 
 }
