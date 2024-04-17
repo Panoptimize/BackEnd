@@ -11,7 +11,7 @@ POST
     workspace: int []
 }
 */
-public class DashboardDTO {
+public class DashboardDataDTO {
     @NotBlank
     private String timeframe;
     private int[] agents;

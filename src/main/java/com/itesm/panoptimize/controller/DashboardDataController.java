@@ -1,6 +1,6 @@
-package com.tec.panoptimize.controller;
+package com.itesm.panoptimize.controller;
 
-import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
+import com.itesm.panoptimize.dto.dashboard.DashboardDataDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,21 +15,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/dashboard")
-public class DashboardController {
+public class DashboardDataController {
     @Operation(summary = "Get the dashboard data", description = "Get the dashboard data by time frame, agent and workspace number")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Found the data",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = DashboardDTO.class))
+                                    schema = @Schema(implementation = DashboardDataDTO.class))
                     }),
             @ApiResponse(responseCode = "404",
                     description = "Data not found",
                     content = @Content),
     })
     @PostMapping("/data")
-    public ResponseEntity<String> postData(@RequestBody DashboardDTO dashboardDTO) {
+    public ResponseEntity<String> postData(@RequestBody DashboardDataDTO dashboardDataDTO) {
         return new ResponseEntity<>("Data received", HttpStatus.OK);
     }
 }
