@@ -1,5 +1,5 @@
 package com.itesm.panoptimize.controller;
-import com.itesm.panoptimize.dto.SupervisorDTO;
+import com.itesm.panoptimize.dto.supervisor.SupervisorDTO;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,22 +14,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RestController
 @RequestMapping ("/supervisors")
 public class SupervisorController {
-    private final List<SupervisorDTO> supervisors = new ArrayList<>();
-    public SupervisorController() {
-        SupervisorDTO initialSupervisor = new SupervisorDTO();
-        initialSupervisor.setId(1);
-        initialSupervisor.setName("Supervisor Uno");
-        initialSupervisor.setEmail("supervisor1@empresa.com");
-        initialSupervisor.setUsername("supervisorUno");
-        initialSupervisor.setPassword("123456");
-        List<String> supervisedAgents = new ArrayList<>();
-        supervisedAgents.add("Agent1");
-        supervisedAgents.add("Agent2");
-        initialSupervisor.setSupervisedAgents(supervisedAgents);
-        supervisors.add(initialSupervisor);
-    }
-
-
     @PatchMapping("/{id}")
     @Operation(summary = "Update a supervisor", description = "Updates the details of an existing supervisor by ID")
     @ApiResponses(value = {
@@ -44,6 +28,18 @@ public class SupervisorController {
                     content = @Content)
     })
     public ResponseEntity<SupervisorDTO> updateSupervisor(@PathVariable int id, @RequestBody SupervisorDTO supervisorDetails) {
+        List<SupervisorDTO> supervisors = new ArrayList<>();
+        SupervisorDTO initialSupervisor = new SupervisorDTO();
+        initialSupervisor.setId(1);
+        initialSupervisor.setName("Supervisor Uno");
+        initialSupervisor.setEmail("supervisor1@empresa.com");
+        initialSupervisor.setUsername("supervisorUno");
+        initialSupervisor.setPassword("123456");
+        List<String> supervisedAgents = new ArrayList<>();
+        supervisedAgents.add("Agent1");
+        supervisedAgents.add("Agent2");
+        initialSupervisor.setSupervisedAgents(supervisedAgents);
+        supervisors.add(initialSupervisor);
         for (SupervisorDTO supervisor : supervisors) {
             if (supervisor != null){
                 if (supervisor.getId() == id) {

@@ -1,4 +1,4 @@
-package com.itesm.panoptimize.dto;
+package com.itesm.panoptimize.dto.supervisor;
 
 import java.util.List;
 
