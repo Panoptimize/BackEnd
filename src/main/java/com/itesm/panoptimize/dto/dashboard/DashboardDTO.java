@@ -1,4 +1,4 @@
-package com.tec.panoptimize.dto;
+package com.itesm.panoptimize.dto.dashboard;
 
 import jakarta.validation.constraints.NotBlank;
 

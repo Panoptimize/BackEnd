@@ -1,6 +1,6 @@
 package com.tec.panoptimize.controller;
 
-import com.tec.panoptimize.dto.DashboardDTO;
+import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
