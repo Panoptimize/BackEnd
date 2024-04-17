@@ -1,10 +1,10 @@
 package com.itesm.panoptimize.controller;
 
 import com.itesm.panoptimize.dto.agent.AgentDTO;
+import com.itesm.panoptimize.dto.agent.PostFeedbackDTO;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.ArrayList;
 
 
@@ -37,16 +37,17 @@ public class AgentController {
         AgentDTO agent6 = new AgentDTO("Phil Bozeman", "Sales", "Call", (int) (Math.random() * 101));
         allAgents.add(agent6);
 
-
-
-
-
         int startIndex = page * size;
         int endIndex = Math.min(startIndex + size, allAgents.size());
         List<AgentDTO> agentsPage = allAgents.subList(startIndex, endIndex);
 
         return ResponseEntity.ok(agentsPage);
 
+    }
+
+    @PostMapping("/agent/feedback")
+    public ResponseEntity<String> postFeedback(@RequestBody PostFeedbackDTO feedbackDTO) {
+        return ResponseEntity.ok("Feedback enviado exitosamente \nFecha: " + feedbackDTO.getDate());
     }
 
 }
