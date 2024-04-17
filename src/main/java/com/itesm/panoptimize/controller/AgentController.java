@@ -21,8 +21,6 @@ import java.util.List;
 @RestController
 public class AgentController {
 
-    private List<AgentDTO> agentList = new ArrayList<>();
-    private List<WorkspaceDTO> workspaces = new ArrayList<>();
 
     //Documentación de Open API
     @Operation(summary = "Obtener info  de agente", description = "Obtener la info de agente mediante el id" )
@@ -51,22 +49,11 @@ public class AgentController {
         agentDTO.setEmailID("chapelle007@gmail.com");
         agentDTO.setUsername("dave.p");
         agentDTO.setPassword("************"); //Ver como darle el formato del password
-        agentList.add(agentDTO);
+
         //Ver si es necesario hacer DTOs para workspace o solo con puro string
         WorkspaceDTO workspace1 = new WorkspaceDTO();
         workspace1.setName("Delivery"); //Creamos workspace dto nuevo y lo llamamos Delivery
-        workspaces.add(workspace1);
-        agentDTO.setWorkspaces(workspaces);
         return  ResponseEntity.ok(agentDTO);
     }
-    @DeleteMapping("/agent/{id}")
-    public ResponseEntity<String> deleteAgent(@PathVariable int id) {
-        for (AgentDTO agent : agentList) {
-            if (agent.getId() == id) {
-                agentList.remove(agent);
-                return ResponseEntity.ok("Agente eliminado exitosamente");
-            }
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró ningún agente con el ID proporcionado");
-    }
+
 }
