@@ -1,22 +1,15 @@
 package com.itesm.panoptimize.controller;
-
 import com.itesm.panoptimize.dto.supervisor.SupervisorDTO;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import jakarta.annotation.Resource;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-
 
 @RestController
 @RequestMapping ("/supervisors")
@@ -72,16 +65,31 @@ public class SupervisorController {
     }
 
     @PatchMapping("/{id}")
+    @Operation(summary = "Update a supervisor", description = "Updates the details of an existing supervisor by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Supervisor updated successfully",
+                    content = {
+                            @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = SupervisorDTO.class))
+                    }),
+            @ApiResponse(responseCode = "404",
+                    description = "Supervisor not found",
+                    content = @Content)
+    })
     public ResponseEntity<SupervisorDTO> updateSupervisor(@PathVariable int id, @RequestBody SupervisorDTO supervisorDetails) {
         List<SupervisorDTO> supervisors = new ArrayList<>();
-        SupervisorDTO supervisorDto= new SupervisorDTO ();
-        supervisorDto.setName("Caligula de Argona");
-        supervisorDto.setFloor("Sales_Floor");
-        supervisorDto.setVerified(true);
-        supervisorDto.setPicture("https://example.com/Caligula.jpg");
-
-        supervisors.add(supervisorDto);
-
+        SupervisorDTO initialSupervisor = new SupervisorDTO();
+        initialSupervisor.setId(1);
+        initialSupervisor.setName("Supervisor Uno");
+        initialSupervisor.setEmail("supervisor1@empresa.com");
+        initialSupervisor.setUsername("supervisorUno");
+        initialSupervisor.setPassword("123456");
+        List<String> supervisedAgents = new ArrayList<>();
+        supervisedAgents.add("Agent1");
+        supervisedAgents.add("Agent2");
+        initialSupervisor.setSupervisedAgents(supervisedAgents);
+        supervisors.add(initialSupervisor);
         for (SupervisorDTO supervisor : supervisors) {
             if (supervisor != null){
                 if (supervisor.getId() == id) {
