@@ -1,38 +1,17 @@
-package com.example.demo.controller;
+package com.itesm.panoptimize.controller;
 
-import com.example.demo.dto.AgentDTO;
-import com.example.demo.dto.PostCrateDTO;
-import com.example.demo.dto.PostDTO;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import com.itesm.panoptimize.dto.agent.AgentDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestParam;
-
-
 import java.util.ArrayList;
+
+
 import java.util.List;
 
 @RestController
 public class AgentController {
-    @Operation(summary = "Get list of agents", description = "Get list of agents of a certain size and in pages")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                        description = "Found agents",
-                        content = {
-                            @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = PostDTO.class))
-                        }),
-            @ApiResponse(responseCode = "404",
-                    description = "Agents not found",
-                    content = @Content),
-            })
-
     @GetMapping("/agents/all")
     public ResponseEntity<List<AgentDTO>> getAllAgents(
             @RequestParam(defaultValue = "0") int page,
@@ -79,9 +58,4 @@ public class AgentController {
         return agent;
     }
 
-
-    @PostMapping("/post")
-    public ResponseEntity<PostCrateDTO> createPost(PostCrateDTO post) {
-        return ResponseEntity.ok(post);
-    }
 }

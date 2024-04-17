@@ -1,4 +1,4 @@
-package com.example.demo.dto;
+package com.itesm.panoptimize.dto.agent;
 
 public class AgentDTO {
     private String name;
