@@ -1,4 +1,4 @@
-package com.itesm.panoptimize.dto;
+package com.itesm.panoptimize.dto.supervisor;
 
 import java.util.List;
 
@@ -7,6 +7,9 @@ public class SupervisorDTO {
     private String email;
     private String username;
     private String password;
+    private String floor;
+    private boolean verified;
+    private String picture;
     private List<String> supervisedAgents;
     private int id;
 
@@ -17,6 +20,7 @@ public class SupervisorDTO {
     public void setId(int id) {
         this.id = id;
     }
+
 
     public String getName() {
         return name;
@@ -56,5 +60,29 @@ public class SupervisorDTO {
 
     public void setSupervisedAgents(List<String> supervisedAgents) {
         this.supervisedAgents = supervisedAgents;
+    }
+
+    public String getFloor() {
+        return floor;
+    }
+
+    public void setFloor(String floor) {
+        this.floor = floor;
+    }
+
+    public boolean isVerified() {
+        return verified;
+    }
+
+    public void setVerified(boolean verified) {
+        this.verified = verified;
+    }
+
+    public String getPicture() {
+        return picture;
+    }
+
+    public void setPicture(String picture) {
+        this.picture = picture;
     }
 }
