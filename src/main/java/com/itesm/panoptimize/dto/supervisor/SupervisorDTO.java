@@ -3,17 +3,16 @@ package com.itesm.panoptimize.dto.supervisor;
 import java.util.List;
 
 public class SupervisorDTO {
-    private int id;
     private String name;
     private String email;
     private String username;
     private String password;
-    private List<String> supervisedAgents;
     private String floor;
     private boolean verified;
     private String picture;
+    private List<String> supervisedAgents;
+    private int id;
 
-    // Getters and setters for all fields
     public int getId() {
         return id;
     }
