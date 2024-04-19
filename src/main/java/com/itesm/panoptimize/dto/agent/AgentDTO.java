@@ -1,6 +1,7 @@
 package com.itesm.panoptimize.dto.agent;
 
 public class AgentDTO {
+    private int id;
     private String name;
     private String workspace;
     private String currentContactM;
@@ -11,6 +12,10 @@ public class AgentDTO {
         this.workspace = workspace;
         this.currentContactM = currentContactM;
         this.intTemperature = intTemperature;
+    }
+
+    public AgentDTO() {
+
     }
 
     public String getName() {
@@ -46,4 +51,11 @@ public class AgentDTO {
     }
 
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 }
