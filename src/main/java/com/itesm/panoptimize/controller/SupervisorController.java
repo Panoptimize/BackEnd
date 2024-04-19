@@ -78,31 +78,41 @@ public class SupervisorController {
                     content = @Content)
     })
     public ResponseEntity<SupervisorDTO> updateSupervisor(@PathVariable int id, @RequestBody SupervisorDTO supervisorDetails) {
+        SupervisorDTO initialSupervisor = new SupervisorDTO();
+        createSupervisor(initialSupervisor);
+
+        return ResponseEntity.ok(initialSupervisor);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<SupervisorDTO> getSupervisorById(@PathVariable int id) {
         List<SupervisorDTO> supervisors = new ArrayList<>();
         SupervisorDTO initialSupervisor = new SupervisorDTO();
+        createSupervisor(initialSupervisor);
+        List<String> supervisedAgents = new ArrayList<>();
+        supervisedAgents.add("Agent1");
+        supervisedAgents.add("Agent2");
+        initialSupervisor.setSupervisedAgents(supervisedAgents);
+
+        supervisors.add(initialSupervisor);
+        //API to get a supervisor by ID
+        for (SupervisorDTO supervisor : supervisors) {
+            if (supervisor.getId() == id) {
+                return ResponseEntity.ok(supervisor);
+            }
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    // Temporal method, to not repeat code
+    private void createSupervisor(SupervisorDTO initialSupervisor) {
         initialSupervisor.setId(1);
         initialSupervisor.setName("Supervisor Uno");
         initialSupervisor.setEmail("supervisor1@empresa.com");
         initialSupervisor.setUsername("supervisorUno");
         initialSupervisor.setPassword("123456");
-        List<String> supervisedAgents = new ArrayList<>();
-        supervisedAgents.add("Agent1");
-        supervisedAgents.add("Agent2");
-        initialSupervisor.setSupervisedAgents(supervisedAgents);
-        supervisors.add(initialSupervisor);
-        for (SupervisorDTO supervisor : supervisors) {
-            if (supervisor != null){
-                if (supervisor.getId() == id) {
-                    if (supervisorDetails.getName() != null) supervisor.setName(supervisorDetails.getName());
-                    if (supervisorDetails.getEmail() != null) supervisor.setEmail(supervisorDetails.getEmail());
-                    if (supervisorDetails.getUsername() != null) supervisor.setUsername(supervisorDetails.getUsername());
-                    if (supervisorDetails.getPassword() != null) supervisor.setPassword(supervisorDetails.getPassword());
-                    if (supervisorDetails.getSupervisedAgents() != null) supervisor.setSupervisedAgents(supervisorDetails.getSupervisedAgents());
-                    return ResponseEntity.ok(supervisor);
-                }
-            }
-
-        }
-        return ResponseEntity.notFound().build();
+        initialSupervisor.setFloor("Main Floor");
+        initialSupervisor.setVerified(true);
+        initialSupervisor.setPicture("https://example.com/supervisorUno.jpg");
     }
 }
