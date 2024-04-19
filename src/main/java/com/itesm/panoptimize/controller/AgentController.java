@@ -1,26 +1,55 @@
 package com.itesm.panoptimize.controller;
+
 import com.itesm.panoptimize.dto.agent.AgentDTO;
+import com.itesm.panoptimize.dto.agent.PostFeedbackDTO;
 import com.itesm.panoptimize.dto.agent.WorkspaceDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+
+
 import java.util.List;
 
-//El controlador debe de comparar el ID con el de la base de datos
-// para despues mostrar el resto del usuario
 @RestController
 public class AgentController {
+    @GetMapping("/agents/all")
+    public ResponseEntity<List<AgentDTO>> getAllAgents(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        List<AgentDTO> allAgents= new ArrayList<>();
 
+        AgentDTO agent1 = new AgentDTO("Dave Lombardo", "Sales", "Call", (int) (Math.random() * 101));
+        allAgents.add(agent1);
+
+        AgentDTO agent2 = new AgentDTO("Trevor Strnad", "Sales", "Call", (int) (Math.random() * 101));
+        allAgents.add(agent2);
+
+        AgentDTO agent3 = new AgentDTO("Mikael Akerfeldt", "Sales", "Call", (int) (Math.random() * 101));
+        allAgents.add(agent3);
+
+        AgentDTO agent4 = new AgentDTO("George Fisher", "Sales", "Call", (int) (Math.random() * 101));
+        allAgents.add(agent4);
+
+        AgentDTO agent5 = new AgentDTO("Angela Gossow", "Sales", "Call", (int) (Math.random() * 101));
+        allAgents.add(agent5);
+
+        AgentDTO agent6 = new AgentDTO("Phil Bozeman", "Sales", "Call", (int) (Math.random() * 101));
+        allAgents.add(agent6);
+
+        int startIndex = page * size;
+        int endIndex = Math.min(startIndex + size, allAgents.size());
+        List<AgentDTO> agentsPage = allAgents.subList(startIndex, endIndex);
+
+        return ResponseEntity.ok(agentsPage);
+
+    }
 
     //Documentación de Open API
     @Operation(summary = "Obtener info  de agente", description = "Obtener la info de agente mediante el id" )
@@ -46,14 +75,12 @@ public class AgentController {
         AgentDTO agentDTO = new AgentDTO();
         agentDTO.setId(1); //Ver si es necesario cambiar esto, seria solamente para la comparación con BD
         agentDTO.setName("Dave Parker");
-        agentDTO.setEmailID("chapelle007@gmail.com");
-        agentDTO.setUsername("dave.p");
-        agentDTO.setPassword("************"); //Ver como darle el formato del password
 
-        //Ver si es necesario hacer DTOs para workspace o solo con puro string
-        WorkspaceDTO workspace1 = new WorkspaceDTO();
-        workspace1.setName("Delivery"); //Creamos workspace dto nuevo y lo llamamos Delivery
         return  ResponseEntity.ok(agentDTO);
     }
 
+    @PostMapping("/agent/feedback")
+    public ResponseEntity<String> postFeedback(@RequestBody PostFeedbackDTO feedbackDTO) {
+        return ResponseEntity.ok("Feedback enviado exitosamente \nFecha: " + feedbackDTO.getDate());
+    }
 }

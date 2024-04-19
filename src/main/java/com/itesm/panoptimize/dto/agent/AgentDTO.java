@@ -1,23 +1,21 @@
 package com.itesm.panoptimize.dto.agent;
 
-import java.util.List;
 public class AgentDTO {
-    private int id; //ID to compare and fetch info
+    private int id;
     private String name;
-    private String emailID;
-    private String username;
-    private String password;
-    private List <WorkspaceDTO> workspaces; //or workspace
+    private String workspace;
+    private String currentContactM;
+    private int intTemperature;
 
-    //Getters and Setters
-
-
-    public int getId() {
-        return id;
+    public AgentDTO(String name, String workspace, String currentContactM, int intTemperature) {
+        this.name = name;
+        this.workspace = workspace;
+        this.currentContactM = currentContactM;
+        this.intTemperature = intTemperature;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public AgentDTO() {
+
     }
 
     public String getName() {
@@ -28,38 +26,36 @@ public class AgentDTO {
         this.name = name;
     }
 
-    public String getEmailID() {
-        return emailID;
+    public String getWorkspace() {
+        return workspace;
     }
 
-    public void setEmailID(String emailID) {
-        this.emailID = emailID;
+    public void setWorkspace(String workspace) {
+        this.workspace = workspace;
     }
 
-    public String getUsername() {
-        return username;
+    public String getCurrentContactM() {
+        return currentContactM;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setCurrentContactM(String currentContactM) {
+        this.currentContactM = currentContactM;
     }
 
-    public String getPassword() {
-        return password;
+    public int getIntTemperature() {
+        return intTemperature;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setIntTemperature(int intTemperature) {
+        this.intTemperature = intTemperature;
     }
 
-    public List<WorkspaceDTO> getWorkspaces() {
-        return workspaces;
+
+    public int getId() {
+        return id;
     }
 
-    public void setWorkspaces(List<WorkspaceDTO> workspaces) {
-        this.workspaces = workspaces;
+    public void setId(int id) {
+        this.id = id;
     }
 }
-
-//We need to check how to properly check this and send the info that is necesary (not passwords or
-//fragile information)
