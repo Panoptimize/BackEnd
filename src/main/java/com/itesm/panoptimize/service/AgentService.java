@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 @Service
-public class DashboardAgentsService {
+public class AgentService {
 
     public Map<String, Integer> calculateStatusCounts(List<com.itesm.panoptimize.dto.agent.DashboardAgentDTO> agents) {
         Map<String, Integer> statusCounts = new HashMap<>();
