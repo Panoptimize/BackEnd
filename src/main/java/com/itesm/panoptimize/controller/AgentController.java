@@ -1,13 +1,15 @@
 package com.itesm.panoptimize.controller;
 
 import com.itesm.panoptimize.dto.agent.AgentDTO;
+import com.itesm.panoptimize.dto.agent.DashboardAgentDTO;
 import com.itesm.panoptimize.dto.agent.PostFeedbackDTO;
-import com.itesm.panoptimize.dto.agent.WorkspaceDTO;
+import com.itesm.panoptimize.service.AgentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,9 +17,18 @@ import java.util.ArrayList;
 
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class AgentController {
+
+    private AgentService agentService = new AgentService();
+
+    @Autowired
+    public AgentController(AgentService agentService) {
+        this.agentService = agentService;
+    }
+
     @GetMapping("/agents/all")
     public ResponseEntity<List<AgentDTO>> getAllAgents(
             @RequestParam(defaultValue = "0") int page,
@@ -82,5 +93,39 @@ public class AgentController {
     @PostMapping("/agent/feedback")
     public ResponseEntity<String> postFeedback(@RequestBody PostFeedbackDTO feedbackDTO) {
         return ResponseEntity.ok("Feedback enviado exitosamente \nFecha: " + feedbackDTO.getDate());
+    }
+
+    @GetMapping("/dashboard/agents")
+    @Operation(summary = "Obtain status for real-time dashboard")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Agents status recollected.",
+                    content = {
+                            @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = DashboardAgentDTO.class))
+                    }),
+            @ApiResponse(responseCode = "404",
+                    description = "Status Not found.",
+                    content = @Content)
+    })
+    public Map<String, Integer> getAgentStatusCountsForDashboard() {
+        // Generate sample agents (you can replace this with actual data from your service)
+        List<DashboardAgentDTO> agents = generateSampleAgents();
+
+        // Calculate status counts using the agent service
+        Map<String, Integer> statusCounts = agentService.calculateStatusCounts(agents);
+
+        return statusCounts;
+    }
+
+    // Generates sample agents for testing purposes
+    private List<DashboardAgentDTO> generateSampleAgents() {
+        List<DashboardAgentDTO> agents = new ArrayList<>();
+        agents.add(new DashboardAgentDTO("Agent 1", DashboardAgentDTO.AgentStatus.AVAILABLE));
+        agents.add(new DashboardAgentDTO("Agent 2", DashboardAgentDTO.AgentStatus.IN_CONTACT));
+        agents.add(new DashboardAgentDTO("Agent 3", DashboardAgentDTO.AgentStatus.AFTER_CALL_WORK));
+        agents.add(new DashboardAgentDTO("Agent 4", DashboardAgentDTO.AgentStatus.OFFLINE));
+        agents.add(new DashboardAgentDTO("Agent 5", DashboardAgentDTO.AgentStatus.AVAILABLE));
+        return agents;
     }
 }
