@@ -1,5 +1,6 @@
 package com.itesm.panoptimize.controller;
 
+import com.itesm.panoptimize.dto.dashboard.DashMetricData;
 import com.itesm.panoptimize.dto.dashboard.DashboardDataDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,10 +13,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequestMapping("/dashboard")
 public class DashboardDataController {
+    private static final String API_URL = "http://localhost:8000/get_metric_data"; //To test the consumption of AWS connect
     @Operation(summary = "Get the dashboard data", description = "Get the dashboard data by time frame, agent and workspace number")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -32,4 +35,28 @@ public class DashboardDataController {
     public ResponseEntity<String> postData(@RequestBody DashboardDataDTO dashboardDataDTO) {
         return new ResponseEntity<>("Data received", HttpStatus.OK);
     }
+
+    @Operation(summary = "Get the connect metric data", description = "Get the metric data requiered to do the solved on first interactions, CallbackContacts, AbandonedContacts, HandledContacts")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Found the metrics",
+                    content = {
+                            @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = DashMetricData.class))
+                    }),
+            @ApiResponse(responseCode = "404",
+                    description = "Data not found",
+                    content = @Content),
+    })
+    @PostMapping("/dataFRC")
+    public ResponseEntity<String> getFRC(@RequestBody DashMetricData requestDto) {
+        //TemplateInstance
+        RestTemplate restTemplate = new RestTemplate();
+        //Make Post
+        ResponseEntity<String> response = restTemplate.postForEntity(API_URL, requestDto,String.class);
+        //Return
+        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+    }
+
+
 }
