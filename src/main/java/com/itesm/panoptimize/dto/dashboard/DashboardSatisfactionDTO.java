@@ -13,11 +13,16 @@ POST
 */
 public class DashboardSatisfactionDTO {
     @NotBlank
+    private int instance_id;
+
     private int speed_of_answer;
     private int handle_time;
     private int after_callwork_time;
     private boolean abandoned;
 
+    public int getInstance_id() { return instance_id; }
+
+    public void setInstance_id(int instance_id) { this.instance_id = instance_id; }
     public int getSpeedOfAnswer() {
         return speed_of_answer;
     }
