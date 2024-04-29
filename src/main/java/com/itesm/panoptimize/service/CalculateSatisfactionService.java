@@ -42,8 +42,8 @@ public class CalculateSatisfactionService {
 
         int satisfaction = 0;
 
-        if(abandoned) {satisfaction=0;}
-        else{            
+        if(!abandoned) 
+        {
             satisfaction += calcAnswerTimeQuality(speedOfAnswer);
             satisfaction += calcHandleTimeQuality(handleTime);
             satisfaction /=20; //to switch case 0-4
