@@ -3,10 +3,10 @@ package com.itesm.panoptimize.service;
 import java.util.ArrayList;
 import java.util.List;
 
-//TODO Creación de endpoints esenciales para performance.
+//TODO Creacion de endpoints esenciales para performance.
 // - El endpoint de KPI de Nivel de servicio (SL) -> 30%
-// - El endpoint de KPI de Resolución a Primer Contacto (FCR) -> 40%
-// - El endpoint del KPI de Ocupación -> 30%
+// - El endpoint de KPI de Resolucion a Primer Contacto (FCR) -> 40%
+// - El endpoint del KPI de Ocupacion -> 30%
 public class CalculatePerformance {
     public static List<Double> performanceCalculation(List<Double> serviceLevel, List<Double> firstContactResolution, List<Double> ocupation){
 
@@ -16,7 +16,7 @@ public class CalculatePerformance {
         int lenFCR = firstContactResolution.size();
         int lenOC = ocupation.size();
 
-        //Suponiendo que las longitudes/tamaños son iguales
+        //Suponiendo que las longitudes son iguales
         if ((lenSl == lenFCR) && (lenOC == lenFCR)){
             System.out.println("The data samples are not of the same size.");
             return performance;
