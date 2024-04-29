@@ -2,11 +2,14 @@ package com.itesm.panoptimize.dto.dashboard;
 
 import jakarta.validation.constraints.NotBlank;
 
+import java.util.UUID;
+
 public class DashboardDTO {
     @NotBlank
-    private String timeframe;
+    private String timeframe; // Timeframe format: "2024-04-28 ~ 2024-04-28"
     private int[] agents;
-    private int[] workspaces;
+    // UUID format
+    private UUID[] workspaceIds;
 
     public String getTimeframe() {
         return timeframe;
@@ -24,11 +27,11 @@ public class DashboardDTO {
         this.agents = agents;
     }
 
-    public int[] getWorkspaces() {
-        return workspaces;
+    public UUID[] getWorkspaceIds() {
+        return workspaceIds;
     }
 
-    public void setWorkspaces(int[] workspaces) {
-        this.workspaces = workspaces;
+    public void setWorkspaceIds(UUID[] workspaceIds) {
+        this.workspaceIds = workspaceIds;
     }
 }
