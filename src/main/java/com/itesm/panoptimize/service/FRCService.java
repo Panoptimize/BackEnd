@@ -1,39 +1,49 @@
 package com.itesm.panoptimize.service;
 
-import org.springframework.core.io.ClassPathResource;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.client.RestTemplate;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 @Service
 public class FRCService {
-    public ResponseEntity<String> requestJSONBuild() throws IOException {
-        ClassPathResource resource = new ClassPathResource("request.json");
-        InputStream inputStream = resource.getInputStream();
-        byte[] fileBytes = FileCopyUtils.copyToByteArray(inputStream);
-        String fileContents = new String(fileBytes, StandardCharsets.UTF_8);
+    public ResponseEntity<String> requestJSONBuild() {
+        JSONObject requestPayload = new JSONObject();
+        requestPayload.put("instance_id", "1");
+        requestPayload.put("start_time", "2024-01-01");
+        requestPayload.put("end_time", "2024-01-31");
+
+        JSONArray metricsArray = new JSONArray();
+        metricsArray.put("contactHandled");
+        metricsArray.put("contactsAbandoned");
+        metricsArray.put("callbackContacts");
+        requestPayload.put("metrics", metricsArray);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<String> requestEntity = new HttpEntity<>(fileContents, headers);
+        HttpEntity<String> requestEntity = new HttpEntity<>(requestPayload.toString(), headers);
 
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> responseEntity = restTemplate.postForEntity(
                 "http://localhost:8080/dashboard/dataFRC", requestEntity, String.class
         );
 
-        String responseBody = responseEntity.getBody();
+        String jsonResponse = responseEntity.getBody();
+        JSONObject responseObject = new JSONObject(jsonResponse);
+        JSONObject dataObject = responseObject.getJSONObject("Data");
 
-        System.out.println("Response from dataFRC endpoint: " + responseEntity);
+        int contactHandled = dataObject.getInt("contactHandled");
+        int contactsAbandoned = dataObject.getInt("contactsAbandoned");
+        int callbackContacts = dataObject.getInt("callbackContacts");
+
+        System.out.println("contactHandled: " + contactHandled);
+        System.out.println("contactsAbandoned: " + contactsAbandoned);
+        System.out.println("callbackContacts: " + callbackContacts);
 
         return responseEntity;
     }

@@ -1,19 +1,20 @@
 package com.itesm.panoptimize.controller;
 
+import com.itesm.panoptimize.dto.dashboard.DashMetricData;
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
+import com.itesm.panoptimize.service.FRCService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -22,6 +23,11 @@ import java.nio.file.Paths;
 @RestController
 @RequestMapping("/dashboard")
 public class DashboardController {
+    public DashboardController(FRCService frcService) {
+        this.frcService = frcService;
+    }
+    private static final String API_URL = "http://localhost:8000/get_metric_data"; //To test the consumption of AWS connect
+
     @Operation(summary = "Download the dashboard data", description = "Download the dashboard data by time frame, agent and workspace number")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -49,5 +55,26 @@ public class DashboardController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+    @PostMapping("/dataFRC")
+    public ResponseEntity<String> getFRC(@RequestBody DashMetricData requestDto) {
+        //TemplateInstance
+        RestTemplate restTemplate = new RestTemplate();
+        //Make Post
+        ResponseEntity<String> response = restTemplate.postForEntity(API_URL, requestDto,String.class);
+        //Return
+        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+    }
+
+    private FRCService frcService;
+
+    @Autowired
+    public void DashboardDataController(FRCService frcService) {
+        this.frcService = frcService;
+    };
+
+    @GetMapping("/metrics")
+    public String FRCService() throws IOException {
+        return frcService.requestJSONBuild().getBody();
     }
 }
