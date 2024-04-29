@@ -1,11 +1,14 @@
 package com.itesm.panoptimize.controller;
 
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
+import com.itesm.panoptimize.dto.dashboard.DashboardSatisfactionDTO;
+import com.itesm.panoptimize.service.CalculateSatisfactionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
@@ -22,6 +25,10 @@ import java.nio.file.Paths;
 @RestController
 @RequestMapping("/dashboard")
 public class DashboardController {
+
+    @Autowired
+    private CalculateSatisfactionService satisfactionService;
+
     @Operation(summary = "Download the dashboard data", description = "Download the dashboard data by time frame, agent and workspace number")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -49,5 +56,10 @@ public class DashboardController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+    @PostMapping("/satisfaction/")
+    public ResponseEntity<String> calculateSatisfaction(@RequestBody DashboardSatisfactionDTO dashboardSatisfactionDTO) {
+        String satisfaction = satisfactionService.calculateSatisfaction(dashboardSatisfactionDTO);
+        return ResponseEntity.ok("Satisfaction Calculated");
     }
 }
