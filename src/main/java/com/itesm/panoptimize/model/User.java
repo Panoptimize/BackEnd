@@ -2,6 +2,8 @@ package com.itesm.panoptimize.model;
 
 import jakarta.persistence.*;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "user")
 public class User {
@@ -11,7 +13,7 @@ public class User {
     private int id;
 
     @Column(name = "connect_id", nullable = false, unique = true)
-    private String connectId;
+    private UUID connectId;
 
     @Column(nullable = false)
     private String email;
@@ -29,4 +31,56 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "user_type_id", nullable = false)
     private UserType userType;
+
+    public int getId() {
+        return id;
+    }
+
+    public UUID getConnectId() {
+        return connectId;
+    }
+
+    public void setConnectId(UUID connectId) {
+        this.connectId = connectId;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+    }
+
+    public Company getCompany() {
+        return company;
+    }
+
+    public void setCompany(Company company) {
+        this.company = company;
+    }
+
+    public UserType getUserType() {
+        return userType;
+    }
+
+    public void setUserType(UserType userType) {
+        this.userType = userType;
+    }
 }

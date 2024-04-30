@@ -24,9 +24,57 @@ public class AgentsHaveUsers {
     @ManyToOne
     @JoinColumn(name = "agent_id", referencedColumnName = "user_id", insertable = false, updatable = false)
     private User agent;
+
+    public int getSupervisorId() {
+        return supervisorId;
+    }
+
+    public void setSupervisorId(int supervisorId) {
+        this.supervisorId = supervisorId;
+    }
+
+    public int getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(int agentId) {
+        this.agentId = agentId;
+    }
+
+    public User getSupervisor() {
+        return supervisor;
+    }
+
+    public void setSupervisor(User supervisor) {
+        this.supervisor = supervisor;
+    }
+
+    public User getAgent() {
+        return agent;
+    }
+
+    public void setAgent(User agent) {
+        this.agent = agent;
+    }
 }
 
 class AgentsHaveUsersId implements Serializable {
     private int supervisorId;
     private int agentId;
+
+    public int getSupervisorId() {
+        return supervisorId;
+    }
+
+    public void setSupervisorId(int supervisorId) {
+        this.supervisorId = supervisorId;
+    }
+
+    public int getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(int agentId) {
+        this.agentId = agentId;
+    }
 }

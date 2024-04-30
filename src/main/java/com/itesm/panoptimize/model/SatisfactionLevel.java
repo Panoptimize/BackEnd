@@ -14,6 +14,6 @@ public class SatisfactionLevel {
     private String levelName;
 
     @ManyToOne
-    @JoinColumn(name = "call_call_id", nullable = false)
-    private Call call;
+    @JoinColumn(name = "contact_id", nullable = false)
+    private Contact contact;
 }

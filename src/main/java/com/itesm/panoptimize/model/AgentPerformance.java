@@ -27,4 +27,52 @@ public class AgentPerformance {
     @ManyToOne
     @JoinColumn(name = "agent_id", nullable = false)
     private User agent;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public int getTotalContactsHandled() {
+        return totalContactsHandled;
+    }
+
+    public void setTotalContactsHandled(int totalContactsHandled) {
+        this.totalContactsHandled = totalContactsHandled;
+    }
+
+    public int getTotalAfterCallwork() {
+        return totalAfterCallwork;
+    }
+
+    public void setTotalAfterCallwork(int totalAfterCallwork) {
+        this.totalAfterCallwork = totalAfterCallwork;
+    }
+
+    public float getAdherencePercentage() {
+        return adherencePercentage;
+    }
+
+    public void setAdherencePercentage(float adherencePercentage) {
+        this.adherencePercentage = adherencePercentage;
+    }
+
+    public User getAgent() {
+        return agent;
+    }
+
+    public void setAgent(User agent) {
+        this.agent = agent;
+    }
 }

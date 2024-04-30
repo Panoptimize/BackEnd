@@ -27,4 +27,52 @@ public class GlobalMetric {
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getMetricDescription() {
+        return metricDescription;
+    }
+
+    public void setMetricDescription(String metricDescription) {
+        this.metricDescription = metricDescription;
+    }
+
+    public float getCurrentValue() {
+        return currentValue;
+    }
+
+    public void setCurrentValue(float currentValue) {
+        this.currentValue = currentValue;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public Company getCompany() {
+        return company;
+    }
+
+    public void setCompany(Company company) {
+        this.company = company;
+    }
 }
