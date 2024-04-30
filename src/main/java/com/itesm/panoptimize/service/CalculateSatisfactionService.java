@@ -1,13 +1,29 @@
 package com.itesm.panoptimize.service;
-import com.itesm.panoptimize.dto.dashboard.DashboardSatisfactionDTO;
+import com.itesm.panoptimize.dto.dashboard.CallMetricsDTO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class CalculateSatisfactionService {
+
+    private final RestTemplate restTemplate;
+
+    @Autowired
+    public CalculateSatisfactionService(RestTemplate restTemplate){
+        this.restTemplate = restTemplate;
+    }
+
+    public List<CallMetricsDTO> getCallMetrics() {
+        String apiUrl = "http://127.0.0.1:8000/";
+
+        CallMetricsDTO[] call_metrics = restTemplate.getForObject(apiUrl, CallMetricsDTO[].class);
+
+        return List.of(call_metrics);
+    }
 
     public static int calcAnswerTimeQuality(int answer_time){
         int quality=30;//we assign 30 max points for answer time and 70 to handle time
@@ -35,10 +51,19 @@ public class CalculateSatisfactionService {
         return quality;
       }
 
-    public String calculateSatisfaction(DashboardSatisfactionDTO satisfactionDTO){
-        int speedOfAnswer = satisfactionDTO.getSpeedOfAnswer();
-        int handleTime = satisfactionDTO.getHandleTime();
-        boolean abandoned = satisfactionDTO.getAbandoned();
+      public List<Integer> calculateSatisfaction(List<CallMetricsDTO> call_metrics){
+        List<Integer> results = new ArrayList<>(List.of(0,0,0,0));
+        for(CallMetricsDTO metrics: call_metrics) {
+            int satisfactionLevel = calculateSatisfaction(metrics);
+            results.set(satisfactionLevel, results.get(satisfactionLevel) + 1);
+        }
+        return results;
+      }
+
+    public int calculateSatisfaction(CallMetricsDTO metrics){
+        int speedOfAnswer = metrics.getSpeedOfAnswer();
+        int handleTime = metrics.getHandleTime();
+        boolean abandoned = metrics.getAbandoned();
 
         int satisfaction = 0;
 
@@ -48,20 +73,10 @@ public class CalculateSatisfactionService {
             satisfaction += calcHandleTimeQuality(handleTime);
             satisfaction /=20; //to switch case 0-4
         }
-
-        switch(satisfaction){
-            case 0:
-                return "Very unsatisfied";
-            case 1:
-                return "Unsatisfied";
-            case 2:
-                return "Neutral";
-            case 3:
-                return "Satisfied";
-            case 4:
-                return "Very satisfied";
-            default:
-                return "";
-        }
+        if(satisfaction < 20) { return 0; }
+        else if (satisfaction < 40) { return 1; }
+        else if (satisfaction < 60) { return 2; }
+        else if (satisfaction < 80) { return 3; }
+        else { return 4; }
     }
 }

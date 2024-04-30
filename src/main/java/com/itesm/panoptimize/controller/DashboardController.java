@@ -1,7 +1,7 @@
 package com.itesm.panoptimize.controller;
 
+import com.itesm.panoptimize.dto.dashboard.CallMetricsDTO;
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
-import com.itesm.panoptimize.dto.dashboard.DashboardSatisfactionDTO;
 import com.itesm.panoptimize.service.CalculateSatisfactionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,14 +13,12 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 @RestController
 @RequestMapping("/dashboard")
@@ -57,9 +55,9 @@ public class DashboardController {
             return ResponseEntity.notFound().build();
         }
     }
-    @PostMapping("/satisfaction/")
-    public ResponseEntity<String> calculateSatisfaction(@RequestBody DashboardSatisfactionDTO dashboardSatisfactionDTO) {
-        String satisfaction = satisfactionService.calculateSatisfaction(dashboardSatisfactionDTO);
-        return ResponseEntity.ok("Satisfaction Calculated");
+    @GetMapping("/customer-satisfaction")
+    public ResponseEntity<List<Integer>> calculateSatisfaction() {
+        List<CallMetricsDTO> metrics = satisfactionService.getCallMetrics();
+        return ResponseEntity.ok(satisfactionService.calculateSatisfaction(metrics));
     }
 }
