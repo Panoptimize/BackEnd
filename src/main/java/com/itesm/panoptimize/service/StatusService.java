@@ -2,21 +2,31 @@ package com.itesm.panoptimize.service;
 
 import com.itesm.panoptimize.dto.agent.StatusDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
+/*
+ * Service that manages agent statuses
+ * This service is responsible for querying specific agent metrics from an Amazon Connect API simulator.
+ * @version 1.0
+ */
 @Service
 public class StatusService {
 
+    private final WebClient webClient;
+
     @Autowired
-    private RestTemplate restTemplate;
+    public StatusService(WebClient.Builder webClientBuilder) {
+        this.webClient = webClientBuilder.baseUrl("http://localhost:8000").build();
+    }
 
+    /**
+     * This method makes a POST request to the metrics endpoint
+     * and returns the data in a StatusDTO object
+     * @return StatusDTO object with the metrics data
+     */
     public StatusDTO filterMetrics() {
-        String url = "http://localhost:8000/metrics";
-
         String requestBody = "{"
                 + "\"Metrics\": ["
                 + "{ \"Name\": \"AGENTS_AVAILABLE\", \"Unit\": \"COUNT\" },"
@@ -29,24 +39,14 @@ public class StatusService {
                 + "\"Message\": null"
                 + "}";
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        StatusDTO statusDTO = webClient.post()
+                .uri("/status")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(StatusDTO.class)
+                .block();  // block is used to wait for the response mono to complete
 
-        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
-
-        StatusDTO data = restTemplate.postForObject(url, entity, StatusDTO.class);
-
-
-        if (data == null) {
-            // handle the case where data is null, for example by returning null or throwing an exception
-            return null;
-        }
-
-        return data;
+        return statusDTO;
     }
-
-
-
-
-
 }
