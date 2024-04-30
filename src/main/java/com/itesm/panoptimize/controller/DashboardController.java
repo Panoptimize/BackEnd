@@ -79,7 +79,7 @@ public class DashboardController {
         List<Double> performance;
 
         //TODO Creacion de endpoints para extraer esos datos
-        List<Double> fcr = List.of(50.0,100.0,30.0,20.0);
+        List<Double> fcr = List.of(50.0,100.0,30.0,20.0); //se saca del endpoint
         List<Double> sl = List.of(20.0,40.0,10.0,20.0);
         List<Double> ocup = List.of(40.0,40.0,10.0,20.0);
 
