@@ -3,29 +3,28 @@ package com.itesm.panoptimize.dto.dashboard;
 import jakarta.validation.constraints.NotBlank;
 public class CallMetricsDTO {
     @NotBlank
-    private int instance_id;
-
-    private int speed_of_answer;
-    private int handle_time;
+    private int instanceId;
+    private int speedOfAnswer;
+    private int handleTime;
     private boolean abandoned;
 
-    public int getInstance_id() { return instance_id; }
+    public int getInstanceId() { return instanceId; }
 
-    public void setInstance_id(int instance_id) { this.instance_id = instance_id; }
+    public void setInstanceId(int instanceId) { this.instanceId = instanceId; }
     public int getSpeedOfAnswer() {
-        return speed_of_answer;
+        return speedOfAnswer;
     }
 
-    public void setSpeedOfAnswer(int speed_of_answer) {
-        this.speed_of_answer = speed_of_answer;
+    public void setSpeedOfAnswer(int speedOfAnswer) {
+        this.speedOfAnswer = speedOfAnswer;
     }
 
     public int getHandleTime() {
-        return handle_time;
+        return handleTime;
     }
 
-    public void setHandleTime(int handle_time) {
-        this.handle_time = handle_time;
+    public void setHandleTime(int handleTime) {
+        this.handleTime = handleTime;
     }
 
     public boolean getAbandoned() { return abandoned; }

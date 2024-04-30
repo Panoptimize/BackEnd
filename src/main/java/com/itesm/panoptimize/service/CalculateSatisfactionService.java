@@ -18,7 +18,7 @@ public class CalculateSatisfactionService {
     }
 
     public List<CallMetricsDTO> getCallMetrics() {
-        String apiUrl = "http://127.0.0.1:8000/";
+        String apiUrl = "http://127.0.0.1:8000";
 
         CallMetricsDTO[] call_metrics = restTemplate.getForObject(apiUrl, CallMetricsDTO[].class);
 
@@ -52,9 +52,11 @@ public class CalculateSatisfactionService {
       }
 
       public List<Integer> calculateSatisfaction(List<CallMetricsDTO> call_metrics){
-        List<Integer> results = new ArrayList<>(List.of(0,0,0,0));
+        List<Integer> results = new ArrayList<>(List.of(0,0,0,0,0));
         for(CallMetricsDTO metrics: call_metrics) {
+            System.out.println(metrics.getSpeedOfAnswer());
             int satisfactionLevel = calculateSatisfaction(metrics);
+            System.out.println(satisfactionLevel);
             results.set(satisfactionLevel, results.get(satisfactionLevel) + 1);
         }
         return results;
@@ -71,7 +73,6 @@ public class CalculateSatisfactionService {
         {
             satisfaction += calcAnswerTimeQuality(speedOfAnswer);
             satisfaction += calcHandleTimeQuality(handleTime);
-            satisfaction /=20; //to switch case 0-4
         }
         if(satisfaction < 20) { return 0; }
         else if (satisfaction < 40) { return 1; }
