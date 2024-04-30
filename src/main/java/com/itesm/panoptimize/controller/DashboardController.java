@@ -1,6 +1,7 @@
 package com.itesm.panoptimize.controller;
 
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
+import com.itesm.panoptimize.dto.dashboard.MetricsDTO;
 import com.itesm.panoptimize.service.DashboardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -88,4 +89,11 @@ public class DashboardController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+
+    @PostMapping("/metrics")
+    public ResponseEntity<MetricsDTO> getMetrics() {
+        MetricsDTO metricsData = dashboardService.getMetricsData();
+        return ResponseEntity.ok(metricsData);
+    }
+
 }

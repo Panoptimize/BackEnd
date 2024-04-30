@@ -19,7 +19,7 @@ public class DashboardDataService {
     }
 
     public Double getAbandonRate() throws JSONException {
-        String url = "http://127.0.0.1:8000/metrics/v2/ABANDONMENT_RATE"; // Replace with your actual URL
+        String url = "http://127.0.0.1:8000/metrics/v2/ABANDONMENT_RATE";
         return getMetricValue(url);
     }
 
