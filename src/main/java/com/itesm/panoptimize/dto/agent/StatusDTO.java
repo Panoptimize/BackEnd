@@ -22,7 +22,7 @@ public class StatusDTO {
     }
 
     /**
-     * Represents a collection of metrics, encapsulating individual metrics.
+     * Represents a collection of metric, encapsulating individual metrics.
      */
     public static class Collection {
         @JsonProperty("Metric")
