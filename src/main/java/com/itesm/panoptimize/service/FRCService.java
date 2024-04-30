@@ -2,16 +2,16 @@ package com.itesm.panoptimize.service;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 public class FRCService {
-    public ResponseEntity<String> requestJSONBuild() {
+    public float requestJSONBuild() {
         JSONObject requestPayload = new JSONObject();
         requestPayload.put("instance_id", "1");
         requestPayload.put("start_time", "2024-01-01");
@@ -23,15 +23,15 @@ public class FRCService {
         metricsArray.put("callbackContacts");
         requestPayload.put("metrics", metricsArray);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        WebClient client = WebClient.create();
 
-        HttpEntity<String> requestEntity = new HttpEntity<>(requestPayload.toString(), headers);
-
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> responseEntity = restTemplate.postForEntity(
-                "http://localhost:8080/dashboard/dataFRC", requestEntity, String.class
-        );
+        ResponseEntity<String> responseEntity = client.post()
+                .uri("http://localhost:8080/dashboard/dataFRC")
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(BodyInserters.fromValue(requestPayload.toString()))
+                .retrieve()
+                .toEntity(String.class)
+                .block();
 
         String jsonResponse = responseEntity.getBody();
         JSONObject responseObject = new JSONObject(jsonResponse);
@@ -41,20 +41,10 @@ public class FRCService {
         int contactsAbandoned = dataObject.getInt("contactsAbandoned");
         int callbackContacts = dataObject.getInt("callbackContacts");
 
-        System.out.println("contactHandled: " + contactHandled);
-        System.out.println("contactsAbandoned: " + contactsAbandoned);
-        System.out.println("callbackContacts: " + callbackContacts);
+        int firstResContact = contactHandled - (contactsAbandoned + callbackContacts);
 
-        int contactHandleTotal = contactHandled;
-        System.out.println("contactHandleTotal: " + contactHandleTotal);
+        float firstResKPI = ((float) firstResContact / contactHandled) * 100;
 
-        int firstResContact = contactHandleTotal - (contactsAbandoned + callbackContacts);
-        System.out.println("firstResContact: " + firstResContact);
-
-        float firstResKPI = ((float) firstResContact / contactHandleTotal) * 100;
-
-        System.out.println("firstResKPI: " + firstResKPI);
-
-        return responseEntity;
+        return firstResKPI;
     }
 }

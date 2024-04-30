@@ -8,9 +8,12 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -74,7 +77,15 @@ public class DashboardController {
     };
 
     @GetMapping("/metrics")
-    public String FRCService() throws IOException {
-        return frcService.requestJSONBuild().getBody();
+    public ResponseEntity<String> FRCService() {
+        float firstResponseKPI = frcService.requestJSONBuild();
+
+        JSONObject responseJSON = new JSONObject();
+        responseJSON.put("FRC-KPI", firstResponseKPI);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        return new ResponseEntity<>(responseJSON.toString(), headers, HttpStatus.OK);
     }
 }
