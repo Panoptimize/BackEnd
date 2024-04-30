@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class AgentPerformancecRepository extends JpaRepository<AgentPerformance, Long> {
+public interface AgentPerformanceRepository extends JpaRepository<AgentPerformance, Long> {
 
 }
