@@ -31,7 +31,7 @@ public class StatusDTO {
     }
 
     /**
-     * Represents an individual metric, detailing the metric's name and its value.
+     * Represents an individual metric, detailing the metric name and its value.
      */
     public static class Metric {
         @JsonProperty("Name")
