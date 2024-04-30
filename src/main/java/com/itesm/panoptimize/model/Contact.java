@@ -1,21 +1,22 @@
 package com.itesm.panoptimize.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+
+import java.util.Date;
 
 @Entity
-@Table(name = "call")
-public class Call {
+@Table(name = "contact")
+public class Contact {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "call_id")
-    private Long callId;
+    @Column(name = "contact_id")
+    private int id;
 
     @Column(name = "start_time")
-    private LocalDateTime startTime;
+    private Date startTime;
 
     @Column(name = "end_time")
-    private LocalDateTime endTime;
+    private Date endTime;
 
     @Column(name = "resolution_status")
     private String resolutionStatus;
@@ -35,27 +36,27 @@ public class Call {
     @Column(name = "satisfaction")
     private int satisfaction;
 
-    public Long getCallId() {
-        return callId;
+    public int getId() {
+        return id;
     }
 
-    public void setCallId(Long callId) {
-        this.callId = callId;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public LocalDateTime getStartTime() {
+    public Date getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(LocalDateTime startTime) {
+    public void setStartTime(Date startTime) {
         this.startTime = startTime;
     }
 
-    public LocalDateTime getEndTime() {
+    public Date getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(LocalDateTime endTime) {
+    public void setEndTime(Date endTime) {
         this.endTime = endTime;
     }
 
