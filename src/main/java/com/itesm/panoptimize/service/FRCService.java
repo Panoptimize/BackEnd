@@ -45,6 +45,16 @@ public class FRCService {
         System.out.println("contactsAbandoned: " + contactsAbandoned);
         System.out.println("callbackContacts: " + callbackContacts);
 
+        int contactHandleTotal = contactHandled;
+        System.out.println("contactHandleTotal: " + contactHandleTotal);
+
+        int firstResContact = contactHandleTotal - (contactsAbandoned + callbackContacts);
+        System.out.println("firstResContact: " + firstResContact);
+
+        float firstResKPI = ((float) firstResContact / contactHandleTotal) * 100;
+
+        System.out.println("firstResKPI: " + firstResKPI);
+
         return responseEntity;
     }
 }
