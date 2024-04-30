@@ -3,6 +3,7 @@ package com.itesm.panoptimize.model;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
 @Table(name = "agents_have_users")
@@ -76,5 +77,18 @@ class AgentsHaveUsersId implements Serializable {
 
     public void setAgentId(int agentId) {
         this.agentId = agentId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AgentsHaveUsersId that = (AgentsHaveUsersId) o;
+        return supervisorId == that.supervisorId && agentId == that.agentId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(supervisorId, agentId);
     }
 }

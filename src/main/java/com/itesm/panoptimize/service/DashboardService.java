@@ -152,17 +152,12 @@ public class DashboardService {
                 "  \"start_time\": 167000\n" +
                 "}";
 
-        MetricsDTO metricdata = webClient.post()
+        return webClient.post()
                 .uri("/metrics/data")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestJson)
                 .retrieve()
                 .bodyToMono(MetricsDTO.class)
                 .block();
-
-        return metricdata;
-
-
     }
-
 }
