@@ -76,7 +76,7 @@ public class DashboardController {
         this.frcService = frcService;
     };
 
-    @GetMapping("/metrics")
+    @GetMapping("/metricFRC")
     public ResponseEntity<String> FRCService() {
         float firstResponseKPI = frcService.requestJSONBuild();
 
