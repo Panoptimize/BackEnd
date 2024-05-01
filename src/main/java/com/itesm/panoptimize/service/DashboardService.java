@@ -2,6 +2,7 @@ package com.itesm.panoptimize.service;
 
 import com.itesm.panoptimize.config.Constants;
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
+import com.itesm.panoptimize.dto.dashboard.metric.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -25,7 +26,7 @@ public class DashboardService {
     public DashboardService(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.baseUrl("http://localhost:8000").build();
     }
-    private double[] callKPIs(String metricRequest) {
+    private double[] callKPIs(RequestMetricDataV2 metricRequest) {
         WebClient.UriSpec<WebClient.RequestBodySpec> uriSpec = webClient.post();
         WebClient.RequestBodySpec bodySpec = uriSpec.uri("/get_metric_data");
         WebClient.RequestHeadersSpec<?> headersSpec = bodySpec.bodyValue(metricRequest);
@@ -33,131 +34,76 @@ public class DashboardService {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .acceptCharset(StandardCharsets.UTF_8)
                 .retrieve();
-        Mono<ResponseEntity<double[]>> responseEntityMono = responseSpec.toEntity(double[].class);
-        ResponseEntity<double[]> responseEntity = responseEntityMono.block();
+        Mono<ResponseEntity<MetricsDTO>> responseEntityMono = responseSpec.toEntity(MetricsDTO.class);
+        ResponseEntity<MetricsDTO> responseEntity = responseEntityMono.block();
+        double[] doublesResponse = new double[3];
         assert responseEntity != null;
-        return responseEntity.getBody();
+        return doublesResponse;
     }
 
-    public List<Double> getKPIs(DashboardDTO dashboardDTO) throws ParseException {
-        String[] dates = dashboardDTO.getTimeframe().split(Constants.DAT_INTERVAL_DELIMITER);
-        Date startDate = DateFormat.getDateInstance().parse(dates[0].trim());
-        Date endDate = DateFormat.getDateInstance().parse(dates[1].trim());
+    public RequestMetricDataV2 getKPIs() {
 
-        // Convert dates to integers
-        int start = (int) startDate.getTime();
-        int end = (int) endDate.getTime();
+        RequestMetricDataV2 requestMetricData = new RequestMetricDataV2();
 
+        // Set the provided values
+        requestMetricData.setEndTime(168000);
+        requestMetricData.setStartTime(167000);
+        requestMetricData.setMaxResults(100);
+        requestMetricData.setNextToken("");
+        requestMetricData.setResourceArn("arn:aws:lambda:us-west-1:123456789012:function:my-lambda-function");
 
+        // Set up filters
+        Filter[] filters = new Filter[1];
+        filters[0] = new Filter();
+        filters[0].setFilterKey("region");
+        filters[0].setFilterValues(new String[]{"us-west-1", "us-east-1"});
+        requestMetricData.setFilters(filters);
 
-        //Dummy method
-        return List.of(1.0, 2.0, 3.0);
+        // Set up groupings
+        requestMetricData.setGroupings(new String[]{"service"});
+
+        // Set up interval
+        Interval interval = new Interval();
+        interval.setIntervalPeriod("1h");
+        interval.setTimeZone("UTC");
+        requestMetricData.setInterval(interval);
+
+        // Set up metrics
+        Metric[] metrics = new Metric[7];
+        metrics[0] = createMetric("AGENT_SCHEDULE_ADHERENCE", "status", new String[]{"success"}, false, "greater_than", 90);
+        metrics[1] = createMetric("ABANDONMENT_RATE", null, null, false, "less_than", 5);
+        metrics[2] = createMetric("CONTACTS_HANDLED", null, null, false, "greater_than", 1000);
+        metrics[3] = createMetric("SUM_HANDLE_TIME", null, null, false, "greater_than", 15000);
+        metrics[4] = createMetric("SERVICE_LEVEL", null, null, false, "greater_than", 80);
+        metrics[5] = createMetric("AVG_HOLD_TIME", null, null, false, "less_than", 120);
+        metrics[6] = createMetric("OCCUPANCY", null, null, false, "greater_than", 75);
+        requestMetricData.setMetrics(metrics);
+
+        return requestMetricData;
     }
-    public MetricsDTO getMetricsData() {
-        String requestJson = """
-                {
-                  "end_time": 168000,
-                  "filters": [
-                    {
-                      "filter_key": "region",
-                      "filter_values": ["us-west-1", "us-east-1"]
-                    }
-                  ],
-                  "groupings": ["service"],
-                  "interval": {
-                    "interval_period": "1h",
-                    "time_zone": "UTC"
-                  },
-                  "max_results": 100,
-                  "metrics": [
-                    {
-                      "metric_filters": [
-                        {
-                          "metric_filter_key": "status",
-                          "metric_filter_values": ["success"],
-                          "negate": false
-                        }
-                      ],
-                      "name": "AGENT_SCHEDULE_ADHERENCE",
-                      "threshold": [
-                        {
-                          "comparison": "greater_than",
-                          "threshold_value": 90
-                        }
-                      ]
-                    },
-                    {
-                      "metric_filters": [],
-                      "name": "ABANDONMENT_RATE",
-                      "threshold": [
-                        {
-                          "comparison": "less_than",
-                          "threshold_value": 5
-                        }
-                      ]
-                    },
-                    {
-                      "metric_filters": [],
-                      "name": "CONTACTS_HANDLED",
-                      "threshold": [
-                        {
-                          "comparison": "greater_than",
-                          "threshold_value": 1000
-                        }
-                      ]
-                    },
-                    {
-                      "metric_filters": [],
-                      "name": "SUM_HANDLE_TIME",
-                      "threshold": [
-                        {
-                          "comparison": "greater_than",
-                          "threshold_value": 15000
-                        }
-                      ]
-                    },
-                    {
-                      "metric_filters": [],
-                      "name": "SERVICE_LEVEL",
-                      "threshold": [
-                        {
-                          "comparison": "greater_than",
-                          "threshold_value": 80
-                        }
-                      ]
-                    },
-                    {
-                      "metric_filters": [],
-                      "name": "AVG_HOLD_TIME",
-                      "threshold": [
-                        {
-                          "comparison": "less_than",
-                          "threshold_value": 120
-                        }
-                      ]
-                    },
-                    {
-                      "metric_filters": [],
-                      "name": "OCCUPANCY",
-                      "threshold": [
-                        {
-                          "comparison": "greater_than",
-                          "threshold_value": 75
-                        }
-                      ]
-                    }
-                  ],
-                  "next_token": "",
-                  "resource_arn": "arn:aws:lambda:us-west-1:123456789012:function:my-lambda-function",
-                  "start_time": 167000
-                }""";
+    private Metric createMetric(String name, String filterKey, String[] filterValues, boolean negate, String comparison, long thresholdValue) {
+        Metric metric = new Metric();
+        metric.setName(name);
 
-        return webClient.post()
-                .uri("/metrics/data")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(requestJson)
-                .retrieve()
-                .bodyToMono(MetricsDTO.class)
-                .block();
+        if (filterKey != null) {
+            MetricFilter[] metricFilters = new MetricFilter[1];
+            metricFilters[0] = new MetricFilter();
+            metricFilters[0].setMetricFilterKey(filterKey);
+            metricFilters[0].setMetricFilterValues(filterValues);
+            metricFilters[0].setNegate(negate);
+            metric.setMetricFilters(metricFilters);
+        }
+
+        Threshold[] thresholds = new Threshold[1];
+        thresholds[0] = new Threshold();
+        thresholds[0].setComparison(comparison);
+        thresholds[0].setThresholdValue(thresholdValue);
+        metric.setThreshold(thresholds);
+
+        return metric;
+    }
+
+    public double[] getMetricsData()  {
+        return callKPIs(getKPIs());
     }
 }

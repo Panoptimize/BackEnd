@@ -80,19 +80,11 @@ public class DashboardController {
     public ResponseEntity<String> postData(@RequestBody DashboardDTO dashboardDTO) {
         return new ResponseEntity<>("Data received", HttpStatus.OK);
     }
-
-    @PostMapping("/get-kpis")
-    public ResponseEntity<List<Double>> getServiceLevel(@RequestBody DashboardDTO dashboardDTO) throws ParseException {
-        try {
-            return new ResponseEntity<>(dashboardService.getKPIs(dashboardDTO), HttpStatus.OK);
-        } catch (ParseException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
+    
 
     @PostMapping("/metrics")
-    public ResponseEntity<MetricsDTO> getMetrics() {
-        MetricsDTO metricsData = dashboardService.getMetricsData();
+    public ResponseEntity<double[]> getMetrics() {
+        double[] metricsData = dashboardService.getMetricsData();
         return ResponseEntity.ok(metricsData);
     }
 
