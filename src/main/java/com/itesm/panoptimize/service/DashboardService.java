@@ -2,7 +2,6 @@ package com.itesm.panoptimize.service;
 
 import com.itesm.panoptimize.config.Constants;
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
-import com.itesm.panoptimize.dto.metric.MetricRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -26,7 +25,7 @@ public class DashboardService {
     public DashboardService(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.baseUrl("http://localhost:8000").build();
     }
-    private double[] callKPIs(MetricRequest metricRequest) {
+    private double[] callKPIs(String metricRequest) {
         WebClient.UriSpec<WebClient.RequestBodySpec> uriSpec = webClient.post();
         WebClient.RequestBodySpec bodySpec = uriSpec.uri("/get_metric_data");
         WebClient.RequestHeadersSpec<?> headersSpec = bodySpec.bodyValue(metricRequest);
@@ -55,102 +54,103 @@ public class DashboardService {
         return List.of(1.0, 2.0, 3.0);
     }
     public MetricsDTO getMetricsData() {
-        String requestJson = "{\n" +
-                "  \"end_time\": 168000,\n" +
-                "  \"filters\": [\n" +
-                "    {\n" +
-                "      \"filter_key\": \"region\",\n" +
-                "      \"filter_values\": [\"us-west-1\", \"us-east-1\"]\n" +
-                "    }\n" +
-                "  ],\n" +
-                "  \"groupings\": [\"service\"],\n" +
-                "  \"interval\": {\n" +
-                "    \"interval_period\": \"1h\",\n" +
-                "    \"time_zone\": \"UTC\"\n" +
-                "  },\n" +
-                "  \"max_results\": 100,\n" +
-                "  \"metrics\": [\n" +
-                "    {\n" +
-                "      \"metric_filters\": [\n" +
-                "        {\n" +
-                "          \"metric_filter_key\": \"status\",\n" +
-                "          \"metric_filter_values\": [\"success\"],\n" +
-                "          \"negate\": false\n" +
-                "        }\n" +
-                "      ],\n" +
-                "      \"name\": \"AGENT_SCHEDULE_ADHERENCE\",\n" +
-                "      \"threshold\": [\n" +
-                "        {\n" +
-                "          \"comparison\": \"greater_than\",\n" +
-                "          \"threshold_value\": 90\n" +
-                "        }\n" +
-                "      ]\n" +
-                "    },\n" +
-                "    {\n" +
-                "      \"metric_filters\": [],\n" +
-                "      \"name\": \"ABANDONMENT_RATE\",\n" +
-                "      \"threshold\": [\n" +
-                "        {\n" +
-                "          \"comparison\": \"less_than\",\n" +
-                "          \"threshold_value\": 5\n" +
-                "        }\n" +
-                "      ]\n" +
-                "    },\n" +
-                "    {\n" +
-                "      \"metric_filters\": [],\n" +
-                "      \"name\": \"CONTACTS_HANDLED\",\n" +
-                "      \"threshold\": [\n" +
-                "        {\n" +
-                "          \"comparison\": \"greater_than\",\n" +
-                "          \"threshold_value\": 1000\n" +
-                "        }\n" +
-                "      ]\n" +
-                "    },\n" +
-                "    {\n" +
-                "      \"metric_filters\": [],\n" +
-                "      \"name\": \"SUM_HANDLE_TIME\",\n" +
-                "      \"threshold\": [\n" +
-                "        {\n" +
-                "          \"comparison\": \"greater_than\",\n" +
-                "          \"threshold_value\": 15000\n" +
-                "        }\n" +
-                "      ]\n" +
-                "    },\n" +
-                "    {\n" +
-                "      \"metric_filters\": [],\n" +
-                "      \"name\": \"SERVICE_LEVEL\",\n" +
-                "      \"threshold\": [\n" +
-                "        {\n" +
-                "          \"comparison\": \"greater_than\",\n" +
-                "          \"threshold_value\": 80\n" +
-                "        }\n" +
-                "      ]\n" +
-                "    },\n" +
-                "    {\n" +
-                "      \"metric_filters\": [],\n" +
-                "      \"name\": \"AVG_HOLD_TIME\",\n" +
-                "      \"threshold\": [\n" +
-                "        {\n" +
-                "          \"comparison\": \"less_than\",\n" +
-                "          \"threshold_value\": 120\n" +
-                "        }\n" +
-                "      ]\n" +
-                "    },\n" +
-                "    {\n" +
-                "      \"metric_filters\": [],\n" +
-                "      \"name\": \"OCCUPANCY\",\n" +
-                "      \"threshold\": [\n" +
-                "        {\n" +
-                "          \"comparison\": \"greater_than\",\n" +
-                "          \"threshold_value\": 75\n" +
-                "        }\n" +
-                "      ]\n" +
-                "    }\n" +
-                "  ],\n" +
-                "  \"next_token\": \"\",\n" +
-                "  \"resource_arn\": \"arn:aws:lambda:us-west-1:123456789012:function:my-lambda-function\",\n" +
-                "  \"start_time\": 167000\n" +
-                "}";
+        String requestJson = """
+                {
+                  "end_time": 168000,
+                  "filters": [
+                    {
+                      "filter_key": "region",
+                      "filter_values": ["us-west-1", "us-east-1"]
+                    }
+                  ],
+                  "groupings": ["service"],
+                  "interval": {
+                    "interval_period": "1h",
+                    "time_zone": "UTC"
+                  },
+                  "max_results": 100,
+                  "metrics": [
+                    {
+                      "metric_filters": [
+                        {
+                          "metric_filter_key": "status",
+                          "metric_filter_values": ["success"],
+                          "negate": false
+                        }
+                      ],
+                      "name": "AGENT_SCHEDULE_ADHERENCE",
+                      "threshold": [
+                        {
+                          "comparison": "greater_than",
+                          "threshold_value": 90
+                        }
+                      ]
+                    },
+                    {
+                      "metric_filters": [],
+                      "name": "ABANDONMENT_RATE",
+                      "threshold": [
+                        {
+                          "comparison": "less_than",
+                          "threshold_value": 5
+                        }
+                      ]
+                    },
+                    {
+                      "metric_filters": [],
+                      "name": "CONTACTS_HANDLED",
+                      "threshold": [
+                        {
+                          "comparison": "greater_than",
+                          "threshold_value": 1000
+                        }
+                      ]
+                    },
+                    {
+                      "metric_filters": [],
+                      "name": "SUM_HANDLE_TIME",
+                      "threshold": [
+                        {
+                          "comparison": "greater_than",
+                          "threshold_value": 15000
+                        }
+                      ]
+                    },
+                    {
+                      "metric_filters": [],
+                      "name": "SERVICE_LEVEL",
+                      "threshold": [
+                        {
+                          "comparison": "greater_than",
+                          "threshold_value": 80
+                        }
+                      ]
+                    },
+                    {
+                      "metric_filters": [],
+                      "name": "AVG_HOLD_TIME",
+                      "threshold": [
+                        {
+                          "comparison": "less_than",
+                          "threshold_value": 120
+                        }
+                      ]
+                    },
+                    {
+                      "metric_filters": [],
+                      "name": "OCCUPANCY",
+                      "threshold": [
+                        {
+                          "comparison": "greater_than",
+                          "threshold_value": 75
+                        }
+                      ]
+                    }
+                  ],
+                  "next_token": "",
+                  "resource_arn": "arn:aws:lambda:us-west-1:123456789012:function:my-lambda-function",
+                  "start_time": 167000
+                }""";
 
         return webClient.post()
                 .uri("/metrics/data")

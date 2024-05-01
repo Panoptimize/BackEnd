@@ -5,6 +5,8 @@ import java.util.List;
 public class MetricsDTO {
     @JsonProperty("metric_results")
     private List<MetricResult> metricResults;
+    @JsonProperty("next_token")
+    private String nextToken;
 
 
     public static class MetricResult {
