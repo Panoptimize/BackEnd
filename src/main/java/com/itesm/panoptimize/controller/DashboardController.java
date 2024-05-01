@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/dashboard")
@@ -80,8 +81,14 @@ public class DashboardController {
     
 
     @PostMapping("/metrics")
-    public ResponseEntity<MetricsDTO> getMetrics(@RequestBody DashboardDTO dashboardDTO) {
-        MetricsDTO metricsData = dashboardService.getMetricsData(dashboardDTO);
-        return ResponseEntity.ok(metricsData);
+    public ResponseEntity<Map<String, Double>> getMetrics(@RequestBody DashboardDTO dashboardDTO) {
+        Map<String, Double> metricsData = dashboardService.getMetricsData(dashboardDTO);
+
+        if(metricsData.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(metricsData, HttpStatus.OK);
+
     }
 }

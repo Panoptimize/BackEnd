@@ -106,7 +106,17 @@ public class DashboardService {
 
         return metric;
     }
-    public MetricsDTO getMetricsData(DashboardDTO dashboardDTO) {
-        return callKPIs(getKPIs(dashboardDTO));
+    public Map<String, Double> getMetricsData(DashboardDTO dashboardDTO) {
+        MetricsDTO metricsDTO = callKPIs(getKPIs(dashboardDTO));
+
+        Map<String, Double> metricsData = new HashMap<>();
+
+        metricsDTO.getMetricResults().forEach(metricResult -> {
+            metricResult.getCollections().forEach(collection -> {
+                metricsData.put(collection.getMetric().getName().getName(), collection.getValue());
+            });
+        });
+
+        return metricsData;
     }
 }
