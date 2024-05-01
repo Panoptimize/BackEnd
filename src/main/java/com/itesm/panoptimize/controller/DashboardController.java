@@ -14,10 +14,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -82,9 +79,9 @@ public class DashboardController {
     }
     
 
-    @PostMapping("/metrics")
-    public ResponseEntity<double[]> getMetrics() {
-        double[] metricsData = dashboardService.getMetricsData();
+    @GetMapping("/metrics")
+    public ResponseEntity<MetricsDTO> getMetrics() {
+        MetricsDTO metricsData = dashboardService.getMetricsData();
         return ResponseEntity.ok(metricsData);
     }
 
