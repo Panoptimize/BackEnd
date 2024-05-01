@@ -1,58 +1,66 @@
 package com.itesm.panoptimize.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
 import com.itesm.panoptimize.dto.dashboard.metric.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import com.itesm.panoptimize.dto.dashboard.MetricsDTO;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+
+import java.util.*;
 
 @Service
 public class DashboardService {
     private final WebClient webClient;
-    ObjectMapper mapper = new ObjectMapper();
-
     @Autowired
     public DashboardService(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.baseUrl("http://localhost:8000").build();
     }
     private MetricsDTO callKPIs(RequestMetricDataV2 metricRequest) {
-        MetricsDTO metricsDTO= webClient.post()
+
+        return webClient.post()
             .uri("/metrics/data")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(metricRequest)
             .retrieve()
             .bodyToMono(MetricsDTO.class)
             .block();
-
-        return metricsDTO;
     }
 
-    public RequestMetricDataV2 getKPIs() {
+    public RequestMetricDataV2 getKPIs(DashboardDTO dashboardDTO) {
+
+        // Set up the date to unix time
+        long startTime = dashboardDTO.getStartDate().getTime();
+        long endTime = dashboardDTO.getEndDate().getTime();
 
         RequestMetricDataV2 requestMetricData = new RequestMetricDataV2();
 
         // Set values for the fields
-        requestMetricData.setEndTime(168000);
-        requestMetricData.setStartTime(167000);
+        requestMetricData.setEndTime(startTime);
+        requestMetricData.setStartTime(endTime);
         requestMetricData.setMaxResults(100);
         requestMetricData.setNextToken("");
         requestMetricData.setResourceArn("arn:aws:lambda:us-west-1:123456789012:function:my-lambda-function");
 
         // Set up filters
         List<Filter> filters = new ArrayList<>();
-        Filter regionFilter = new Filter();
-        regionFilter.setFilterKey("region");
-        regionFilter.setFilterValues(Arrays.asList("us-west-1", "us-east-1"));
-        filters.add(regionFilter);
+        if (dashboardDTO.getAgents().length > 0) {
+            Filter agentFilter = new Filter();
+            agentFilter.setFilterKey("AGENT");
+            agentFilter.setFilterValues(List.of(Arrays.toString(dashboardDTO.getAgents())));
+            filters.add(agentFilter);
+        }
+        if (dashboardDTO.getWorkspaces().length > 0) {
+            Filter workspaceFilter = new Filter();
+            workspaceFilter.setFilterKey("ROUTING_PROFILE");
+            workspaceFilter.setFilterValues(List.of(Arrays.toString(dashboardDTO.getWorkspaces())));
+            filters.add(workspaceFilter);
+        }
         requestMetricData.setFilters(filters);
 
         // Set up groupings
-        requestMetricData.setGroupings(Arrays.asList("service"));
+        requestMetricData.setGroupings(List.of("service"));
 
         // Set up interval
         Interval interval = new Interval();
@@ -98,7 +106,7 @@ public class DashboardService {
 
         return metric;
     }
-    public MetricsDTO getMetricsData()  {
-        return callKPIs(getKPIs());
+    public MetricsDTO getMetricsData(DashboardDTO dashboardDTO) {
+        return callKPIs(getKPIs(dashboardDTO));
     }
 }

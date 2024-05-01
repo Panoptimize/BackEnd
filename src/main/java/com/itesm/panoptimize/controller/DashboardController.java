@@ -25,7 +25,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/dashboard")
 public class DashboardController {
-    private DashboardService dashboardService;
+    private final DashboardService dashboardService;
 
     @Autowired
     public DashboardController(DashboardService dashboardService) {
@@ -79,10 +79,9 @@ public class DashboardController {
     }
     
 
-    @GetMapping("/metrics")
-    public ResponseEntity<MetricsDTO> getMetrics() {
-        MetricsDTO metricsData = dashboardService.getMetricsData();
+    @PostMapping("/metrics")
+    public ResponseEntity<MetricsDTO> getMetrics(@RequestBody DashboardDTO dashboardDTO) {
+        MetricsDTO metricsData = dashboardService.getMetricsData(dashboardDTO);
         return ResponseEntity.ok(metricsData);
     }
-
 }

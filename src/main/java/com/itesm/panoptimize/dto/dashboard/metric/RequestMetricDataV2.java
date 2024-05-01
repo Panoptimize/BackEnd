@@ -10,7 +10,7 @@ public class RequestMetricDataV2 {
     @JsonProperty("filters")
     private List<Filter> filters;
     @JsonProperty("groupings")
-    private List<String> groupings;
+    private List<String> groupings = null;
     @JsonProperty("interval")
     private Interval interval;
     @JsonProperty("max_results")
