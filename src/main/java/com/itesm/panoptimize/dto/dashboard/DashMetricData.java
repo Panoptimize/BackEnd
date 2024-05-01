@@ -24,11 +24,9 @@ public class DashMetricData {
 
     public List<String> getMetrics() {return metrics;}
 
-
     public void setMetrics(List<String> metrics) {this.metrics = metrics;}
 
     public String getEnd_time() {return end_time;}
 
     public void setEnd_time(String end_time) {this.end_time = end_time;}
-
 }

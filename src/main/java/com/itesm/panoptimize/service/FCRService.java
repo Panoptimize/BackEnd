@@ -1,7 +1,7 @@
 package com.itesm.panoptimize.service;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -10,30 +10,35 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
-public class FRCService {
-    public float requestJSONBuild() {
-        JSONObject requestPayload = new JSONObject();
-        requestPayload.put("instance_id", "1");
-        requestPayload.put("start_time", "2024-01-01");
-        requestPayload.put("end_time", "2024-01-31");
+public class FCRService {
 
-        JSONArray metricsArray = new JSONArray();
-        metricsArray.put("contactHandled");
-        metricsArray.put("contactsAbandoned");
-        metricsArray.put("callbackContacts");
-        requestPayload.put("metrics", metricsArray);
+    private final WebClient webClient;
 
-        WebClient client = WebClient.create();
+    @Autowired
+    public FCRService(WebClient.Builder webClientBuilder) {
+        this.webClient = webClientBuilder.baseUrl("http://localhost:8080").build();
+    }
 
-        ResponseEntity<String> responseEntity = client.post()
-                .uri("http://localhost:8080/dashboard/dataFRC")
+    public float fcrMetrics() {
+        String requestBody = "{"
+                + "\"instance_id\": \"1\","
+                + "\"start_time\": \"2024-01-01\","
+                + "\"end_time\": \"2024-01-31\","
+                + "\"metrics\": ["
+                + "\"contactHandled\","
+                + "\"contactsAbandoned\","
+                + "\"callbackContacts\""
+                + "]}";
+
+        ResponseEntity<String> dashMetricData = webClient.post()
+                .uri("/dashboard/dataFRC")
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .body(BodyInserters.fromValue(requestPayload.toString()))
+                .body(BodyInserters.fromValue(requestBody))
                 .retrieve()
                 .toEntity(String.class)
                 .block();
 
-        String jsonResponse = responseEntity.getBody();
+        String jsonResponse = dashMetricData.getBody();
         JSONObject responseObject = new JSONObject(jsonResponse);
         JSONObject dataObject = responseObject.getJSONObject("Data");
 

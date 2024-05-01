@@ -2,7 +2,7 @@ package com.itesm.panoptimize.controller;
 
 import com.itesm.panoptimize.dto.dashboard.DashMetricData;
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
-import com.itesm.panoptimize.service.FRCService;
+import com.itesm.panoptimize.service.FCRService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -26,8 +26,8 @@ import java.nio.file.Paths;
 @RestController
 @RequestMapping("/dashboard")
 public class DashboardController {
-    public DashboardController(FRCService frcService) {
-        this.frcService = frcService;
+    public DashboardController(FCRService fcrService) {
+        this.fcrService = fcrService;
     }
     private static final String API_URL = "http://localhost:8000/get_metric_data"; //To test the consumption of AWS connect
 
@@ -69,16 +69,16 @@ public class DashboardController {
         return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
     }
 
-    private FRCService frcService;
+    private FCRService fcrService;
 
     @Autowired
-    public void DashboardDataController(FRCService frcService) {
-        this.frcService = frcService;
+    public void DashboardDataController(FCRService fcrService) {
+        this.fcrService = fcrService;
     };
 
-    @GetMapping("/metricFRC")
-    public ResponseEntity<String> FRCService() {
-        float firstResponseKPI = frcService.requestJSONBuild();
+    @GetMapping("/metricFCR")
+    public ResponseEntity<String> FCRService() {
+        float firstResponseKPI = fcrService.fcrMetrics();
 
         JSONObject responseJSON = new JSONObject();
         responseJSON.put("FRC-KPI", firstResponseKPI);
