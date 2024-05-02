@@ -1,29 +1,69 @@
 package com.itesm.panoptimize.controller;
 
+
+import com.itesm.panoptimize.dto.dashboard.DashMetricData;
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
+import com.itesm.panoptimize.service.DashboardService;
+import com.itesm.panoptimize.service.FCRService;
+
+import com.itesm.panoptimize.dto.dashboard.CallMetricsDTO;
+import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
+import com.itesm.panoptimize.service.CalculateSatisfactionService;
+
+import com.itesm.panoptimize.dto.dashboard.MetricsDTO;
+import com.itesm.panoptimize.service.DashboardService;
+
 import com.itesm.panoptimize.dto.performance.PerformanceDTO;
 import com.itesm.panoptimize.service.CalculatePerformance;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+
+import java.text.ParseException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+
 import java.util.List;
 
 @RestController
 @RequestMapping("/dashboard")
 public class DashboardController {
+
+    @Autowired
+    private CalculateSatisfactionService satisfactionService;
+    private DashboardService dashboardService;
+
+
+    @Autowired
+    public DashboardController(DashboardService dashboardService) {
+        this.dashboardService = dashboardService;
+    }
+
+    private static final String API_URL = "http://localhost:8000/get_metric_data"; //To test the consumption of AWS connect
+
+
     @Operation(summary = "Download the dashboard data", description = "Download the dashboard data by time frame, agent and workspace number")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -54,9 +94,75 @@ public class DashboardController {
             return ResponseEntity.notFound().build();
         }
     }
+    @PostMapping("/dataFRC")
+    public ResponseEntity<String> getFRC(@RequestBody DashMetricData requestDto) {
+        //TemplateInstance
+        RestTemplate restTemplate = new RestTemplate();
+        //Make Post
+        ResponseEntity<String> response = restTemplate.postForEntity(API_URL, requestDto,String.class);
+        //Return
+        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+    }
+
+    private FCRService fcrService;
+
+    @GetMapping("/customer-satisfaction")
+    public ResponseEntity<List<Integer>> calculateSatisfaction() {
+        List<CallMetricsDTO> metrics = satisfactionService.getCallMetrics();
+        return ResponseEntity.ok(satisfactionService.calculateSatisfaction(metrics));
+    }
 
 
-    
+    @Operation(summary = "Get the dashboard data", description = "Get the dashboard data by time frame, agent and workspace number")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Found the data",
+                    content = {
+                            @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = DashboardDTO.class))
+                    }),
+            @ApiResponse(responseCode = "404",
+                    description = "Data not found",
+                    content = @Content),
+    })
+    @PostMapping("/data")
+    public ResponseEntity<String> postData(@RequestBody DashboardDTO dashboardDTO) {
+        return new ResponseEntity<>("Data received", HttpStatus.OK);
+    }
+
+    @PostMapping("/get-kpis")
+    public ResponseEntity<List<Double>> getServiceLevel(@RequestBody DashboardDTO dashboardDTO) throws ParseException {
+        try {
+            return new ResponseEntity<>(dashboardService.getKPIs(dashboardDTO), HttpStatus.OK);
+        } catch (ParseException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/metrics")
+    public ResponseEntity<MetricsDTO> getMetrics() {
+        MetricsDTO metricsData = dashboardService.getMetricsData();
+        return ResponseEntity.ok(metricsData);
+    }
+
+
+    @Autowired
+    public void DashboardDataController(FCRService fcrService) {
+        this.fcrService = fcrService;
+    };
+
+    @GetMapping("/metricFCR")
+    public ResponseEntity<String> FCRService() {
+        float firstResponseKPI = fcrService.fcrMetrics();
+
+        JSONObject responseJSON = new JSONObject();
+        responseJSON.put("FRC-KPI", firstResponseKPI);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        return new ResponseEntity<>(responseJSON.toString(), headers, HttpStatus.OK);
+    }
 
 
     //Performance
@@ -89,7 +195,4 @@ public class DashboardController {
 
         return  ResponseEntity.ok(performanceData);
     }
-
-
-
 }
