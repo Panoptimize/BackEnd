@@ -70,13 +70,13 @@ public class DashboardService {
 
         // Set up metrics
         List<Metric> metrics = new ArrayList<>();
-        metrics.add(createMetric("AGENT_SCHEDULE_ADHERENCE", "status", List.of("success"), false, "greater_than", 90));
+        metrics.add(createMetric("PERCENT_CASES_FIRST_CONTACT_RESOLVED", "status", List.of("success"), false, "greater_than", 90));
         metrics.add(createMetric("ABANDONMENT_RATE", null, null, false, "less_than", 5));
         metrics.add(createMetric("CONTACTS_HANDLED", null, null, false, "greater_than", 1000));
-        metrics.add(createMetric("SUM_HANDLE_TIME", null, null, false, "greater_than", 15000));
+        metrics.add(createMetric("SUM_HOLD_TIME", null, null, false, "greater_than", 15000));
         metrics.add(createMetric("SERVICE_LEVEL", null, null, false, "greater_than", 80));
         metrics.add(createMetric("AVG_HOLD_TIME", null, null, false, "less_than", 120));
-        metrics.add(createMetric("OCCUPANCY", null, null, false, "greater_than", 75));
+        metrics.add(createMetric("AGENT_SCHEDULE_ADHERENCE", null, null, false, "greater_than", 75));
         requestMetricData.setMetrics(metrics);
 
         return requestMetricData;
