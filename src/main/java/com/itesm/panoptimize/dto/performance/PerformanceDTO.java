@@ -4,18 +4,20 @@ package com.itesm.panoptimize.dto.performance;
 //El to do esta en el servicio
 
 import java.util.List;
+import java.util.Map;
 
 public class PerformanceDTO {
 
-    public List<Double> getPerformanceData() {
+
+    public List<Map<String, Double>> getPerformanceData() {
         return performanceData;
     }
 
-    public void setPerformanceData(List<Double> performanceData) {
+    public void setPerformanceData(List<Map<String, Double>> performanceData) {
         this.performanceData = performanceData;
     }
 
-    private List<Double> performanceData;
+    List<Map<String, Double>> performanceData;
 
 }
 
