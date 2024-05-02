@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -35,6 +36,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -46,15 +48,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/dashboard")
 public class DashboardController {
 
-    @Autowired
     private CalculateSatisfactionService satisfactionService;
     private DashboardService dashboardService;
-
 
     @Autowired
     public DashboardController(DashboardService dashboardService) {
@@ -130,29 +131,20 @@ public class DashboardController {
         return new ResponseEntity<>("Data received", HttpStatus.OK);
     }
 
-    @PostMapping("/get-kpis")
-    public ResponseEntity<List<Double>> getServiceLevel(@RequestBody DashboardDTO dashboardDTO) throws ParseException {
-        try {
-            return new ResponseEntity<>(dashboardService.getKPIs(dashboardDTO), HttpStatus.OK);
-        } catch (ParseException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
 
     @PostMapping("/metrics")
-    public ResponseEntity<MetricsDTO> getMetrics() {
-        MetricsDTO metricsData = dashboardService.getMetricsData();
-        return ResponseEntity.ok(metricsData);
+    public ResponseEntity<Map<String, Double>> getMetrics(@RequestBody DashboardDTO dashboardDTO) {
+        Map<String, Double> metricsData = dashboardService.getMetricsData(dashboardDTO);
+
+        if(metricsData.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(metricsData, HttpStatus.OK);
     }
 
-
-    @Autowired
-    public void DashboardDataController(FCRService fcrService) {
-        this.fcrService = fcrService;
-    };
-
     @GetMapping("/metricFCR")
-    public ResponseEntity<String> FCRService() {
+    public ResponseEntity<String> FCRService() throws JSONException {
         float firstResponseKPI = fcrService.fcrMetrics();
 
         JSONObject responseJSON = new JSONObject();
