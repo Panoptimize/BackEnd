@@ -1,6 +1,8 @@
 package com.itesm.panoptimize.controller;
 
+import com.itesm.panoptimize.dto.dashboard.CallMetricsDTO;
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
+import com.itesm.panoptimize.service.CalculateSatisfactionService;
 
 import com.itesm.panoptimize.dto.dashboard.MetricsDTO;
 import com.itesm.panoptimize.service.DashboardService;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import java.text.ParseException;
 
@@ -35,6 +38,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/dashboard")
 public class DashboardController {
+
+    @Autowired
+    private CalculateSatisfactionService satisfactionService;
     private DashboardService dashboardService;
 
     @Autowired
@@ -71,6 +77,12 @@ public class DashboardController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/customer-satisfaction")
+    public ResponseEntity<List<Integer>> calculateSatisfaction() {
+        List<CallMetricsDTO> metrics = satisfactionService.getCallMetrics();
+        return ResponseEntity.ok(satisfactionService.calculateSatisfaction(metrics));
     }
 
 
@@ -141,8 +153,4 @@ public class DashboardController {
 
         return  ResponseEntity.ok(performanceData);
     }
-
-
-
-
 }
