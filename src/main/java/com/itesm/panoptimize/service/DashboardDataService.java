@@ -37,4 +37,5 @@ public class DashboardDataService {
         String url = "http://127.0.0.1:8000/metrics/v2/CONTACTS_HANDLED";
         return getMetricValue(url);
     }
+
 }

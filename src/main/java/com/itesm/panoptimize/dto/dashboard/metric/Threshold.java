@@ -13,4 +13,5 @@ public class Threshold {
 
     public long getThresholdValue() { return thresholdValue; }
     public void setThresholdValue(long value) { this.thresholdValue = value; }
+
 }
