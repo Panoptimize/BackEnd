@@ -1,11 +1,7 @@
-package com.itesm.panoptimize.dto.dashboard.metric;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+package com.itesm.panoptimize.dto.metric;
 
 public class Threshold {
-    @JsonProperty("comparison")
     private String comparison;
-    @JsonProperty("threshold_value")
     private long thresholdValue;
 
     public String getComparison() { return comparison; }

@@ -1,45 +1,37 @@
 package com.itesm.panoptimize.dto.dashboard;
 
-import java.util.Date;
+import jakarta.validation.constraints.NotBlank;
+
 import java.util.UUID;
 
 public class DashboardDTO {
-
-    private Date startDate;
-    private Date endDate;
-    private UUID[] agents;
+    @NotBlank
+    private String timeframe; // Timeframe format: "2024-04-28 ~ 2024-04-28"
+    private int[] agents;
     // UUID format
-    private UUID[] workspaces;
+    private UUID[] workspaceIds;
 
-    public Date getStartDate() {
-        return startDate;
+    public String getTimeframe() {
+        return timeframe;
     }
 
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
+    public void setTimeframe(String timeframe) {
+        this.timeframe = timeframe;
     }
 
-    public Date getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
-    }
-
-    public UUID[] getAgents() {
+    public int[] getAgents() {
         return agents;
     }
 
-    public void setAgents(UUID[] agents) {
+    public void setAgents(int[] agents) {
         this.agents = agents;
     }
 
-    public UUID[] getWorkspaces() {
-        return workspaces;
+    public UUID[] getWorkspaceIds() {
+        return workspaceIds;
     }
 
-    public void setWorkspaces(UUID[] workspaces) {
-        this.workspaces = workspaces;
+    public void setWorkspaceIds(UUID[] workspaceIds) {
+        this.workspaceIds = workspaceIds;
     }
 }
