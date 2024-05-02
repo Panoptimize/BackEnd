@@ -58,6 +58,7 @@ import static com.itesm.panoptimize.service.CalculatePerformance.performanceCalc
 @RequestMapping("/dashboard")
 public class DashboardController {
 
+    @Autowired
     private CalculateSatisfactionService satisfactionService;
     private DashboardService dashboardService;
 
