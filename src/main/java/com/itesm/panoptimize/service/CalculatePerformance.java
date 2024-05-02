@@ -2,13 +2,59 @@ package com.itesm.panoptimize.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 //TODO Creating the essential endpoints or getting the data from Connect.
 // - Endpoint of KPI about Service Level (SL) -> 30%
 // - Endpoint of KPI about First Contact Resolution -> 40%
 // - Endpoint of KPI about Occupation -> 30%
+
+
+
+
 public class CalculatePerformance {
-    public static List<Double> performanceCalculation(List<Double> serviceLevel, List<Double> firstContactResolution, List<Double> ocupation) {
+
+
+    public static List<Map<String, List<Double>>> performanceCalculation(List<Map<String, List<Double>>> agents) {
+
+        List<Double> serviceLevel = new ArrayList<>(8);
+        List<Double> firstContactResolution = new ArrayList<>(8);
+        List<Double> ocupation = new ArrayList<>(8);
+
+        //We suppose that the arrays have the same length for this iteration.
+        for (Map<String, List<Double>> data : agents) {
+            for (Map.Entry<String, List<Double>> entry : data.entrySet()) {
+
+                //Simulation of data collection
+                collectionSimulation(serviceLevel);
+                collectionSimulation(firstContactResolution);
+                collectionSimulation(ocupation);
+
+                //calculating performance of values
+                List <Double> performance = performanceCalculation(firstContactResolution,ocupation,serviceLevel);
+                String agent_name = entry.getKey();
+                List<Double> newList = performance;
+                data.put(agent_name,newList);
+            }
+        }
+        return agents;
+
+    }
+
+    //Simulates the collection of data with the endpoints
+    private static List<Double> collectionSimulation(List<Double> data_to_fill){
+        Random rand = new Random();
+
+        for (int i = 0; i < 8; i++) {
+            double randValue = 1 + rand.nextDouble() * 99;
+            data_to_fill.add(randValue);
+        }
+
+        return data_to_fill;
+    }
+
+    private static  List<Double> performanceCalculation(List<Double> serviceLevel, List<Double> firstContactResolution, List<Double> ocupation) {
 
         List<Double> performance = new ArrayList<>();
         //Check
@@ -33,3 +79,5 @@ public class CalculatePerformance {
 
     }
 }
+
+
