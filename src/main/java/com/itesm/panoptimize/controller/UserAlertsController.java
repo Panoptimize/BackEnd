@@ -1,5 +1,5 @@
 package com.itesm.panoptimize.controller;
-import com.tec.panoptimize.dto.alert.UserAlertsDTO;
+import com.itesm.panoptimize.dto.alert.UserAlertsDTO;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
