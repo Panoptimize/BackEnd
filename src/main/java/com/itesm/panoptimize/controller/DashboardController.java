@@ -1,5 +1,11 @@
 package com.itesm.panoptimize.controller;
 
+
+import com.itesm.panoptimize.dto.dashboard.DashMetricData;
+import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
+import com.itesm.panoptimize.service.DashboardService;
+import com.itesm.panoptimize.service.FCRService;
+
 import com.itesm.panoptimize.dto.dashboard.CallMetricsDTO;
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
 import com.itesm.panoptimize.service.CalculateSatisfactionService;
@@ -15,6 +21,13 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -22,6 +35,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -34,12 +48,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/dashboard")
 public class DashboardController {
 
-    @Autowired
     private CalculateSatisfactionService satisfactionService;
     private DashboardService dashboardService;
 
@@ -47,6 +61,9 @@ public class DashboardController {
     public DashboardController(DashboardService dashboardService) {
         this.dashboardService = dashboardService;
     }
+
+    private static final String API_URL = "http://localhost:8000/get_metric_data"; //To test the consumption of AWS connect
+
 
     @Operation(summary = "Download the dashboard data", description = "Download the dashboard data by time frame, agent and workspace number")
     @ApiResponses(value = {
@@ -78,6 +95,17 @@ public class DashboardController {
             return ResponseEntity.notFound().build();
         }
     }
+    @PostMapping("/dataFRC")
+    public ResponseEntity<String> getFRC(@RequestBody DashMetricData requestDto) {
+        //TemplateInstance
+        RestTemplate restTemplate = new RestTemplate();
+        //Make Post
+        ResponseEntity<String> response = restTemplate.postForEntity(API_URL, requestDto,String.class);
+        //Return
+        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+    }
+
+    private FCRService fcrService;
 
     @GetMapping("/customer-satisfaction")
     public ResponseEntity<List<Integer>> calculateSatisfaction() {
@@ -103,24 +131,30 @@ public class DashboardController {
         return new ResponseEntity<>("Data received", HttpStatus.OK);
     }
 
-    @PostMapping("/get-kpis")
-    public ResponseEntity<List<Double>> getServiceLevel(@RequestBody DashboardDTO dashboardDTO) throws ParseException {
-        try {
-            return new ResponseEntity<>(dashboardService.getKPIs(dashboardDTO), HttpStatus.OK);
-        } catch (ParseException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
 
     @PostMapping("/metrics")
-    public ResponseEntity<MetricsDTO> getMetrics() {
-        MetricsDTO metricsData = dashboardService.getMetricsData();
-        return ResponseEntity.ok(metricsData);
+    public ResponseEntity<Map<String, Double>> getMetrics(@RequestBody DashboardDTO dashboardDTO) {
+        Map<String, Double> metricsData = dashboardService.getMetricsData(dashboardDTO);
+
+        if(metricsData.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(metricsData, HttpStatus.OK);
     }
 
+    @GetMapping("/metricFCR")
+    public ResponseEntity<String> FCRService() throws JSONException {
+        float firstResponseKPI = fcrService.fcrMetrics();
 
+        JSONObject responseJSON = new JSONObject();
+        responseJSON.put("FRC-KPI", firstResponseKPI);
 
-    
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        return new ResponseEntity<>(responseJSON.toString(), headers, HttpStatus.OK);
+    }
 
 
     //Performance
