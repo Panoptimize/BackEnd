@@ -25,19 +25,21 @@ import java.util.*;
 @Service
 public class DashboardService {
     private final WebClient webClient;
+
     @Autowired
     public DashboardService(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.baseUrl("http://localhost:8000").build();
     }
+
     private MetricsDTO callKPIs(RequestMetricDataV2 metricRequest) {
 
         return webClient.post()
-            .uri("/metrics/data")
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(metricRequest)
-            .retrieve()
-            .bodyToMono(MetricsDTO.class)
-            .block();
+                .uri("/metrics/data")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(metricRequest)
+                .retrieve()
+                .bodyToMono(MetricsDTO.class)
+                .block();
     }
 
     public RequestMetricDataV2 getKPIs(DashboardDTO dashboardDTO) {
@@ -93,6 +95,7 @@ public class DashboardService {
 
         return requestMetricData;
     }
+
     private Metric createMetric(String name, String filterKey, List<String> filterValues, boolean negate, String comparison, long thresholdValue) {
         Metric metric = new Metric();
         metric.setName(name);
@@ -118,6 +121,7 @@ public class DashboardService {
 
         return metric;
     }
+
     public Map<String, Double> getMetricsData(DashboardDTO dashboardDTO) {
         MetricsDTO metricsDTO = callKPIs(getKPIs(dashboardDTO));
 
@@ -155,7 +159,6 @@ public class DashboardService {
     }
 
 
-
     public List<Integer> extractValues(MetricResultsDTO metricResults) {
         List<Integer> values = new ArrayList<>();
         if (metricResults == null || metricResults.getMetricResults() == null) {
@@ -172,3 +175,4 @@ public class DashboardService {
 
         return values;
     }
+}
