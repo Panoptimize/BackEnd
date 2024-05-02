@@ -40,15 +40,13 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
+import java.util.*;
 
 import java.text.ParseException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import java.util.List;
-import java.util.Map;
+
+import static com.itesm.panoptimize.service.CalculatePerformance.performanceCalculation;
 
 @RestController
 @RequestMapping("/dashboard")
@@ -174,16 +172,13 @@ public class DashboardController {
     @GetMapping("/performance") //cambiar dependiendo al timeframe y los otros parametros (checar si los recibe el endpoint en si o el de dashboard)
     public ResponseEntity<PerformanceDTO> getPerformanceData (){
         PerformanceDTO performanceData = new PerformanceDTO();
-        List<Double> performance;
 
         //TODO Creacion de endpoints para extraer esos datos
-        List<Double> fcr = List.of(50.0,100.0,30.0,20.0); //se saca del endpoint
-        List<Double> sl = List.of(20.0,40.0,10.0,20.0);
-        List<Double> ocup = List.of(40.0,40.0,10.0,20.0);
+        List<Map<String, List <Double>>> agent_performance = new ArrayList<>();;
 
-        performance = CalculatePerformance.performanceCalculation(sl,fcr,ocup);
 
-        performanceData.setPerformanceData(performance);
+        performanceCalculation(agent_performance);
+        performanceData.setPerformanceData(agent_performance);
 
         return  ResponseEntity.ok(performanceData);
     }
