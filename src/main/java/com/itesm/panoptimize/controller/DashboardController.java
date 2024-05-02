@@ -147,7 +147,6 @@ public class DashboardController {
         return new ResponseEntity<>("Data received", HttpStatus.OK);
     }
 
-
     @PostMapping("/metrics")
     public ResponseEntity<Map<String, Double>> getMetrics(@RequestBody DashboardDTO dashboardDTO) {
         Map<String, Double> metricsData = dashboardService.getMetricsData(dashboardDTO);
