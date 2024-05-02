@@ -2,6 +2,7 @@ package com.itesm.panoptimize.controller;
 
 import com.itesm.panoptimize.dto.dashboard.DashMetricData;
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
+import com.itesm.panoptimize.service.DashboardService;
 import com.itesm.panoptimize.service.FCRService;
 import com.itesm.panoptimize.dto.performance.PerformanceDTO;
 import com.itesm.panoptimize.service.CalculatePerformance;
@@ -30,8 +31,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/dashboard")
 public class DashboardController {
-    public DashboardController(FCRService fcrService) {
-        this.fcrService = fcrService;
+    private final DashboardService dashboardService;
+
+    @Autowired
+    public DashboardController(DashboardService dashboardService) {
+        this.dashboardService = dashboardService;
     }
     private static final String API_URL = "http://localhost:8000/get_metric_data"; //To test the consumption of AWS connect
 
@@ -95,8 +99,6 @@ public class DashboardController {
         return new ResponseEntity<>(responseJSON.toString(), headers, HttpStatus.OK);
     }
 
-
-  
 
     //Performance
     @Operation(summary = "Download the dashboard data", description = "Download the dashboard data by time frame, agent and workspace number")
