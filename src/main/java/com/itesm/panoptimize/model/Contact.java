@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 
 import java.util.Date;
 
+/**
+ * Entity representing a contact.
+ * This class maps to the 'contact' table in the database and defines the structure for contact data.
+ */
 @Entity
 @Table(name = "contact")
 public class Contact {
