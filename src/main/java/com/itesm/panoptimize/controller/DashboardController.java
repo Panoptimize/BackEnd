@@ -34,6 +34,12 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -52,6 +58,7 @@ import static com.itesm.panoptimize.service.CalculatePerformance.performanceCalc
 @RequestMapping("/dashboard")
 public class DashboardController {
 
+    @Autowired
     private CalculateSatisfactionService satisfactionService;
     private DashboardService dashboardService;
 
@@ -111,6 +118,18 @@ public class DashboardController {
         return ResponseEntity.ok(satisfactionService.calculateSatisfaction(metrics));
     }
 
+    @Autowired
+    private DashboardService apiClient;
+
+    @Autowired
+    private DashboardService metricService;
+
+    @GetMapping("/values")
+    public Mono<List<Integer>> getValues() {
+        return apiClient.getMetricResults()
+                .map(metricService::extractValues);
+    }
+
 
     @Operation(summary = "Get the dashboard data", description = "Get the dashboard data by time frame, agent and workspace number")
     @ApiResponses(value = {
@@ -128,7 +147,6 @@ public class DashboardController {
     public ResponseEntity<String> postData(@RequestBody DashboardDTO dashboardDTO) {
         return new ResponseEntity<>("Data received", HttpStatus.OK);
     }
-
 
     @PostMapping("/metrics")
     public ResponseEntity<Map<String, Double>> getMetrics(@RequestBody DashboardDTO dashboardDTO) {

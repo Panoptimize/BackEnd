@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+
 @RestController
 public class AgentController {
 
@@ -78,8 +79,20 @@ public class AgentController {
 
         AgentDTO agentDTO = convertToDTO(agent);
 
+
         return  ResponseEntity.ok(agentDTO);
     }
+
+    @PostMapping("/newAgent")
+    public ResponseEntity<AgentDTO> createNewAgent(@RequestBody AgentDTO agentDTO) {
+        
+        return ResponseEntity.ok(agentDTO);
+    }
+    
+    @DeleteMapping("/deleteAgent/{id}")
+    public ResponseEntity<String> deleteAgentResponse(@PathVariable Long id){
+        return ResponseEntity.ok("Agent " + id + " was deleted.");
+    } 
 
     @PostMapping("/agent/feedback")
     public ResponseEntity<String> postFeedback(@RequestBody PostFeedbackDTO feedbackDTO) {
