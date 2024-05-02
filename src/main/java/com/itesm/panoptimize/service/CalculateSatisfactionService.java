@@ -23,7 +23,7 @@ public class CalculateSatisfactionService {
     public List<CallMetricsDTO> getCallMetrics() {
         return webClientBuilder.build()
                 .get()
-                .uri("http://127.0.0.1:8000")
+                .uri("http://localhost:8000/customer-satisfaction")
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<List<CallMetricsDTO>>() {})
                 .block();
