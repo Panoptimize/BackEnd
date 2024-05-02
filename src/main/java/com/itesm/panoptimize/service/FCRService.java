@@ -1,6 +1,5 @@
 package com.itesm.panoptimize.service;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -20,7 +19,7 @@ public class FCRService {
         this.webClient = webClientBuilder.baseUrl("http://localhost:8080").build();
     }
 
-    public float fcrMetrics() throws JSONException {
+    public float fcrMetrics() {
         String requestBody = "{"
                 + "\"instance_id\": \"1\","
                 + "\"start_time\": \"2024-01-01\","
