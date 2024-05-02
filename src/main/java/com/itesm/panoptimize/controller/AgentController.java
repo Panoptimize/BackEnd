@@ -1,13 +1,14 @@
 package com.itesm.panoptimize.controller;
 
 import com.itesm.panoptimize.dto.agent.AgentDTO;
+import com.itesm.panoptimize.dto.agent.StatusDTO;
 import com.itesm.panoptimize.dto.agent.PostFeedbackDTO;
-import com.itesm.panoptimize.dto.agent.WorkspaceDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,9 +16,12 @@ import java.util.ArrayList;
 
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class AgentController {
+
+
     @GetMapping("/agents/all")
     public ResponseEntity<List<AgentDTO>> getAllAgents(
             @RequestParam(defaultValue = "0") int page,
@@ -83,4 +87,5 @@ public class AgentController {
     public ResponseEntity<String> postFeedback(@RequestBody PostFeedbackDTO feedbackDTO) {
         return ResponseEntity.ok("Feedback enviado exitosamente \nFecha: " + feedbackDTO.getDate());
     }
+
 }
