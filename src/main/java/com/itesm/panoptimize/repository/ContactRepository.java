@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-
 /**
  * Repository interface for {@link Contact} instances.
  * Provides management operations for contacts including CRUD operations and custom queries.

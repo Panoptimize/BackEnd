@@ -1,4 +1,4 @@
-package com.tec.panoptimize.dto.alert;
+package com.itesm.panoptimize.dto.alert;
 
 public class UserAlertsDTO {
     private String recipient;

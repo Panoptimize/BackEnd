@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
+
 @Service
 public class TotalContactsService {
     private final ContactRepository contactRepository;
@@ -14,6 +15,7 @@ public class TotalContactsService {
     public TotalContactsService(ContactRepository contactRepository) {
         this.contactRepository = contactRepository;
     }
+
 
     /**
      * Method to load dummy data into the database.
@@ -45,6 +47,7 @@ public class TotalContactsService {
         }
     }
 
+
     public List<Integer> countMonthlyContacts() {
         try {
             List<Object[]> results = contactRepository.countMonthlyContacts();
@@ -61,5 +64,5 @@ public class TotalContactsService {
             return new ArrayList<>();
         }
     }
-}
 
+}
