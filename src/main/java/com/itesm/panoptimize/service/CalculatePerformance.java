@@ -16,15 +16,15 @@ import java.util.Random;
 public class CalculatePerformance {
 
 
-    public static List<Map<String, Double>> performanceCalculation(List<Map<String, Double>> agents) {
+    public static List<Map<String, List<Double>>> performanceCalculation(List<Map<String, List<Double>>> agents) {
 
         List<Double> serviceLevel = new ArrayList<>(8);
         List<Double> firstContactResolution = new ArrayList<>(8);
         List<Double> ocupation = new ArrayList<>(8);
 
         //We suppose that the arrays have the same length for this iteration.
-        for (Map<String, Double> data : agents) {
-            for (Map.Entry<String, Double> entry : data.entrySet()) {
+        for (Map<String, List<Double>> data : agents) {
+            for (Map.Entry<String, List<Double>> entry : data.entrySet()) {
 
                 //Simulation of data collection
                 collectionSimulation(serviceLevel);
@@ -32,10 +32,10 @@ public class CalculatePerformance {
                 collectionSimulation(ocupation);
 
                 //calculating performance of values
-                double performance = performanceCalculation(firstContactResolution,ocupation,serviceLevel);
+                List <Double> performance = performanceCalculation(firstContactResolution,ocupation,serviceLevel);
                 String agent_name = entry.getKey();
-                Double newValue = performance;
-                data.put(agent_name,newValue);
+                List<Double> newList = performance;
+                data.put(agent_name,newList);
             }
         }
         return agents;
@@ -54,12 +54,9 @@ public class CalculatePerformance {
         return data_to_fill;
     }
 
-    private static  Double performanceCalculation(List<Double> serviceLevel, List<Double> firstContactResolution, List<Double> ocupation) {
+    private static  List<Double> performanceCalculation(List<Double> serviceLevel, List<Double> firstContactResolution, List<Double> ocupation) {
 
-        Double performance = 0.0;
-        double firstContactSum = 0.0;
-        double serviceSum = 0.0;
-        double ocupationSum = 0.0;
+        List<Double> performance = new ArrayList<>();
         //Check
         int length_ServiceLevel_data = serviceLevel.size();
         int length_FirstContactResolution_data = firstContactResolution.size();
@@ -68,35 +65,18 @@ public class CalculatePerformance {
         //We suppose that the arrays have the same length, but we check just in case
         if (length_ServiceLevel_data != length_FirstContactResolution_data || length_ServiceLevel_data != lengthOccupation) {
             System.out.println("The arrays have different lengths");
-            performance = 0.0;
             return performance;
         }
-
-        //suming all the values
-        for (Double valor : serviceLevel) {
-            serviceSum += valor;
+        for (int i = 0; i < length_ServiceLevel_data; i++) {
+            double performance_data;
+            double serviceLevel_percentage = serviceLevel.get(i) * 0.3;
+            double firstContactResolution_percentage = firstContactResolution.get(i) * 0.4;
+            double occupation_percentage = ocupation.get(i) * 0.3;
+            performance_data = serviceLevel_percentage + firstContactResolution_percentage + occupation_percentage;
+            performance.add(performance_data);
         }
-        serviceSum  = (serviceSum/length_ServiceLevel_data);
-
-        for (Double valor : firstContactResolution) {
-            firstContactSum += valor;
-        }
-        firstContactSum  = (firstContactSum/length_ServiceLevel_data);
-
-
-        for (Double valor : ocupation) {
-            ocupationSum += valor;
-        }
-        ocupationSum  = (ocupationSum/length_ServiceLevel_data);
-
-
-        //calculating performance
-        double serviceLevel_percentage = serviceSum * 0.3;
-        double firstContactResolution_percentage = firstContactSum * 0.4;
-        double occupation_percentage = ocupationSum * 0.3;
-        performance = serviceLevel_percentage + firstContactResolution_percentage + occupation_percentage;
-
         return performance;
+
     }
 }
 

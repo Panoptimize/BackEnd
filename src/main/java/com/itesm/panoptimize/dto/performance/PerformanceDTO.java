@@ -9,15 +9,15 @@ import java.util.Map;
 public class PerformanceDTO {
 
 
-    public List<Map<String, Double>> getPerformanceData() {
+    public List<Map<String, List<Double>>> getPerformanceData() {
         return performanceData;
     }
 
-    public void setPerformanceData(List<Map<String, Double>> performanceData) {
+    public void setPerformanceData(List<Map<String, List<Double>>> performanceData) {
         this.performanceData = performanceData;
     }
 
-    List<Map<String, Double>> performanceData;
+    List<Map<String, List<Double>>> performanceData;
 
 }
 
