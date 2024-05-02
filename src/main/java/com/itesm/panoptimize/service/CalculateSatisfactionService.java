@@ -1,8 +1,10 @@
 package com.itesm.panoptimize.service;
 import com.itesm.panoptimize.dto.dashboard.CallMetricsDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,19 +12,21 @@ import java.util.List;
 @Service
 public class CalculateSatisfactionService {
 
-    private final RestTemplate restTemplate;
+    private final WebClient.Builder webClientBuilder;
 
     @Autowired
-    public CalculateSatisfactionService(RestTemplate restTemplate){
-        this.restTemplate = restTemplate;
+    public CalculateSatisfactionService(WebClient.Builder webClientBuilder){
+
+        this.webClientBuilder = webClientBuilder;
     }
 
     public List<CallMetricsDTO> getCallMetrics() {
-        String apiUrl = "http://127.0.0.1:8000";
-
-        CallMetricsDTO[] call_metrics = restTemplate.getForObject(apiUrl, CallMetricsDTO[].class);
-
-        return List.of(call_metrics);
+        return webClientBuilder.build()
+                .get()
+                .uri("http://127.0.0.1:8000")
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<List<CallMetricsDTO>>() {})
+                .block();
     }
 
     public static int calcAnswerTimeQuality(int answer_time){
