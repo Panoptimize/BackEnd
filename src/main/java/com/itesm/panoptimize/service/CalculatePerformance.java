@@ -34,8 +34,7 @@ public class CalculatePerformance {
                 //calculating performance of values
                 List <Double> performance = performanceCalculation(firstContactResolution,ocupation,serviceLevel);
                 String agent_name = entry.getKey();
-                List<Double> newList = performance;
-                data.put(agent_name,newList);
+                data.put(agent_name, performance);
             }
         }
         return agents;

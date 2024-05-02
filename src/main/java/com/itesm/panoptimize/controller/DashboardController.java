@@ -176,6 +176,18 @@ public class DashboardController {
         //TODO Creacion de endpoints para extraer esos datos
         List<Map<String, List <Double>>> agent_performance = new ArrayList<>();;
 
+        Map<String, List<Double>> Mariah = new HashMap<>();
+        Mariah.put("Mariah Carey", new ArrayList<>());
+
+        Map<String, List<Double>> Will = new HashMap<>();
+        Will.put("Will Smith", new ArrayList<>());
+
+        Map<String, List<Double>> Tom = new HashMap<>();
+        Tom.put("Tom Cruise", new ArrayList<>());
+
+        agent_performance.add(Mariah);
+        agent_performance.add(Will);
+        agent_performance.add(Tom);
 
         performanceCalculation(agent_performance);
         performanceData.setPerformanceData(agent_performance);
