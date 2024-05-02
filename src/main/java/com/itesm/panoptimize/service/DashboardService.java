@@ -1,5 +1,17 @@
 package com.itesm.panoptimize.service;
 
+import com.itesm.panoptimize.dto.contact.CollectionDTO;
+import com.itesm.panoptimize.dto.contact.MetricResultDTO;
+import com.itesm.panoptimize.dto.contact.MetricResultsDTO;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
 import com.itesm.panoptimize.dto.dashboard.metric.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,19 +25,21 @@ import java.util.*;
 @Service
 public class DashboardService {
     private final WebClient webClient;
+
     @Autowired
     public DashboardService(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.baseUrl("http://localhost:8000").build();
     }
+
     private MetricsDTO callKPIs(RequestMetricDataV2 metricRequest) {
 
         return webClient.post()
-            .uri("/metrics/data")
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(metricRequest)
-            .retrieve()
-            .bodyToMono(MetricsDTO.class)
-            .block();
+                .uri("/metrics/data")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(metricRequest)
+                .retrieve()
+                .bodyToMono(MetricsDTO.class)
+                .block();
     }
 
     public RequestMetricDataV2 getKPIs(DashboardDTO dashboardDTO) {
@@ -81,6 +95,7 @@ public class DashboardService {
 
         return requestMetricData;
     }
+
     private Metric createMetric(String name, String filterKey, List<String> filterValues, boolean negate, String comparison, long thresholdValue) {
         Metric metric = new Metric();
         metric.setName(name);
@@ -106,6 +121,7 @@ public class DashboardService {
 
         return metric;
     }
+
     public Map<String, Double> getMetricsData(DashboardDTO dashboardDTO) {
         MetricsDTO metricsDTO = callKPIs(getKPIs(dashboardDTO));
 
@@ -118,5 +134,45 @@ public class DashboardService {
         });
 
         return metricsData;
+    }
+
+    public Mono<MetricResultsDTO> getMetricResults() {
+        String requestBody = "{"
+                + "\"InstanceId\": \"example-instance-id\","
+                + "\"Filters\": {},"
+                + "\"Groupings\": [\"CHANNEL\"],"
+                + "\"CurrentMetrics\": ["
+                + "{ \"Name\": \"CONTACTS_IN_PROGRESS\", \"Unit\": \"COUNT\" }"
+                + "]"
+                + "}";
+
+        return webClient.post()
+                .uri("/metrics")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(MetricResultsDTO.class)
+                .onErrorResume(WebClientResponseException.class, ex -> {
+                    System.err.println("Error al llamar a la API: " + ex.getStatusCode() + " - " + ex.getResponseBodyAsString());
+                    return Mono.empty();
+                });
+    }
+
+
+    public List<Integer> extractValues(MetricResultsDTO metricResults) {
+        List<Integer> values = new ArrayList<>();
+        if (metricResults == null || metricResults.getMetricResults() == null) {
+            return values;
+        }
+
+        for (MetricResultDTO metricResult : metricResults.getMetricResults()) {
+            if (metricResult.getCollections() != null) {
+                for (CollectionDTO collection : metricResult.getCollections()) {
+                    values.add(collection.getValue());
+                }
+            }
+        }
+
+        return values;
     }
 }
