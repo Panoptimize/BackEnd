@@ -54,11 +54,7 @@ jobs:
           # Build a docker container and
           # push it to ECR so that it can
           # be deployed to ECS. And add the environment parameters
-          docker build --build-arg MYSQL_HOST=${{ secrets.MYSQL_HOST }} \ 
-          --build-arg MYSQL_USER=${{ secrets.MYSQL_USER }} \
-          --build-arg MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
-          --build-arg SIMULATION_URL=${{ secrets.SIMULATION_URL }} \
-          -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker build --build-arg MYSQL_HOST=${{ secrets.MYSQL_HOST }} --build-arg MYSQL_USER=${{ secrets.MYSQL_USER }} --build-arg MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} --build-arg SIMULATION_URL=${{ secrets.SIMULATION_URL }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
