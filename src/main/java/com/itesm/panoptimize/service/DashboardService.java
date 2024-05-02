@@ -132,17 +132,6 @@ public class DashboardService {
         return metricsData;
     }
 
-
-
-@Service
-public class DashboardService {
-
-    private final WebClient webClient;
-
-    public DashboardService(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("http://localhost:8000").build();
-    }
-
     public Mono<MetricResultsDTO> getMetricResults() {
         String requestBody = "{"
                 + "\"InstanceId\": \"example-instance-id\","
@@ -182,4 +171,4 @@ public class DashboardService {
         }
 
         return values;
-}
+    }
