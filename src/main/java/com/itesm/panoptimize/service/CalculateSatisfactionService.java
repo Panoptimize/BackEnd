@@ -23,7 +23,7 @@ public class CalculateSatisfactionService {
     public List<CallMetricsDTO> getCallMetrics() {
         return webClientBuilder.build()
                 .get()
-                .uri("http://127.0.0.1:8000")
+                .uri("http://localhost:8000/customer-satisfaction")
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<List<CallMetricsDTO>>() {})
                 .block();
@@ -31,31 +31,31 @@ public class CalculateSatisfactionService {
 
     public static int calcAnswerTimeQuality(int answer_time){
         int quality=30;//we assign 30 max points for answer time and 70 to handle time
-        int leniency=20;//time we give the agent (in seconds) to answer without any penalty    
+        int leniency=20;//time we give the agent (in seconds) to answer without any penalty
         int rhythm=2;//how often (in seconds) a point is taken off of quality
-    
+
         int penalty=(answer_time-leniency)/rhythm;//points to be taken off
         quality-= penalty;
         if (quality<0){
-          quality=0;
+            quality=0;
         }
         return quality;
-      }
-    
+    }
+
     public static int calcHandleTimeQuality(int handle_time){
         int quality=70;//we assign 30 max points for answer time and 70 to handle time
         int leniency=90;//time we give the agent (in seconds) to handle without any penalty, maybe better use AHT
         int rhythm=6;//how often (in seconds) a point is taken off of quality
-    
+
         int penalty=(handle_time-leniency)/rhythm;//points to be taken off
         quality-= penalty;
         if (quality<0){
-          quality=0;
+            quality=0;
         }
         return quality;
-      }
+    }
 
-      public List<Integer> calculateSatisfaction(List<CallMetricsDTO> call_metrics){
+    public List<Integer> calculateSatisfaction(List<CallMetricsDTO> call_metrics){
         List<Integer> results = new ArrayList<>(List.of(0,0,0,0,0));
         for(CallMetricsDTO metrics: call_metrics) {
             System.out.println(metrics.getSpeedOfAnswer());
@@ -64,16 +64,16 @@ public class CalculateSatisfactionService {
             results.set(satisfactionLevel, results.get(satisfactionLevel) + 1);
         }
         return results;
-      }
+    }
 
     public int calculateSatisfaction(CallMetricsDTO metrics){
         int speedOfAnswer = metrics.getSpeedOfAnswer();
         int handleTime = metrics.getHandleTime();
-        boolean abandoned = metrics.getAbandoned();
+        boolean abandoned = metrics.isAbandoned();
 
         int satisfaction = 0;
 
-        if(!abandoned) 
+        if(!abandoned)
         {
             satisfaction += calcAnswerTimeQuality(speedOfAnswer);
             satisfaction += calcHandleTimeQuality(handleTime);
