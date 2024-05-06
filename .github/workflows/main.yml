@@ -10,29 +10,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Authenticate with GCP
-      uses: google-github-actions/auth@v2
-      with:
-        credentials_json: ${{ secrets.GCR_SERVICE_ACCOUNT_KEY }}
+      - name: Authenticate with GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCR_SERVICE_ACCOUNT_KEY }}
 
-    - name: Set up Cloud SDK
-      uses: google-github-actions/setup-gcloud@v2
-      with:
-        project_id: ${{ secrets.GCP_PROJECT_ID }}
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-    - name: Build and Push to Artifact Registry
-      uses: docker/build-push-action@v5.3.0
-      with:
-        push: true
-        tags: |
-          us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/backend/backend:latest
-          us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/backend/backend:${{ github.sha }}
+      - name: Build and Push to Artifact Registry
+        uses: docker/build-push-action@v5.3.0
+        with:
+          push: true
+          tags: |
+            us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/backend/backend:latest
+            us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/backend/backend:${{ github.sha }}
 
-    - name: Deploy to Cloud Run
-      uses: google-github-actions/deploy-cloudrun@v2
-      with:
-        service: merkdo-front
-        image: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/backend/backend:latest
-        region: us-central1
-        allow_unauthenticated: true
-        port: 8080
+      - name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: backend
+          image: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/backend/backend:latest
+          region: us-central1
+          allow_unauthenticated: true
+          port: 8080
