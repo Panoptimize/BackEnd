@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+env:
+  REPOSITORY_NAME: ${{ vars.REPOSITORY_NAME }}
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -25,14 +28,14 @@ jobs:
         with:
           push: true
           tags: |
-            us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/backend/backend:latest
-            us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/backend/backend:${{ github.sha }}
+            us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.REPOSITORY_NAME }}:latest
+            us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.REPOSITORY_NAME }}:${{ github.sha }}
 
       - name: Deploy to Cloud Run
         uses: google-github-actions/deploy-cloudrun@v2
         with:
           service: backend
-          image: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/backend/backend:latest
+          image: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.REPOSITORY_NAME }}:latest
           region: us-central1
           allow_unauthenticated: true
           port: 8080
