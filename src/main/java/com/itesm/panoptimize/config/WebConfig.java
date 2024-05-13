@@ -1,4 +1,4 @@
-package com.itesm.panoptimize.config;  // Asegúrate de usar el paquete correcto
+package com.itesm.panoptimize.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,14 +7,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3001")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(true)
-                .maxAge(3600);
+        registry.addMapping("/**") // Apply CORS to all endpoints
+                .allowedOrigins("http://localhost:3000") // Allowed origin(s)
+                .allowedMethods("GET", "POST", "PUT", "DELETE") // Allowed methods
+                .allowedHeaders("*") // Allowed headers
+                .allowCredentials(true); // Allow credentials
     }
 }

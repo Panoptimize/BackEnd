@@ -19,6 +19,13 @@ public class StatusDTO {
         @JsonProperty("Collections")
         private List<Collection> collections;
 
+        public List<Collection> getCollections() {
+            return collections;
+        }
+
+        public void setCollections(List<Collection> collections) {
+            this.collections = collections;
+        }
     }
 
     /**
@@ -28,7 +35,15 @@ public class StatusDTO {
         @JsonProperty("Metric")
         private Metric metric;
 
+        public Metric getMetric() {
+            return metric;
+        }
+
+        public void setMetric(Metric metric) {
+            this.metric = metric;
+        }
     }
+
 
     /**
      * Represents an individual metric, detailing the metric name and its value.
@@ -40,7 +55,28 @@ public class StatusDTO {
         @JsonProperty("Value")
         private double value;
 
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public double getValue() {
+            return value;
+        }
+
+        public void setValue(double value) {
+            this.value = value;
+        }
     }
 
+    public List<MetricResult> getMetricResults() {
+        return metricResults;
+    }
 
+    public void setMetricResults(List<MetricResult> metricResults) {
+        this.metricResults = metricResults;
+    }
 }
