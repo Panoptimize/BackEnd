@@ -13,7 +13,7 @@ public class User {
     private int id;
 
     @Column(name = "connect_id", nullable = false, unique = true)
-    private UUID connectId;
+    private String connectId;
 
     @Column(nullable = false)
     private String email;
@@ -36,11 +36,11 @@ public class User {
         return id;
     }
 
-    public UUID getConnectId() {
+    public String getConnectId() {
         return connectId;
     }
 
-    public void setConnectId(UUID connectId) {
+    public void setConnectId(String connectId) {
         this.connectId = connectId;
     }
 
