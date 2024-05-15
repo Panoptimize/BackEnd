@@ -7,9 +7,9 @@ public class DashboardDTO {
 
     private Date startDate;
     private Date endDate;
-    private UUID[] agents;
+    private String[] routingProfiles;
     // UUID format
-    private UUID[] workspaces;
+    private String[] queues;
 
     public Date getStartDate() {
         return startDate;
@@ -27,19 +27,19 @@ public class DashboardDTO {
         this.endDate = endDate;
     }
 
-    public UUID[] getAgents() {
-        return agents;
+    public String[] getRoutingProfiles() {
+        return routingProfiles;
     }
 
-    public void setAgents(UUID[] agents) {
-        this.agents = agents;
+    public void setRoutingProfiles(String[] routingProfiles) {
+        this.routingProfiles = routingProfiles;
     }
 
-    public UUID[] getWorkspaces() {
-        return workspaces;
+    public String[] getQueues() {
+        return queues;
     }
 
-    public void setWorkspaces(UUID[] workspaces) {
-        this.workspaces = workspaces;
+    public void setQueues(String[] queues) {
+        this.queues = queues;
     }
 }

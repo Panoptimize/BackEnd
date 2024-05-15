@@ -9,129 +9,126 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
-import com.itesm.panoptimize.dto.dashboard.metric.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 import com.itesm.panoptimize.dto.dashboard.MetricsDTO;
+import software.amazon.awssdk.services.connect.ConnectClient;
+import software.amazon.awssdk.services.connect.model.*;
 
 import java.util.*;
 
 @Service
 public class DashboardService {
     private final WebClient webClient;
+    private final ConnectClient connectClient;
 
     @Autowired
-    public DashboardService(WebClient.Builder webClientBuilder) {
+    public DashboardService(WebClient.Builder webClientBuilder, ConnectClient connectClient){
         this.webClient = webClientBuilder.baseUrl("http://localhost:8000").build();
+        this.connectClient = connectClient;
     }
 
-    private MetricsDTO callKPIs(RequestMetricDataV2 metricRequest) {
+    /**
+     * Get KPIs from Amazon Connect. These KPIs are the following:
+     * - Service Level
+     * - Average Hold Time
+     * - Average Speed of Answer
+     * - Schedule Adherence
+     * - First Contact Resolution
+     * @param dashboardDTO is the DTO that contains the filters to get the KPIs
+     * @return a list of KPIs
+     */
+    public GetMetricDataV2Response getKPIs(DashboardDTO dashboardDTO) {
 
-        return webClient.post()
-                .uri("/metrics/data")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(metricRequest)
-                .retrieve()
-                .bodyToMono(MetricsDTO.class)
-                .block();
-    }
-
-    public RequestMetricDataV2 getKPIs(DashboardDTO dashboardDTO) {
-
-        // Set up the date to unix time
-        long startTime = dashboardDTO.getStartDate().getTime();
-        long endTime = dashboardDTO.getEndDate().getTime();
-
-        RequestMetricDataV2 requestMetricData = new RequestMetricDataV2();
-
-        // Set values for the fields
-        requestMetricData.setEndTime(startTime);
-        requestMetricData.setStartTime(endTime);
-        requestMetricData.setMaxResults(100);
-        requestMetricData.setNextToken("");
-        requestMetricData.setResourceArn("arn:aws:lambda:us-west-1:123456789012:function:my-lambda-function");
+        Instant startTime = dashboardDTO.getStartDate().toInstant();
+        Instant endTime = dashboardDTO.getEndDate().toInstant();
 
         // Set up filters
-        List<Filter> filters = new ArrayList<>();
-        if (dashboardDTO.getAgents().length > 0) {
-            Filter agentFilter = new Filter();
-            agentFilter.setFilterKey("AGENT");
-            agentFilter.setFilterValues(List.of(Arrays.toString(dashboardDTO.getAgents())));
-            filters.add(agentFilter);
-        }
-        if (dashboardDTO.getWorkspaces().length > 0) {
-            Filter workspaceFilter = new Filter();
-            workspaceFilter.setFilterKey("ROUTING_PROFILE");
-            workspaceFilter.setFilterValues(List.of(Arrays.toString(dashboardDTO.getWorkspaces())));
-            filters.add(workspaceFilter);
-        }
-        requestMetricData.setFilters(filters);
+        List<FilterV2> filters = new ArrayList<>();
 
-        // Set up groupings
-        requestMetricData.setGroupings(List.of("service"));
+        if (dashboardDTO.getRoutingProfiles().length > 0) {
+            FilterV2 routingProfileFilter = FilterV2.builder()
+                    .filterKey("ROUTING_PROFILE")
+                    .filterValues(Arrays.asList(dashboardDTO.getRoutingProfiles()))
+                    .build();
+            filters.add(routingProfileFilter);
+        }
 
-        // Set up interval
-        Interval interval = new Interval();
-        interval.setIntervalPeriod("1h");
-        interval.setTimeZone("UTC");
-        requestMetricData.setInterval(interval);
+        if (dashboardDTO.getQueues().length > 0) {
+            FilterV2 queueFilter = FilterV2.builder()
+                    .filterKey("QUEUE")
+                    .filterValues(Arrays.asList(dashboardDTO.getQueues()))
+                    .build();
+            filters.add(queueFilter);
+        }
 
         // Set up metrics
-        List<Metric> metrics = new ArrayList<>();
-        metrics.add(createMetric("PERCENT_CASES_FIRST_CONTACT_RESOLVED", "status", List.of("success"), false, "greater_than", 90));
-        metrics.add(createMetric("ABANDONMENT_RATE", null, null, false, "less_than", 5));
-        metrics.add(createMetric("CONTACTS_HANDLED", null, null, false, "greater_than", 1000));
-        metrics.add(createMetric("SUM_HOLD_TIME", null, null, false, "greater_than", 15000));
-        metrics.add(createMetric("SERVICE_LEVEL", null, null, false, "greater_than", 80));
-        metrics.add(createMetric("AVG_HOLD_TIME", null, null, false, "less_than", 120));
-        metrics.add(createMetric("AGENT_SCHEDULE_ADHERENCE", null, null, false, "greater_than", 75));
-        requestMetricData.setMetrics(metrics);
+        List<MetricV2> metrics = new ArrayList<>();
 
-        return requestMetricData;
-    }
+        // Service Level
+        MetricV2 serviceLevel = MetricV2.builder()
+                .name("SERVICE_LEVEL")
+                .threshold(ThresholdV2.builder()
+                        .comparison("LT")
+                        .thresholdValue(80.0)
+                        .build())
+                .build();
 
-    private Metric createMetric(String name, String filterKey, List<String> filterValues, boolean negate, String comparison, long thresholdValue) {
-        Metric metric = new Metric();
-        metric.setName(name);
+        metrics.add(serviceLevel);
 
-        if (filterKey != null) {
-            List<MetricFilter> metricFilters = new ArrayList<>();
-            MetricFilter metricFilter = new MetricFilter();
-            metricFilter.setMetricFilterKey(filterKey);
-            metricFilter.setMetricFilterValues(filterValues);
-            metricFilter.setNegate(negate);
-            metricFilters.add(metricFilter);
-            metric.setMetricFilters(metricFilters);
-        } else {
-            metric.setMetricFilters(new ArrayList<>());
-        }
+        // Average Speed of Answer
+        MetricV2 averageSpeedOfAnswer = MetricV2.builder()
+                .name("ABANDONMENT_RATE")
+                .build();
 
-        List<Threshold> thresholds = new ArrayList<>();
-        Threshold threshold = new Threshold();
-        threshold.setComparison(comparison);
-        threshold.setThresholdValue(thresholdValue);
-        thresholds.add(threshold);
-        metric.setThreshold(thresholds);
+        metrics.add(averageSpeedOfAnswer);
 
-        return metric;
+        // Average Hold Time
+        MetricV2 averageHoldTime = MetricV2.builder()
+                .name("AVG_HOLD_TIME")
+                .build();
+
+        metrics.add(averageHoldTime);
+
+        // Schedule Adherence
+        MetricV2 scheduleAdherence = MetricV2.builder()
+                .name("AGENT_SCHEDULE_ADHERENCE")
+                .build();
+
+        metrics.add(scheduleAdherence);
+
+        // First Contact Resolution
+        MetricV2 firstContactResolution = MetricV2.builder()
+                .name("PERCENT_CASES_FIRST_CONTACT_RESOLVED")
+                .build();
+
+        metrics.add(firstContactResolution);
+
+
+        return connectClient.getMetricDataV2(GetMetricDataV2Request.builder()
+                .startTime(startTime)
+                .endTime(endTime)
+                .resourceArn("arn:aws:connect:us-east-1:674530197385:instance/7c78bd60-4a9f-40e5-b461-b7a0dfaad848")
+                .filters(filters)
+                .metrics(metrics)
+                .build());
     }
 
     public Map<String, Double> getMetricsData(DashboardDTO dashboardDTO) {
-        MetricsDTO metricsDTO = callKPIs(getKPIs(dashboardDTO));
+        GetMetricDataV2Response response = getKPIs(dashboardDTO);
 
         Map<String, Double> metricsData = new HashMap<>();
 
-        metricsDTO.getMetricResults().forEach(metricResult -> {
-            metricResult.getCollections().forEach(collection -> {
-                metricsData.put(collection.getMetric().getName().getName(), collection.getValue());
-            });
-        });
+        for (MetricResultV2 metricData : response.metricResults()) {
+            List<MetricDataV2> metrics = metricData.collections();
+            for (MetricDataV2 metric : metrics) {
+                metricsData.put(metric.metric().name(), metric.value());
+            }
+        }
 
         return metricsData;
     }
