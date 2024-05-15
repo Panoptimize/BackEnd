@@ -1,20 +1,14 @@
 package com.itesm.panoptimize.controller;
 
 
-import com.itesm.panoptimize.dto.dashboard.DashMetricData;
-import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
-import com.itesm.panoptimize.service.DashboardService;
-import com.itesm.panoptimize.service.FCRService;
+import com.itesm.panoptimize.dto.dashboard.*;
+import com.itesm.panoptimize.service.*;
 
-import com.itesm.panoptimize.dto.dashboard.CallMetricsDTO;
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
-import com.itesm.panoptimize.service.CalculateSatisfactionService;
 
-import com.itesm.panoptimize.dto.dashboard.MetricsDTO;
 import com.itesm.panoptimize.service.DashboardService;
 
 import com.itesm.panoptimize.dto.performance.PerformanceDTO;
-import com.itesm.panoptimize.service.CalculatePerformance;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,29 +20,20 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.*;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-
-import java.text.ParseException;
 
 import java.util.List;
 

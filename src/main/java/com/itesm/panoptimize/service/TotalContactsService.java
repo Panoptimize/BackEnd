@@ -64,5 +64,13 @@ public class TotalContactsService {
             return new ArrayList<>();
         }
     }
+    public List<Contact> getAllContacts(){
+        try{
+            return contactRepository.findAll();
+        } catch (Exception e){
+            System.err.println("Error retrieving data from the table: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
 
 }
