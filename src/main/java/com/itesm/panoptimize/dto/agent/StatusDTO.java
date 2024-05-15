@@ -9,74 +9,30 @@ import java.util.List;
  * structured in nested collections.
  */
 public class StatusDTO {
-    @JsonProperty("MetricResults")
-    private List<MetricResult> metricResults;
+    @JsonProperty("status")
+    private String status;
 
-    /**
-     * Represents a single metric result, which contains multiple collections of metrics.
-     */
-    public static class MetricResult {
-        @JsonProperty("Collections")
-        private List<Collection> collections;
+    @JsonProperty("numUsers")
+    private double numUsers;
 
-        public List<Collection> getCollections() {
-            return collections;
-        }
-
-        public void setCollections(List<Collection> collections) {
-            this.collections = collections;
-        }
+    public StatusDTO(String status, double numUsers) {
+        this.status = status;
+        this.numUsers = numUsers;
     }
 
-    /**
-     * Represents a collection of metric, encapsulating individual metrics.
-     */
-    public static class Collection {
-        @JsonProperty("Metric")
-        private Metric metric;
-
-        public Metric getMetric() {
-            return metric;
-        }
-
-        public void setMetric(Metric metric) {
-            this.metric = metric;
-        }
+    public String getStatus() {
+        return status;
     }
 
-
-    /**
-     * Represents an individual metric, detailing the metric name and its value.
-     */
-    public static class Metric {
-        @JsonProperty("Name")
-        private String name;
-
-        @JsonProperty("Value")
-        private double value;
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public double getValue() {
-            return value;
-        }
-
-        public void setValue(double value) {
-            this.value = value;
-        }
+    public void setStatus(String status) {
+        this.status = status;
     }
 
-    public List<MetricResult> getMetricResults() {
-        return metricResults;
+    public double getNumUsers() {
+        return numUsers;
     }
 
-    public void setMetricResults(List<MetricResult> metricResults) {
-        this.metricResults = metricResults;
+    public void setNumUsers(double numUsers) {
+        this.numUsers = numUsers;
     }
 }
