@@ -9,38 +9,30 @@ import java.util.List;
  * structured in nested collections.
  */
 public class StatusDTO {
-    @JsonProperty("MetricResults")
-    private List<MetricResult> metricResults;
+    @JsonProperty("status")
+    private String status;
 
-    /**
-     * Represents a single metric result, which contains multiple collections of metrics.
-     */
-    public static class MetricResult {
-        @JsonProperty("Collections")
-        private List<Collection> collections;
+    @JsonProperty("numUsers")
+    private double numUsers;
 
+    public StatusDTO(String status, double numUsers) {
+        this.status = status;
+        this.numUsers = numUsers;
     }
 
-    /**
-     * Represents a collection of metric, encapsulating individual metrics.
-     */
-    public static class Collection {
-        @JsonProperty("Metric")
-        private Metric metric;
-
+    public String getStatus() {
+        return status;
     }
 
-    /**
-     * Represents an individual metric, detailing the metric name and its value.
-     */
-    public static class Metric {
-        @JsonProperty("Name")
-        private String name;
-
-        @JsonProperty("Value")
-        private double value;
-
+    public void setStatus(String status) {
+        this.status = status;
     }
 
+    public double getNumUsers() {
+        return numUsers;
+    }
 
+    public void setNumUsers(double numUsers) {
+        this.numUsers = numUsers;
+    }
 }
