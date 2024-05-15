@@ -1,11 +1,18 @@
 package com.itesm.panoptimize.dto.dashboard;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import java.util.Date;
-import java.util.UUID;
 
 public class DashboardDTO {
-
+    @NotNull(message = "Instance ID is required")
+    @Size(min = 36, max = 36, message = "Instance ID must be 36 characters long")
+    private String instanceId;
+    @NotNull(message = "Start date is required")
     private Date startDate;
+    @NotNull(message = "End date is required")
     private Date endDate;
     private String[] routingProfiles;
     // UUID format
@@ -41,5 +48,13 @@ public class DashboardDTO {
 
     public void setQueues(String[] queues) {
         this.queues = queues;
+    }
+
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
     }
 }

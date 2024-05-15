@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +61,7 @@ public class DashboardController {
 
     @Autowired
     private CalculateSatisfactionService satisfactionService;
-    private DashboardService dashboardService;
+    private final DashboardService dashboardService;
 
     @Autowired
     public DashboardController(DashboardService dashboardService) {
@@ -148,8 +149,20 @@ public class DashboardController {
         return new ResponseEntity<>("Data received", HttpStatus.OK);
     }
 
+    @Operation(summary = "Get the metrics data", description = "Get the metrics data by time frame, agent and workspace number")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Found the data",
+                    content = {
+                            @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = MetricsDTO.class))
+                    }),
+            @ApiResponse(responseCode = "404",
+                    description = "Data not found",
+                    content = @Content),
+    })
     @PostMapping("/metrics")
-    public ResponseEntity<Map<String, Double>> getMetrics(@RequestBody DashboardDTO dashboardDTO) {
+    public ResponseEntity<Map<String, Double>> getMetrics(@Valid @RequestBody DashboardDTO dashboardDTO) {
         Map<String, Double> metricsData = dashboardService.getMetricsData(dashboardDTO);
 
         if(metricsData.isEmpty()) {

@@ -1,8 +1,10 @@
 package com.itesm.panoptimize.service;
 
+import com.itesm.panoptimize.util.Constants;
 import com.itesm.panoptimize.dto.contact.CollectionDTO;
 import com.itesm.panoptimize.dto.contact.MetricResultDTO;
 import com.itesm.panoptimize.dto.contact.MetricResultsDTO;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -15,7 +17,6 @@ import java.util.List;
 
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.itesm.panoptimize.dto.dashboard.MetricsDTO;
 import software.amazon.awssdk.services.connect.ConnectClient;
 import software.amazon.awssdk.services.connect.model.*;
 
@@ -42,7 +43,8 @@ public class DashboardService {
      * @param dashboardDTO is the DTO that contains the filters to get the KPIs
      * @return a list of KPIs
      */
-    public GetMetricDataV2Response getKPIs(DashboardDTO dashboardDTO) {
+    public GetMetricDataV2Response getKPIs(@NotNull DashboardDTO dashboardDTO) {
+        String instanceId = dashboardDTO.getInstanceId();
 
         Instant startTime = dashboardDTO.getStartDate().toInstant();
         Instant endTime = dashboardDTO.getEndDate().toInstant();
@@ -112,7 +114,7 @@ public class DashboardService {
         return connectClient.getMetricDataV2(GetMetricDataV2Request.builder()
                 .startTime(startTime)
                 .endTime(endTime)
-                .resourceArn("arn:aws:connect:us-east-1:674530197385:instance/7c78bd60-4a9f-40e5-b461-b7a0dfaad848")
+                .resourceArn(Constants.BASE_ARN + ":instance/" + instanceId)
                 .filters(filters)
                 .metrics(metrics)
                 .build());
