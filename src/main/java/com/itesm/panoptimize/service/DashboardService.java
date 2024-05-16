@@ -43,7 +43,7 @@ public class DashboardService {
      * @param dashboardDTO is the DTO that contains the filters to get the KPIs
      * @return a list of KPIs
      */
-    public GetMetricDataV2Response getKPIs(@NotNull DashboardDTO dashboardDTO) {
+    private GetMetricDataV2Response getKPIs(@NotNull DashboardDTO dashboardDTO, List<MetricV2> metrics) {
         String instanceId = dashboardDTO.getInstanceId();
 
         Instant startTime = dashboardDTO.getStartDate().toInstant();
@@ -68,8 +68,18 @@ public class DashboardService {
             filters.add(queueFilter);
         }
 
+
+        return connectClient.getMetricDataV2(GetMetricDataV2Request.builder()
+                .startTime(startTime)
+                .endTime(endTime)
+                .resourceArn(Constants.BASE_ARN + ":instance/" + instanceId)
+                .filters(filters)
+                .metrics(metrics)
+                .build());
+    }
+    public Map<String, Double> getMetricsData(DashboardDTO dashboardDTO) {
         // Set up metrics
-        List<MetricV2> metrics = new ArrayList<>();
+        List<MetricV2> metricList = new ArrayList<>();
 
         // Service Level
         MetricV2 serviceLevel = MetricV2.builder()
@@ -80,48 +90,36 @@ public class DashboardService {
                         .build())
                 .build();
 
-        metrics.add(serviceLevel);
+        metricList.add(serviceLevel);
 
         // Average Speed of Answer
         MetricV2 averageSpeedOfAnswer = MetricV2.builder()
                 .name("ABANDONMENT_RATE")
                 .build();
 
-        metrics.add(averageSpeedOfAnswer);
+        metricList.add(averageSpeedOfAnswer);
 
         // Average Hold Time
         MetricV2 averageHoldTime = MetricV2.builder()
                 .name("AVG_HOLD_TIME")
                 .build();
 
-        metrics.add(averageHoldTime);
+        metricList.add(averageHoldTime);
 
         // Schedule Adherence
         MetricV2 scheduleAdherence = MetricV2.builder()
                 .name("AGENT_SCHEDULE_ADHERENCE")
                 .build();
 
-        metrics.add(scheduleAdherence);
+        metricList.add(scheduleAdherence);
 
         // First Contact Resolution
         MetricV2 firstContactResolution = MetricV2.builder()
                 .name("PERCENT_CASES_FIRST_CONTACT_RESOLVED")
                 .build();
 
-        metrics.add(firstContactResolution);
-
-
-        return connectClient.getMetricDataV2(GetMetricDataV2Request.builder()
-                .startTime(startTime)
-                .endTime(endTime)
-                .resourceArn(Constants.BASE_ARN + ":instance/" + instanceId)
-                .filters(filters)
-                .metrics(metrics)
-                .build());
-    }
-
-    public Map<String, Double> getMetricsData(DashboardDTO dashboardDTO) {
-        GetMetricDataV2Response response = getKPIs(dashboardDTO);
+        metricList.add(firstContactResolution);
+        GetMetricDataV2Response response = getKPIs(dashboardDTO, metricList);
 
         Map<String, Double> metricsData = new HashMap<>();
 
