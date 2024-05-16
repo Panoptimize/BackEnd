@@ -1,13 +1,11 @@
 package com.itesm.panoptimize.controller;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itesm.panoptimize.dto.dashboard.DashboardDataDTO;
 import com.itesm.panoptimize.model.Contact;
-import com.itesm.panoptimize.service.DashboardService;
 import com.itesm.panoptimize.service.DownloadService;
 import com.itesm.panoptimize.service.TotalContactsService;
 import com.opencsv.CSVWriter;
-import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -33,11 +31,13 @@ public class DownloadController {
     private DownloadService downloadService;
 
     private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public DownloadController(DownloadService downloadService, RestTemplate restTemplate) {
+    public DownloadController(DownloadService downloadService, RestTemplate restTemplate, ObjectMapper objectMapper) {
         this.downloadService = downloadService;
         this.restTemplate = restTemplate;
+        this.objectMapper = objectMapper;
     }
 
     //Download data from the Dashboard (Only work with data from the database for now)
@@ -106,7 +106,7 @@ public class DownloadController {
     }
 
     @GetMapping("/getData")
-    public ResponseEntity<List<Contact>> getJSONData(){
+    public ResponseEntity<String> getJSONData(){
         String GET_DB_DATA_URL = "http://localhost:8080/download/getDBData";
         ResponseEntity<List<Contact>> response = restTemplate.exchange(
                 GET_DB_DATA_URL,
@@ -115,6 +115,29 @@ public class DownloadController {
                 new ParameterizedTypeReference<List<Contact>>() {}
         );
         List<Contact> data = response.getBody();
-        return ResponseEntity.ok(data);
+
+        try{
+            String filePath = "D:\\Tec\\Semestre 2024-1\\Panoptimise\\BackEnd/contacts.csv";
+            FileWriter csvWriter = new FileWriter(filePath);
+            csvWriter.write("id,startTime,endTime,firstContactResolution,resolutionStatus,sentimentNegative,sentimentPositive,agentId,satisfaction\n");
+            for (Contact contact : data) {
+                csvWriter.write(contact.getId() + "," +
+                        contact.getStartTime() + "," +
+                        contact.getEndTime() + "," +
+                        contact.isFirstContactResolution() + "," +
+                        contact.getResolutionStatus() + "," +
+                        contact.getSentimentNegative() + "," +
+                        contact.getSentimentPositive() + "," +
+                        contact.getAgentId() + "," +
+                        contact.getSatisfaction() + "\n");
+            }
+            csvWriter.flush();
+            csvWriter.close();
+
+            return ResponseEntity.ok("CSV file saved at: " + filePath);
+        }catch(Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error generating JSON file: " + e.getMessage());
+        }
+
     }
 }
