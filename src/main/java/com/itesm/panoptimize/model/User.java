@@ -15,6 +15,9 @@ public class User {
     @Column(name = "connect_id", nullable = false, unique = true)
     private String connectId;
 
+    @Column(name = "firebase_id", nullable = false, unique = true)
+    private UUID firebaseId;
+
     @Column(nullable = false)
     private String email;
 
@@ -43,6 +46,12 @@ public class User {
     public void setConnectId(String connectId) {
         this.connectId = connectId;
     }
+
+    public UUID getFirebaseId() {
+        return firebaseId;
+    }
+
+    public void setFirebaseId(UUID firebaseId) { this.firebaseId = firebaseId; }
 
     public String getEmail() {
         return email;
@@ -83,4 +92,5 @@ public class User {
     public void setUserType(UserType userType) {
         this.userType = userType;
     }
+
 }
