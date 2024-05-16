@@ -18,8 +18,8 @@ public class AgentPerformance {
     @Column(name = "total_contacts_handled", nullable = false)
     private int totalContactsHandled;
 
-    @Column(name = "total_after_callwork", nullable = false)
-    private int totalAfterCallwork;
+    @Column(name = "total_after_call_work", nullable = false)
+    private int totalAfterCallWork;
 
     @Column(name = "adherence_percentage", nullable = false)
     private float adherencePercentage;
@@ -52,12 +52,12 @@ public class AgentPerformance {
         this.totalContactsHandled = totalContactsHandled;
     }
 
-    public int getTotalAfterCallwork() {
-        return totalAfterCallwork;
+    public int getTotalAfterCallWork() {
+        return totalAfterCallWork;
     }
 
-    public void setTotalAfterCallwork(int totalAfterCallwork) {
-        this.totalAfterCallwork = totalAfterCallwork;
+    public void setTotalAfterCallWork(int totalAfterCallwork) {
+        this.totalAfterCallWork = totalAfterCallwork;
     }
 
     public float getAdherencePercentage() {
