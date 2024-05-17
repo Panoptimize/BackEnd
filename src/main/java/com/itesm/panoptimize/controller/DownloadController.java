@@ -1,16 +1,11 @@
 package com.itesm.panoptimize.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.itesm.panoptimize.dto.dashboard.DashboardDataDTO;
 import com.itesm.panoptimize.model.Contact;
 import com.itesm.panoptimize.service.DownloadService;
 import com.itesm.panoptimize.service.TotalContactsService;
 import com.opencsv.CSVWriter;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
@@ -19,8 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping("/download")
@@ -40,97 +34,73 @@ public class DownloadController {
         this.objectMapper = objectMapper;
     }
 
-    //Download data from the Dashboard (Only work with data from the database for now)
-    @Operation(summary = "Download the dashboard data", description = "Download the dashboard data by time frame, agent and workspace number")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Found the data",
-                    content = {
-                            @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = DashboardDataDTO.class))
-                    }),
-            @ApiResponse(responseCode = "404",
-                    description = "Data not found",
-                    content = @Content),
-    })
-
-    @PostMapping("/downloadDataDB")
-    public ResponseEntity<String> downloadDashboardData(@RequestBody DashboardDataDTO dashboardDataDTO){
-        List<Contact> data = totalContactsService.getAllContacts();
-        try{
-            String filePath = "./BackEnd/contacts.csv";
-
-            FileWriter fileWriter = new FileWriter(filePath);
-            CSVWriter csvWriter = new CSVWriter(new PrintWriter(fileWriter));
-
-            csvWriter.writeNext(new String[]{"id",
-                    "startTime",
-                    "endTime",
-                    "firstContactResolution",
-                    "resolutionStatus",
-                    "sentimentNegative",
-                    "sentimentPositive",
-                    "agentId",
-                    "satisfaction" });
-            for (Contact contact : data) {
-                csvWriter.writeNext(new String[]{String.valueOf(contact.getId()),
-                        String.valueOf(contact.getStartTime()),
-                        String.valueOf(contact.getEndTime()),
-                        String.valueOf(contact.isFirstContactResolution()),
-                        contact.getResolutionStatus(),
-                        String.valueOf(contact.getSentimentNegative()),
-                        String.valueOf(contact.getSentimentPositive()),
-                        String.valueOf(contact.getAgentId()),
-                        String.valueOf(contact.getSatisfaction())});            }
-            csvWriter.close();
-            fileWriter.close();
-
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.TEXT_PLAIN);
-            headers.setContentDispositionFormData("filename", "contacts.csv");
-
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body("CSV file saved at: " + filePath);
-
-        }catch (IOException e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error generating CSV file: " + e.getMessage());
-        }
-    }
-
+    //Download data from the Dashboard
+    // Endpoint to get data in JSON format (This is from the database)
     @GetMapping("/getDBData")
     public ResponseEntity<List<Contact>> getData(){
         List<Contact> data = totalContactsService.getAllContacts();
         return ResponseEntity.ok(data);
     }
-
-    @GetMapping("/getData")
-    public ResponseEntity<String> getJSONData(){
-        String GET_DB_DATA_URL = "http://localhost:8080/download/getDBData";
-        ResponseEntity<List<Contact>> response = restTemplate.exchange(
-                GET_DB_DATA_URL,
+    /*
+    // Enpoint to get data from a JSON into a CSV file
+    @GetMapping("/getAnyJSONA")
+    public ResponseEntity<String> getAnyJSONDataA(){
+        String GET_DB_JSON_URL = "https://kanjiapi.dev/v1/kanji/蛍";
+        ResponseEntity<JsonNode> response = restTemplate.exchange(
+                GET_DB_JSON_URL,
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<List<Contact>>() {}
+                new ParameterizedTypeReference<JsonNode>() {}
         );
-        List<Contact> data = response.getBody();
+        JsonNode data = response.getBody();
+        if (data == null || !data.isArray()) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Invalid JSON response");
+        }
 
-        try{
-            String filePath = "D:\\Tec\\Semestre 2024-1\\Panoptimise\\BackEnd/contacts.csv";
-            FileWriter csvWriter = new FileWriter(filePath);
-            csvWriter.write("id,startTime,endTime,firstContactResolution,resolutionStatus,sentimentNegative,sentimentPositive,agentId,satisfaction\n");
-            for (Contact contact : data) {
-                csvWriter.write(contact.getId() + "," +
-                        contact.getStartTime() + "," +
-                        contact.getEndTime() + "," +
-                        contact.isFirstContactResolution() + "," +
-                        contact.getResolutionStatus() + "," +
-                        contact.getSentimentNegative() + "," +
-                        contact.getSentimentPositive() + "," +
-                        contact.getAgentId() + "," +
-                        contact.getSatisfaction() + "\n");
+        try {
+            String filePath = "D:\\Tec\\Semestre 2024-1\\Panoptimise\\BackEnd\\kanji5.csv";
+            FileWriter fileWriter = new FileWriter(filePath);
+            CSVWriter csvWriter = new CSVWriter(fileWriter);
+
+            // List to hold all headers
+            Set<String> headers = new LinkedHashSet<>();
+            List<Map<String, String>> rows = new ArrayList<>();
+
+            // Process each element in the JSON array
+            for (JsonNode element : data) {
+                if (element.isObject()) {
+                    Map<String, String> row = new LinkedHashMap<>();
+                    Iterator<Map.Entry<String, JsonNode>> fields = element.fields();
+                    while (fields.hasNext()) {
+                        Map.Entry<String, JsonNode> field = fields.next();
+                        headers.add(field.getKey());
+                        JsonNode fieldValue = field.getValue();
+                        if (fieldValue.isArray()) {
+                            List<String> listValues = new ArrayList<>();
+                            for (JsonNode item : fieldValue) {
+                                listValues.add(item.asText());
+                            }
+                            row.put(field.getKey(), String.join(";", listValues));
+                        } else {
+                            row.put(field.getKey(), fieldValue.asText());
+                        }
+                    }
+                    rows.add(row);
+                }
             }
+
+            // Write header
+            csvWriter.writeNext(headers.toArray(new String[0]));
+
+            // Write rows
+            for (Map<String, String> row : rows) {
+                List<String> values = new ArrayList<>();
+                for (String header : headers) {
+                    values.add(row.getOrDefault(header, ""));
+                }
+                csvWriter.writeNext(values.toArray(new String[0]));
+            }
+
             csvWriter.flush();
             csvWriter.close();
 
@@ -138,6 +108,62 @@ public class DownloadController {
         }catch(Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error generating JSON file: " + e.getMessage());
         }
-
     }
+    */
+
+    @GetMapping("/getAnyJSON")
+    public ResponseEntity<String> getAnyJSONData() {
+        String GET_DB_JSON_URL = "https://kanjiapi.dev/v1/kanji/蛍";
+        ResponseEntity<JsonNode> response = restTemplate.exchange(
+                GET_DB_JSON_URL,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<JsonNode>() {}
+        );
+        JsonNode data = response.getBody();
+
+        if (data == null || !data.isObject()) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Invalid JSON response");
+        }
+
+        try {
+            String filePath = "D:\\Tec\\Semestre 2024-1\\Panoptimise\\BackEnd\\data.csv";
+            FileWriter fileWriter = new FileWriter(filePath);
+            CSVWriter csvWriter = new CSVWriter(fileWriter);
+
+            // Extract field names (header)
+            Iterator<Map.Entry<String, JsonNode>> fields = data.fields();
+            List<String> header = new ArrayList<>();
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> field = fields.next();
+                header.add(field.getKey());
+            }
+            csvWriter.writeNext(header.toArray(new String[0]));
+
+            // Extract field values (row)
+            List<String> values = new ArrayList<>();
+            for (String fieldName : header) {
+                JsonNode fieldValue = data.path(fieldName);
+                if (fieldValue.isArray()) {
+                    // Concatenate list values into a single string
+                    List<String> listValues = new ArrayList<>();
+                    for (JsonNode item : fieldValue) {
+                        listValues.add(item.asText());
+                    }
+                    values.add(String.join(";", listValues)); // Using ";" to separate list values
+                } else {
+                    values.add(fieldValue.asText());
+                }
+            }
+            csvWriter.writeNext(values.toArray(new String[0]));
+
+            csvWriter.flush();
+            csvWriter.close();
+
+            return ResponseEntity.ok("CSV file saved at: " + filePath);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error generating CSV file: " + e.getMessage());
+        }
+    }
+
 }
