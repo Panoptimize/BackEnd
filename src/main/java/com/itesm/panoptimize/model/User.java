@@ -2,6 +2,7 @@ package com.itesm.panoptimize.model;
 
 import jakarta.persistence.*;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -31,6 +32,17 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "user_type_id", nullable = false)
     private UserType userType;
+
+    @ManyToMany
+    @JoinTable(
+            name = "agents_have_users",
+            joinColumns = @JoinColumn(name = "supervisor_id"),
+            inverseJoinColumns = @JoinColumn(name = "agent_id")
+    )
+    private Set<User> agents;
+
+    @ManyToMany(mappedBy = "agents")
+    private Set<User> supervisors;
 
     public int getId() {
         return id;
@@ -82,5 +94,21 @@ public class User {
 
     public void setUserType(UserType userType) {
         this.userType = userType;
+    }
+
+    public Set<User> getAgents() {
+        return agents;
+    }
+
+    public void setAgents(Set<User> agents) {
+        this.agents = agents;
+    }
+
+    public Set<User> getSupervisors() {
+        return supervisors;
+    }
+
+    public void setSupervisors(Set<User> supervisors) {
+        this.supervisors = supervisors;
     }
 }

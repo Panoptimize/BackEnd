@@ -42,7 +42,7 @@ public class TotalContactsService {
             contact.setSentimentNegative(random.nextFloat());
             contact.setSentimentPositive(random.nextFloat());
             contact.setAgentId(1);
-            contact.setSatisfaction(random.nextInt(5) + 1);
+            contact.setSatisfactionId(random.nextLong(5) + 1);
             contactRepository.save(contact  );
         }
     }

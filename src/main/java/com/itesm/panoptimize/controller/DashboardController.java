@@ -14,7 +14,7 @@ import com.itesm.panoptimize.dto.dashboard.MetricsDTO;
 import com.itesm.panoptimize.service.DashboardService;
 
 import com.itesm.panoptimize.dto.performance.PerformanceDTO;
-import com.itesm.panoptimize.service.CalculatePerformance;
+import com.itesm.panoptimize.service.CalculatePerformanceService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,6 +27,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,13 +48,13 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.*;
 
 import java.text.ParseException;
 
 import java.util.List;
 
-import static com.itesm.panoptimize.service.CalculatePerformance.performanceCalculation;
 
 @RestController
 @RequestMapping("/dashboard")
@@ -67,6 +68,9 @@ public class DashboardController {
     public DashboardController(DashboardService dashboardService) {
         this.dashboardService = dashboardService;
     }
+
+    @Autowired
+    private CalculatePerformanceService calculatePerformanceService;
 
     private static final String API_URL = "http://localhost:8000/get_metric_data"; //To test the consumption of AWS connect
 
@@ -200,17 +204,15 @@ public class DashboardController {
                     content = @Content),
     })
 
-    @GetMapping("/performance") //cambiar dependiendo al timeframe y los otros parametros (checar si los recibe el endpoint en si o el de dashboard)
-    public ResponseEntity<PerformanceDTO> getPerformanceData (){
-        PerformanceDTO performanceData = new PerformanceDTO();
-
-        //TODO Creacion de endpoints para extraer esos datos
-        List<Map<String, List <Double>>> agent_performance = new ArrayList<>();;
 
 
-        performanceCalculation(agent_performance);
-        performanceData.setPerformanceData(agent_performance);
+    @GetMapping("/performance")
+    public ResponseEntity<Map<String, List<Double>>> calculateAHT(
+            @RequestParam String instanceId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant endDate) {
 
-        return  ResponseEntity.ok(performanceData);
+        Map<String, List<Double>> ahtResults = calculatePerformanceService.calculateAHT(instanceId, startDate, endDate);
+        return ResponseEntity.ok(ahtResults);
     }
 }
