@@ -13,10 +13,6 @@ public class SatisfactionLevel {
     @Column(name = "level_name", nullable = false)
     private String levelName;
 
-    @ManyToOne
-    @JoinColumn(name = "contact_id", nullable = false)
-    private Contact contact;
-
     public Long getId() {
         return id;
     }
@@ -33,11 +29,4 @@ public class SatisfactionLevel {
         this.levelName = levelName;
     }
 
-    public Contact getContact() {
-        return contact;
-    }
-
-    public void setContact(Contact contact) {
-        this.contact = contact;
-    }
 }

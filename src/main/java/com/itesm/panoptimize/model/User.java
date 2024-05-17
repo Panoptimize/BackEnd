@@ -16,6 +16,9 @@ public class User {
     @Column(name = "connect_id", nullable = false, unique = true)
     private String connectId;
 
+    @Column(name = "firebase_id", nullable = false, unique = true)
+    private String firebaseId;
+
     @Column(nullable = false)
     private String email;
 
@@ -24,6 +27,12 @@ public class User {
 
     @Column(name = "image_path")
     private String imagePath;
+
+    @Column(name = "routing_profile_id", nullable = false)
+    private String routingProfileId;
+
+    @Column(name = "can_switch", nullable = false)
+    private boolean canSwitch = true;
 
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)
@@ -55,6 +64,12 @@ public class User {
     public void setConnectId(String connectId) {
         this.connectId = connectId;
     }
+
+    public String getFirebaseId() {
+        return firebaseId;
+    }
+
+    public void setFirebaseId(String firebaseId) { this.firebaseId = firebaseId; }
 
     public String getEmail() {
         return email;
@@ -110,5 +125,21 @@ public class User {
 
     public void setSupervisors(Set<User> supervisors) {
         this.supervisors = supervisors;
+    }
+
+    public String getRoutingProfileId() {
+        return routingProfileId;
+    }
+
+    public void setRoutingProfileId(String routingProfileId) {
+        this.routingProfileId = routingProfileId;
+    }
+
+    public boolean isCanSwitch() {
+        return canSwitch;
+    }
+
+    public void setCanSwitch(boolean canSwitch) {
+        this.canSwitch = canSwitch;
     }
 }

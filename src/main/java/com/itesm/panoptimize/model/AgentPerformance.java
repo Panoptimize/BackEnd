@@ -10,7 +10,7 @@ public class AgentPerformance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "agent_performance_id")
-    private int id;
+    private Integer id;
 
     @Column(nullable = false)
     private Date date;
@@ -28,11 +28,11 @@ public class AgentPerformance {
     @JoinColumn(name = "agent_id", nullable = false)
     private User agent;
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
