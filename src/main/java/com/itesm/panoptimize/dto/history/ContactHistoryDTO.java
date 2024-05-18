@@ -6,10 +6,26 @@ import java.util.Date;
 public class ContactHistoryDTO {
     private int contact_id;
     private String agent_name;
-    private int agent_id;
-    private LocalDateTime start_time;
-    private LocalDateTime end_time;
+    private Date date;
+    private Date time;
     private long duration;
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public Date getTime() {
+        return time;
+    }
+
+    public void setTime(Date time) {
+        this.time = time;
+    }
+
     private String resolution_status;
     private int satisfaction;
 
@@ -37,36 +53,12 @@ public class ContactHistoryDTO {
         this.contact_id = contact_id;
     }
 
-    public LocalDateTime getStart_time() {
-        return start_time;
-    }
-
-    public void setStart_time(LocalDateTime start_time) {
-        this.start_time = start_time;
-    }
-
-    public LocalDateTime getEnd_time() {
-        return end_time;
-    }
-
-    public void setEnd_time(LocalDateTime end_time) {
-        this.end_time = end_time;
-    }
-
     public String getResolution_status() {
         return resolution_status;
     }
 
     public void setResolution_status(String resolution_status) {
         this.resolution_status = resolution_status;
-    }
-
-    public int getAgent_id() {
-        return agent_id;
-    }
-
-    public void setAgent_id(int agent_id) {
-        this.agent_id = agent_id;
     }
 
     public int getSatisfaction() {

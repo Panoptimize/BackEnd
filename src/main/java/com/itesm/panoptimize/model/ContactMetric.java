@@ -31,12 +31,12 @@ public class ContactMetric {
     @Column(name = "sentiment_positive")
     private Float sentimentPositive;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "contact_id", nullable = false)
     private Contact contact;
 
     @Column(name = "contact_status", length = 10, nullable = false)
-    private Integer contactStatus;
+    private String contactStatus;
 
     public Integer getContactMetricId() {
         return contactMetricId;
@@ -110,11 +110,11 @@ public class ContactMetric {
         this.contact = contact;
     }
 
-    public Integer getContactStatus() {
+    public String getContactStatus() {
         return contactStatus;
     }
 
-    public void setContactStatus(Integer contactStatus) {
+    public void setContactStatus(String contactStatus) {
         this.contactStatus = contactStatus;
     }
 }
