@@ -15,7 +15,6 @@ public class DashboardDTO {
     @NotNull(message = "End date is required")
     private Date endDate;
     private String[] routingProfiles;
-    // UUID format
     private String[] queues;
 
     public Date getStartDate() {

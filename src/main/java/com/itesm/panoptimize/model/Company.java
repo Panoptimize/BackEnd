@@ -15,7 +15,7 @@ public class Company {
     @Column(name = "company_id")
     private Integer companyId;
 
-    @Column(name = "name", nullable = false, length = 10)
+    @Column(name = "name", nullable = false, length = 20)
     private String name;
 
     @Column(name = "slogan", length = 50)
@@ -26,9 +26,6 @@ public class Company {
 
     @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
     private Set<User> users;
-
-    // Getters and setters
-
 
     public Integer getCompanyId() {
         return companyId;
