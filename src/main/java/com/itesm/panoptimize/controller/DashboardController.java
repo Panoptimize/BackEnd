@@ -206,13 +206,14 @@ public class DashboardController {
 
 
 
-    @GetMapping("/performance")
-    public ResponseEntity<Map<String, List<Double>>> calculateAHT(
-            @RequestParam String instanceId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant endDate) {
+    @PostMapping("/performance")
+    public ResponseEntity<?> calculateAHT(@Valid @RequestBody PerformanceDTO performanceDTO) {
+        Map<String, List<Map<String, Double>>> metricsData = calculatePerformanceService.getMetricsData(performanceDTO);
 
-        Map<String, List<Double>> ahtResults = calculatePerformanceService.calculateAHT(instanceId, startDate, endDate);
-        return ResponseEntity.ok(ahtResults);
+        if(metricsData.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(metricsData, HttpStatus.OK);
     }
 }
