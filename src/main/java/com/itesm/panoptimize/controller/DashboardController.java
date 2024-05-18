@@ -59,13 +59,13 @@ import static com.itesm.panoptimize.service.CalculatePerformance.performanceCalc
 @RequestMapping("/dashboard")
 public class DashboardController {
 
-    @Autowired
-    private CalculateSatisfactionService satisfactionService;
+    private final CalculateSatisfactionService satisfactionService;
     private final DashboardService dashboardService;
 
     @Autowired
-    public DashboardController(DashboardService dashboardService) {
+    public DashboardController(DashboardService dashboardService, CalculateSatisfactionService satisfactionService) {
         this.dashboardService = dashboardService;
+        this.satisfactionService = satisfactionService;
     }
 
     private static final String API_URL = "http://localhost:8000/get_metric_data"; //To test the consumption of AWS connect

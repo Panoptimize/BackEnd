@@ -9,8 +9,8 @@ import java.util.UUID;
 @Table(name = "instance")
 public class Instance {
     @Id
-    @Column(name = "instance_id", nullable = false)
-    private UUID id;
+    @Column(name = "instance_id", nullable = false, length = 36)
+    private String id;
 
     @Column(nullable = false)
     private String name;
@@ -19,11 +19,11 @@ public class Instance {
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 
