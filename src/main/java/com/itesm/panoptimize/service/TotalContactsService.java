@@ -26,6 +26,7 @@ public class TotalContactsService {
         Random random = new Random();
         Calendar cal = Calendar.getInstance();
 
+        /**
         for (int i = 0; i < 5; i++) {
             cal.setTime(new Date()); // Establece la fecha actual
             int randomMonth = random.nextInt(12); // Genera un mes aleatorio (0-11)
@@ -44,7 +45,7 @@ public class TotalContactsService {
             contact.setAgentId(1);
             contact.setSatisfaction(random.nextInt(5) + 1);
             contactRepository.save(contact  );
-        }
+        }**/
     }
 
 
