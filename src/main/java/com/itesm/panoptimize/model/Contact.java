@@ -1,5 +1,6 @@
 package com.itesm.panoptimize.model;
 
+import com.itesm.panoptimize.enumerator.SatisfactionLevel;
 import jakarta.persistence.*;
 
 import java.util.Date;
@@ -27,8 +28,8 @@ public class Contact {
     @JoinColumn(name = "agent_id", nullable = false)
     private User agent;
 
-    @ManyToOne
-    @JoinColumn(name = "satisfaction_level_id")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "satisfaction_level")
     private SatisfactionLevel satisfactionLevel;
 
     @OneToMany(mappedBy = "contact")
