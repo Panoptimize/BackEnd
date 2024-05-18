@@ -68,8 +68,8 @@ public class AgentController {
     })
     //No pongo lo de Open Api por que me marca que no encuentra la dependencia
     //Mapping del dominio que nos dieron en la junta del 2 abril, hay que ver si se puede con el :
-    @GetMapping("/agent/:id")
-    public ResponseEntity<AgentDTO> getAgent(@PathVariable("id") long id) {
+    @GetMapping("/agent/{id}")
+    public ResponseEntity<AgentDTO> getAgent(@PathVariable("id") int id) {
 
         User agent = userService.getAgent(id);
 

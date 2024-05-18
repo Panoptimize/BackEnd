@@ -13,7 +13,10 @@ public class User {
     private int id;
 
     @Column(name = "connect_id", nullable = false, unique = true)
-    private UUID connectId;
+    private String connectId;
+
+    @Column(name = "firebase_id", nullable = false, unique = true)
+    private UUID firebaseId;
 
     @Column(nullable = false)
     private String email;
@@ -36,13 +39,19 @@ public class User {
         return id;
     }
 
-    public UUID getConnectId() {
+    public String getConnectId() {
         return connectId;
     }
 
-    public void setConnectId(UUID connectId) {
+    public void setConnectId(String connectId) {
         this.connectId = connectId;
     }
+
+    public UUID getFirebaseId() {
+        return firebaseId;
+    }
+
+    public void setFirebaseId(UUID firebaseId) { this.firebaseId = firebaseId; }
 
     public String getEmail() {
         return email;
@@ -83,4 +92,5 @@ public class User {
     public void setUserType(UserType userType) {
         this.userType = userType;
     }
+
 }

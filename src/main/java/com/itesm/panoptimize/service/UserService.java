@@ -25,7 +25,7 @@ public class UserService {
         return userRepository.getUsersByType("agent", pageRequest);
     }
 
-    public User getAgent(long id) {
+    public User getAgent(int id) {
         return userRepository.findById(id).orElse(null);
     }
 
