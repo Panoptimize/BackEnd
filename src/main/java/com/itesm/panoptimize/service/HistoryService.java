@@ -29,26 +29,21 @@ public class HistoryService {
     public List<ContactHistoryDTO> getContactHistory() {
         List<Contact> contacts = contactRepository.findAll();
 
-
+        List<ContactHistoryDTO> results = contacts.stream()
+                .map(this::convertToContactHistoryDTO)
+                .collect(Collectors.toList());
 
         return results;
     }
 
-    private ContactHistoryDTO convertToContactHistoryDTO(Contact contact, User user){
+    private ContactHistoryDTO convertToContactHistoryDTO( Contact contact ){
         ContactHistoryDTO contactHistoryDTO = new ContactHistoryDTO();
 
         contactHistoryDTO.setContact_id(contact.getId());
-        contactHistoryDTO.setAgent_id(contact.getId());
-        contactHistoryDTO.setSatisfaction(contact.getSatisfaction());
-        contactHistoryDTO.setResolution_status(contact.getResolutionStatus());
-
-        contactHistoryDTO.setStart_time(contact.getStartTime());
-        contactHistoryDTO.setEnd_time(contact.getEndTime());
-
-        Duration duration = Duration.between(contactHistoryDTO.getStart_time(), contactHistoryDTO.getEnd_time());
-        contactHistoryDTO.setDuration(duration.getSeconds());
-
-        contactHistoryDTO.setAgent_name(user.getFullName());
+        contactHistoryDTO.setDate(contact.getStartTime());
+        contactHistoryDTO.setTime(contact.getStartTime());
+        contactHistoryDTO.setAgent_name(contact.getAgent().getFullName());
+        contactHistoryDTO.setResolution_status(contact.getContactMetrics().getContactStatus());
 
         return contactHistoryDTO;
     }

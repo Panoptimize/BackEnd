@@ -32,8 +32,8 @@ public class Contact {
     @Column(name = "satisfaction_level")
     private SatisfactionLevel satisfactionLevel;
 
-    @OneToMany(mappedBy = "contact")
-    private Set<ContactMetric> contactMetrics;
+    @OneToOne(mappedBy = "contact")
+    private ContactMetric contactMetrics;
 
     @OneToMany(mappedBy = "contact")
     private Set<Feedback> feedbacks;
@@ -81,11 +81,11 @@ public class Contact {
         this.satisfactionLevel = satisfactionLevel;
     }
 
-    public Set<ContactMetric> getContactMetrics() {
+    public ContactMetric getContactMetrics() {
         return contactMetrics;
     }
 
-    public void setContactMetrics(Set<ContactMetric> contactMetrics) {
+    public void setContactMetrics(ContactMetric contactMetrics) {
         this.contactMetrics = contactMetrics;
     }
 
