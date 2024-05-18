@@ -10,6 +10,6 @@ public class DownloadService {
 
     @Autowired
     public DownloadService(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("http://localhost:8000").build();
+        this.webClient = webClientBuilder.baseUrl("http://localhost:8080").build();
     }
 }

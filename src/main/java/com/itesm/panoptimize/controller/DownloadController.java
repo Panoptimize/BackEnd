@@ -2,9 +2,7 @@ package com.itesm.panoptimize.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.itesm.panoptimize.model.Contact;
 import com.itesm.panoptimize.service.DownloadService;
-import com.itesm.panoptimize.service.TotalContactsService;
 import com.opencsv.CSVWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
@@ -19,33 +17,27 @@ import java.util.*;
 @RestController
 @RequestMapping("/download")
 public class DownloadController {
-    @Autowired
-    private TotalContactsService totalContactsService;
 
     private DownloadService downloadService;
 
-    private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
+    private final RestTemplate restTemplate = new RestTemplate();
     @Autowired
-    public DownloadController(DownloadService downloadService, RestTemplate restTemplate, ObjectMapper objectMapper) {
+    public DownloadController(DownloadService downloadService, ObjectMapper objectMapper) {
         this.downloadService = downloadService;
-        this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
     }
 
     //Download data from the Dashboard
     // Endpoint to get data in JSON format (This is from the database)
-    @GetMapping("/getDBData")
-    public ResponseEntity<List<Contact>> getData(){
-        List<Contact> data = totalContactsService.getAllContacts();
-        return ResponseEntity.ok(data);
-    }
+
+
     /*
     // Enpoint to get data from a JSON into a CSV file
     @GetMapping("/getAnyJSONA")
     public ResponseEntity<String> getAnyJSONDataA(){
-        String GET_DB_JSON_URL = "https://kanjiapi.dev/v1/kanji/蛍";
+        String GET_DB_JSON_URL = "";
         ResponseEntity<JsonNode> response = restTemplate.exchange(
                 GET_DB_JSON_URL,
                 HttpMethod.GET,
@@ -58,7 +50,7 @@ public class DownloadController {
         }
 
         try {
-            String filePath = "D:\\Tec\\Semestre 2024-1\\Panoptimise\\BackEnd\\kanji5.csv";
+            String filePath = "";
             FileWriter fileWriter = new FileWriter(filePath);
             CSVWriter csvWriter = new CSVWriter(fileWriter);
 
@@ -113,7 +105,7 @@ public class DownloadController {
 
     @GetMapping("/getAnyJSON")
     public ResponseEntity<String> getAnyJSONData() {
-        String GET_DB_JSON_URL = "https://kanjiapi.dev/v1/kanji/蛍";
+        String GET_DB_JSON_URL = " ";
         ResponseEntity<JsonNode> response = restTemplate.exchange(
                 GET_DB_JSON_URL,
                 HttpMethod.GET,
@@ -127,7 +119,7 @@ public class DownloadController {
         }
 
         try {
-            String filePath = "D:\\Tec\\Semestre 2024-1\\Panoptimise\\BackEnd\\data.csv";
+            String filePath = ".\\BackEnd\\data.csv";
             FileWriter fileWriter = new FileWriter(filePath);
             CSVWriter csvWriter = new CSVWriter(fileWriter);
 
