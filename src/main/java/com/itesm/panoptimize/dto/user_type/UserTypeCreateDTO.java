@@ -11,6 +11,6 @@ public class UserTypeCreateDTO {
     }
 
     public void setTypeName(String typeName) {
-        this.typeName = typeName;
+        this.typeName = typeName.toLowerCase();
     }
 }

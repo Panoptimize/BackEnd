@@ -25,6 +25,7 @@ import java.util.List;
 
 
 @RestController
+@RequestMapping("/agent")
 public class AgentController {
 
     private final UserService userService;
@@ -54,9 +55,8 @@ public class AgentController {
                     description = "Agentes no encontrados.",
                     content = @Content),
     })
-    @GetMapping("/agents/all")
+    @GetMapping("/")
     public ResponseEntity<Page<AgentDTO>> getAllAgents(Pageable pageable) {
-
         Page<AgentDTO> agentsPage = userService.getAllAgents(pageable);
         return ResponseEntity.ok(agentsPage);
     }

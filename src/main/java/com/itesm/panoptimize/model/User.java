@@ -11,7 +11,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private int id;
+    private Integer id;
 
     @Column(name = "connect_id", nullable = false, unique = true)
     private String connectId;
@@ -44,7 +44,7 @@ public class User {
 
     @ManyToMany
     @JoinTable(
-            name = "agents_have_users",
+            name = "agents_have_supervisors",
             joinColumns = @JoinColumn(name = "supervisor_id"),
             inverseJoinColumns = @JoinColumn(name = "agent_id")
     )
@@ -53,7 +53,11 @@ public class User {
     @ManyToMany(mappedBy = "agents")
     private Set<User> supervisors;
 
-    public int getId() {
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getId() {
         return id;
     }
 
