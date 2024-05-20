@@ -27,6 +27,9 @@ public class User {
     @Column(name = "image_path")
     private String imagePath;
 
+    @Column(name = "routing_profile_id")
+    private String routing_profile_id;
+
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
@@ -75,6 +78,14 @@ public class User {
 
     public void setImagePath(String imagePath) {
         this.imagePath = imagePath;
+    }
+
+    public String getRouting_profile_id() {
+        return routing_profile_id;
+    }
+
+    public void setRouting_profile_id(String routing_profile_id) {
+        this.routing_profile_id = routing_profile_id;
     }
 
     public Company getCompany() {

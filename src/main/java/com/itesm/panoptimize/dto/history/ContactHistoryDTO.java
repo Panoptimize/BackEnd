@@ -1,43 +1,46 @@
 package com.itesm.panoptimize.dto.history;
 
+import org.springframework.cglib.core.Local;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Date;
 
 public class ContactHistoryDTO {
     private int contact_id;
     private String agent_name;
-    private Date date;
-    private Date time;
-    private long duration;
+    private LocalDate date;
+    private LocalTime time;
+    private LocalTime duration;
+    private String resolution_status;
+    private String satisfaction;
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
-    public Date getTime() {
+    public LocalTime getTime() {
         return time;
     }
 
-    public void setTime(Date time) {
+    public void setTime(LocalTime time) {
         this.time = time;
     }
-
-    private String resolution_status;
-    private int satisfaction;
 
     public int getContact_id() {
         return contact_id;
     }
 
-    public long getDuration() {
+    public LocalTime getDuration() {
         return duration;
     }
 
-    public void setDuration(long duration) {
+    public void setDuration(LocalTime duration) {
         this.duration = duration;
     }
 
@@ -61,11 +64,11 @@ public class ContactHistoryDTO {
         this.resolution_status = resolution_status;
     }
 
-    public int getSatisfaction() {
+    public String getSatisfaction() {
         return satisfaction;
     }
 
-    public void setSatisfaction(int satisfaction) {
+    public void setSatisfaction(String satisfaction) {
         this.satisfaction = satisfaction;
     }
 }

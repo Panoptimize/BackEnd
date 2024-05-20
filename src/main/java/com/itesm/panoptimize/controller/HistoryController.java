@@ -23,9 +23,9 @@ public class HistoryController {
     public HistoryController(HistoryService historyService) {this.historyService = historyService; }
 
     @GetMapping("/contact/all")
-    public ResponseEntity<Map<String, List<ContactHistoryDTO>>> getHistory(){
-        List<ContactHistoryDTO> contactHistoryList = historyService.getContactHistory();
-        Map<String, List<ContactHistoryDTO>> contacts = new HashMap<>();
+    public ResponseEntity<Map<String, List<Contact>>> getHistory(){
+        List<Contact> contactHistoryList = historyService.getContactHistory();
+        Map<String, List<Contact>> contacts = new HashMap<>();
         contacts.put("contacts", contactHistoryList);
 
         return new ResponseEntity<>(contacts, HttpStatus.OK);
@@ -34,6 +34,7 @@ public class HistoryController {
     @GetMapping("/contact/:id")
     public ResponseEntity<String> getContactDetails(@PathVariable("id") long id){
         String test = "";
+        historyService.getContactDetails(id);
         return new ResponseEntity<>(test, HttpStatus.OK);
     }
 }
