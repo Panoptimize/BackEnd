@@ -12,7 +12,7 @@ public class Instance {
     @Column(name = "instance_id", nullable = false, length = 36)
     private String id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
 
     @ManyToOne

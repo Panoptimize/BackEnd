@@ -1,7 +1,9 @@
 package com.itesm.panoptimize.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.Instant;
 import java.util.Date;
 
 @Entity
@@ -10,29 +12,30 @@ public class GlobalMetric {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "global_metric_id")
-    private Long id;
+    private Integer id;
 
-    @Column(name = "metric_description", nullable = false)
+    @Column(name = "metric_description", nullable = false, unique = true)
     private String metricDescription;
 
     @Column(name = "current_value", nullable = false)
-    private float currentValue;
+    private Float currentValue;
 
     @Column(nullable = false)
     private String status;
 
+    @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
-    private Date updatedAt;
+    private Instant updatedAt;
 
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -44,11 +47,11 @@ public class GlobalMetric {
         this.metricDescription = metricDescription;
     }
 
-    public float getCurrentValue() {
+    public Float getCurrentValue() {
         return currentValue;
     }
 
-    public void setCurrentValue(float currentValue) {
+    public void setCurrentValue(Float currentValue) {
         this.currentValue = currentValue;
     }
 
@@ -60,12 +63,8 @@ public class GlobalMetric {
         this.status = status;
     }
 
-    public Date getUpdatedAt() {
+    public Instant getUpdatedAt() {
         return updatedAt;
-    }
-
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
     }
 
     public Company getCompany() {

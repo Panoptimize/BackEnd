@@ -17,24 +17,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping(path="/instance")
-public class InstanceController implements Mappable<Instance, InstanceDTO> {
+public class InstanceController {
     private final InstanceService instanceService;
-    private final ModelMapper modelMapper;
 
     @Autowired
-    public InstanceController(InstanceService instanceService, ModelMapper modelMapper) {
+    public InstanceController(InstanceService instanceService) {
         this.instanceService = instanceService;
-        this.modelMapper = modelMapper;
-    }
-
-    @Override
-    public InstanceDTO convertToDTO(Instance instance) {
-        return modelMapper.map(instance, InstanceDTO.class);
-    }
-
-    @Override
-    public Instance convertToEntity(InstanceDTO instanceDTO) {
-        return modelMapper.map(instanceDTO, Instance.class);
     }
 
     @Operation(summary = "Get all instances")
@@ -44,8 +32,8 @@ public class InstanceController implements Mappable<Instance, InstanceDTO> {
             @ApiResponse(responseCode = "404", description = "No instances found")
     })
     @GetMapping(path="/")
-    public ResponseEntity<List<Instance>> getInstances() {
-        List<Instance> instances = instanceService.getInstances();
+    public ResponseEntity<List<InstanceDTO>> getInstances() {
+        List<InstanceDTO> instances = instanceService.getInstances();
         if (instances.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -62,7 +50,7 @@ public class InstanceController implements Mappable<Instance, InstanceDTO> {
     public ResponseEntity<InstanceDTO> getInstanceById(@PathVariable String instanceId) {
         // Convert the instance to an instanceDTO
         try {
-            return ResponseEntity.ok(convertToDTO(instanceService.getInstanceById(instanceId)));
+            return ResponseEntity.ok(instanceService.getInstanceById(instanceId));
         } catch (IllegalStateException e) {
             return ResponseEntity.notFound().build();
         }
@@ -75,22 +63,21 @@ public class InstanceController implements Mappable<Instance, InstanceDTO> {
     })
     @DeleteMapping(path="/{instanceId}")
     public ResponseEntity<String> deleteInstance(@PathVariable String instanceId) {
-        try {
-            instanceService.deleteInstance(instanceId);
-            return ResponseEntity.ok("Instance with id " + instanceId + " deleted");
-        } catch (IllegalStateException e) {
+        if (!instanceService.deleteInstance(instanceId)) {
             return ResponseEntity.notFound().build();
         }
+
+        return ResponseEntity.ok("Instance with id " + instanceId + " deleted");
     }
 
     @Operation(summary = "Add a new instance")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Instance added"),
+            @ApiResponse(responseCode = "200", description = "Instance added",
+            content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "Invalid instance")
     })
     @PostMapping(path="/")
-    public ResponseEntity<String> addInstance(@RequestBody InstanceDTO instanceDTO) {
-        instanceService.addNewInstance(this.convertToEntity(instanceDTO));
-        return ResponseEntity.ok("Instance added");
+    public ResponseEntity<InstanceDTO> addInstance(@RequestBody InstanceDTO instanceDTO) {
+        return ResponseEntity.ok(instanceService.addNewInstance(instanceDTO));
     }
 }

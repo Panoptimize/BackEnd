@@ -13,26 +13,26 @@ public class Company {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "company_id")
-    private Integer companyId;
+    private Integer id;
 
-    @Column(name = "name", nullable = false, length = 20)
+    @Column(name = "name", nullable = false, length = 20, unique = true)
     private String name;
 
     @Column(name = "slogan", length = 50)
     private String slogan;
 
-    @Column(name = "logo_path", length = 100)
+    @Column(name = "logo_path", length = 100, unique = true)
     private String logoPath;
 
     @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
     private Set<User> users;
 
-    public Integer getCompanyId() {
-        return companyId;
+    public Integer getId() {
+        return id;
     }
 
-    public void setCompanyId(Integer companyId) {
-        this.companyId = companyId;
+    public void setId(Integer companyId) {
+        this.id = companyId;
     }
 
     public String getName() {

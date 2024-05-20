@@ -12,7 +12,7 @@ public class UserType {
     @Column(name = "user_type_id")
     private Integer id;
 
-    @Column(name = "user_type_name", nullable = false)
+    @Column(name = "user_type_name", nullable = false, unique = true, length = 10)
     private String typeName;
 
     @OneToMany(mappedBy = "userType")
