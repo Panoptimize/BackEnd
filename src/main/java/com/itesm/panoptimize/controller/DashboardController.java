@@ -1,8 +1,10 @@
 package com.itesm.panoptimize.controller;
 
 
+import com.itesm.panoptimize.dto.company.CompanyDTO;
 import com.itesm.panoptimize.dto.dashboard.DashMetricData;
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
+import com.itesm.panoptimize.model.Notification;
 import com.itesm.panoptimize.service.DashboardService;
 import com.itesm.panoptimize.service.FCRService;
 
@@ -212,5 +214,35 @@ public class DashboardController {
         performanceData.setPerformanceData(agent_performance);
 
         return  ResponseEntity.ok(performanceData);
+    }
+
+    @GetMapping("/Notifications")
+    public ResponseEntity<List<Notification>> getNotifications() {
+        List<Notification> notifications = dashboardService.getNotifications().stream().toList();
+        if (notifications.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(notifications);
+    }
+
+    @GetMapping("/Notifications/{id}")
+    public ResponseEntity<Notification> getNotificationById(@PathVariable Long id) {
+        Notification notification = dashboardService.getNotificationById(id);
+        return ResponseEntity.ok(notification);
+    }
+    @PostMapping("/Notifications")
+    public ResponseEntity<Notification> addNotification(@RequestBody Notification notification) {
+        Notification newNotification = dashboardService.addNotification(notification);
+        return ResponseEntity.ok(newNotification);
+    }
+    @DeleteMapping("/Notifications/{id}")
+    public ResponseEntity<Boolean> deleteNotification(@PathVariable Long id) {
+        return ResponseEntity.ok(
+                dashboardService.deleteNotification(id)
+        );
+    }
+    @PatchMapping("/Notifications/{id}")
+    public ResponseEntity<Notification> updateNotification(@PathVariable Long id, @RequestBody Notification notification) {
+        return ResponseEntity.ok(dashboardService.updateNotification(id, notification));
     }
 }

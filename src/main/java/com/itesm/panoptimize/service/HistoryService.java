@@ -20,10 +20,12 @@ import java.util.stream.Collectors;
 public class HistoryService {
 
     private final ContactRepository contactRepository;
+    private final ContactMetricRepository contactMetricRepository;
     @Autowired
-    public HistoryService(ContactRepository contactRepository, UserRepository userRepository,
+    public HistoryService(ContactRepository contactRepository,
                           ContactMetricRepository contactMetricRepository) {
         this.contactRepository = contactRepository;
+        this.contactMetricRepository = contactMetricRepository;
     }
 
     public List<ContactHistoryDTO> getContactHistory() {
@@ -50,6 +52,51 @@ public class HistoryService {
 
     private void getContactDetails(){
 
+    }
+    public Contact getContactById(Integer id){
+        return contactRepository.findById(id).orElseThrow();
+    }
+    public Contact addContact(Contact contact){
+        return contactRepository.save(contact);
+    }
+    public boolean deleteContact(Integer id){
+        boolean exists = contactRepository.existsById(id);
+        contactRepository.deleteById(id);
+        return exists;
+    }
+    public Contact updateContact(Integer id, Contact contact){
+        Contact contactToUpdate = contactRepository.findById(id).orElseThrow();
+        contactToUpdate.setStartTime(contact.getStartTime());
+        contactToUpdate.setEndTime(contact.getEndTime());
+        contactToUpdate.setAgent(contact.getAgent());
+        contactToUpdate.setContactMetrics(contact.getContactMetrics());
+        contactToUpdate.setSatisfactionLevel(contact.getSatisfactionLevel());
+        contactRepository.save(contactToUpdate);
+        return contactToUpdate;
+    }
+    public ContactMetric getContactMetrics(Integer id){
+        return contactRepository.findById(id).orElseThrow().getContactMetrics();
+    }
+    public ContactMetric addContactMetric(ContactMetric contactMetric){
+        return contactMetricRepository.save(contactMetric);
+    }
+    public boolean deleteContactMetric(Integer id){
+        boolean exists = contactMetricRepository.existsById(id);
+        contactMetricRepository.deleteById(id);
+        return exists;
+    }
+    public ContactMetric updateContactMetric(Integer id, ContactMetric contactMetric){
+        ContactMetric contactMetricToUpdate = contactMetricRepository.findById(id).orElseThrow();
+        contactMetricToUpdate.setContact(contactMetric.getContact());
+        contactMetricToUpdate.setContactStatus(contactMetric.getContactStatus());
+        contactMetricToUpdate.setSpeedOfAnswer(contactMetric.getSpeedOfAnswer());
+        contactMetricToUpdate.setHandleTime(contactMetric.getHandleTime());
+        contactMetricToUpdate.setAfterCallWorkTime(contactMetric.getAfterCallWorkTime());
+        contactMetricToUpdate.setAbandoned(contactMetric.getAbandoned());
+        contactMetricToUpdate.setFirstContactResolution(contactMetric.getFirstContactResolution());
+        contactMetricToUpdate.setSentimentNegative(contactMetric.getSentimentNegative());
+        contactMetricRepository.save(contactMetricToUpdate);
+        return contactMetricToUpdate;
     }
 
 }
