@@ -119,7 +119,7 @@ public class DownloadController {
         }
 
         try {
-            String filePath = ".\\BackEnd\\data.csv";
+            String filePath = "./BackEnd/data.csv";
             FileWriter fileWriter = new FileWriter(filePath);
             CSVWriter csvWriter = new CSVWriter(fileWriter);
 
