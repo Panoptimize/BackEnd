@@ -9,30 +9,19 @@ import java.util.List;
  * structured in nested collections.
  */
 public class StatusDTO {
-    @JsonProperty("status")
-    private String status;
+    private final String metricName;
+    private final Double metricValue;
 
-    @JsonProperty("numUsers")
-    private double numUsers;
-
-    public StatusDTO(String status, double numUsers) {
-        this.status = status;
-        this.numUsers = numUsers;
+    public StatusDTO(String metricName, Double metricValue) {
+        this.metricName = metricName;
+        this.metricValue = metricValue;
     }
 
-    public String getStatus() {
-        return status;
+    public String getMetricName() {
+        return metricName;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public double getNumUsers() {
-        return numUsers;
-    }
-
-    public void setNumUsers(double numUsers) {
-        this.numUsers = numUsers;
+    public Double getMetricValue() {
+        return metricValue;
     }
 }

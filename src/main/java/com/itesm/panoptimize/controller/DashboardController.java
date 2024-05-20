@@ -14,18 +14,20 @@ import com.itesm.panoptimize.dto.dashboard.MetricsDTO;
 import com.itesm.panoptimize.service.DashboardService;
 
 import com.itesm.panoptimize.dto.performance.PerformanceDTO;
-import com.itesm.panoptimize.service.CalculatePerformance;
+import com.itesm.panoptimize.service.CalculatePerformanceService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,13 +48,13 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.*;
 
 import java.text.ParseException;
 
 import java.util.List;
 
-import static com.itesm.panoptimize.service.CalculatePerformance.performanceCalculation;
 
 @RestController
 @RequestMapping("/dashboard")
@@ -60,12 +62,15 @@ public class DashboardController {
 
     @Autowired
     private CalculateSatisfactionService satisfactionService;
-    private DashboardService dashboardService;
+    private final DashboardService dashboardService;
 
     @Autowired
     public DashboardController(DashboardService dashboardService) {
         this.dashboardService = dashboardService;
     }
+
+    @Autowired
+    private CalculatePerformanceService calculatePerformanceService;
 
     private static final String API_URL = "http://localhost:8000/get_metric_data"; //To test the consumption of AWS connect
 
@@ -148,8 +153,20 @@ public class DashboardController {
         return new ResponseEntity<>("Data received", HttpStatus.OK);
     }
 
+    @Operation(summary = "Get the metrics data", description = "Get the metrics data by time frame, agent and workspace number")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Found the data",
+                    content = {
+                            @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = MetricsDTO.class))
+                    }),
+            @ApiResponse(responseCode = "404",
+                    description = "Data not found",
+                    content = @Content),
+    })
     @PostMapping("/metrics")
-    public ResponseEntity<Map<String, Double>> getMetrics(@RequestBody DashboardDTO dashboardDTO) {
+    public ResponseEntity<Map<String, Double>> getMetrics(@Valid @RequestBody DashboardDTO dashboardDTO) {
         Map<String, Double> metricsData = dashboardService.getMetricsData(dashboardDTO);
 
         if(metricsData.isEmpty()) {
@@ -187,17 +204,16 @@ public class DashboardController {
                     content = @Content),
     })
 
-    @GetMapping("/performance") //cambiar dependiendo al timeframe y los otros parametros (checar si los recibe el endpoint en si o el de dashboard)
-    public ResponseEntity<PerformanceDTO> getPerformanceData (){
-        PerformanceDTO performanceData = new PerformanceDTO();
-
-        //TODO Creacion de endpoints para extraer esos datos
-        List<Map<String, List <Double>>> agent_performance = new ArrayList<>();;
 
 
-        performanceCalculation(agent_performance);
-        performanceData.setPerformanceData(agent_performance);
+    @PostMapping("/performance")
+    public ResponseEntity<?> calculateAHT(@Valid @RequestBody PerformanceDTO performanceDTO) {
+        Map<String, List<Map<String, Double>>> metricsData = calculatePerformanceService.getMetricsData(performanceDTO);
 
-        return  ResponseEntity.ok(performanceData);
+        if(metricsData.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(metricsData, HttpStatus.OK);
     }
 }
