@@ -1,5 +1,7 @@
 package com.itesm.panoptimize.service;
 
+import com.itesm.panoptimize.model.Notification;
+import com.itesm.panoptimize.repository.NotificationRepository;
 import com.itesm.panoptimize.util.Constants;
 import com.itesm.panoptimize.dto.contact.CollectionDTO;
 import com.itesm.panoptimize.dto.contact.MetricResultDTO;
@@ -26,11 +28,13 @@ import java.util.*;
 public class DashboardService {
     private final WebClient webClient;
     private final ConnectClient connectClient;
+    private final NotificationRepository notificationRepository;
 
     @Autowired
-    public DashboardService(WebClient.Builder webClientBuilder, ConnectClient connectClient){
+    public DashboardService(WebClient.Builder webClientBuilder, ConnectClient connectClient, NotificationRepository notificationRepository){
         this.webClient = webClientBuilder.baseUrl("http://localhost:8000").build();
         this.connectClient = connectClient;
+        this.notificationRepository = notificationRepository;
     }
 
     /**
@@ -172,4 +176,31 @@ public class DashboardService {
 
         return values;
     }
+    public List<Notification> getNotifications() {
+        return notificationRepository.findAll();
+    }
+    public Notification getNotificationById(Long id) {
+        return notificationRepository.findById(id).orElse(null);
+    }
+    public Notification addNotification(Notification notification) {
+        return notificationRepository.save(notification);
+    }
+    public boolean deleteNotification(Long id) {
+        boolean exists = notificationRepository.existsById(id);
+        notificationRepository.deleteById(id);
+        return exists;
+    }
+    public Notification updateNotification(Long id, Notification notification) {
+        Notification notificationToUpdate = notificationRepository.findById(id)
+                .orElseThrow(() -> new IllegalStateException(
+                        "Notification with id " + id + " does not exist"
+                ));
+        notificationToUpdate.setDateTime(notification.getDateTime());
+        notificationToUpdate.setDescription(notification.getDescription());
+        notificationToUpdate.setUser(notification.getUser());
+        notificationToUpdate.setContact(notification.getContact());
+        notificationRepository.save(notificationToUpdate);
+        return notificationToUpdate;
+    }
+
 }

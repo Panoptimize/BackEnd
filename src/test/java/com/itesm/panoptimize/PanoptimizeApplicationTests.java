@@ -40,7 +40,7 @@ class PanoptimizeApplicationTests {
 		user.setConnectId(UUID.randomUUID().toString());
 		UserType ut= userTypeRepository.findById(2).get();
 		user.setUserType(ut);
-		Company company= companyRepository.findById(1L).get();
+		Company company= companyRepository.findById(1).get();
 		user.setCompany(company);
 		User savedUser= userRepository.save(user);
 		System.out.println(savedUser.getId());

@@ -1,9 +1,9 @@
 package com.itesm.panoptimize.repository;
 
-import com.itesm.panoptimize.model.SatisfactionLevel;
+import com.itesm.panoptimize.model.Feedback;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SatisfactionLevelRepository extends JpaRepository<SatisfactionLevel, Integer> {
+public interface FeedbackRepository extends JpaRepository<Feedback, Integer> {
 }
