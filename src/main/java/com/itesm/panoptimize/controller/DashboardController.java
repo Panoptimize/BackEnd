@@ -13,6 +13,7 @@ import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
 import com.itesm.panoptimize.service.DashboardService;
 
 import com.itesm.panoptimize.dto.performance.PerformanceDTO;
+import com.itesm.panoptimize.service.CalculatePerformanceService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,7 +26,8 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.http.*;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,11 +40,11 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.*;
 
 import java.util.List;
 
-import static com.itesm.panoptimize.service.CalculatePerformance.performanceCalculation;
 
 @RestController
 @RequestMapping("/dashboard")
@@ -56,6 +58,9 @@ public class DashboardController {
         this.dashboardService = dashboardService;
         this.satisfactionService = satisfactionService;
     }
+
+    @Autowired
+    private CalculatePerformanceService calculatePerformanceService;
 
     private static final String API_URL = "http://localhost:8000/get_metric_data"; //To test the consumption of AWS connect
 
@@ -189,18 +194,17 @@ public class DashboardController {
                     content = @Content),
     })
 
-    @GetMapping("/performance") //cambiar dependiendo al timeframe y los otros parametros (checar si los recibe el endpoint en si o el de dashboard)
-    public ResponseEntity<PerformanceDTO> getPerformanceData (){
-        PerformanceDTO performanceData = new PerformanceDTO();
-
-        //TODO Creacion de endpoints para extraer esos datos
-        List<Map<String, List <Double>>> agent_performance = new ArrayList<>();;
 
 
-        performanceCalculation(agent_performance);
-        performanceData.setPerformanceData(agent_performance);
+    @PostMapping("/performance")
+    public ResponseEntity<?> calculateAHT(@Valid @RequestBody PerformanceDTO performanceDTO) {
+        Map<String, List<Double>> metricsData = calculatePerformanceService.getMetricsData(performanceDTO);
 
-        return  ResponseEntity.ok(performanceData);
+        if(metricsData.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(metricsData, HttpStatus.OK);
     }
 
     @GetMapping("/Notifications")
