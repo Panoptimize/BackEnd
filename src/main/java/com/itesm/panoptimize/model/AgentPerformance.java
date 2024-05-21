@@ -10,7 +10,7 @@ public class AgentPerformance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "agent_performance_id")
-    private int id;
+    private Integer id;
 
     @Column(nullable = false)
     private Date date;
@@ -18,8 +18,8 @@ public class AgentPerformance {
     @Column(name = "total_contacts_handled", nullable = false)
     private int totalContactsHandled;
 
-    @Column(name = "total_after_callwork", nullable = false)
-    private int totalAfterCallwork;
+    @Column(name = "total_after_call_work", nullable = false)
+    private int totalAfterCallWork;
 
     @Column(name = "adherence_percentage", nullable = false)
     private float adherencePercentage;
@@ -28,11 +28,11 @@ public class AgentPerformance {
     @JoinColumn(name = "agent_id", nullable = false)
     private User agent;
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -52,12 +52,12 @@ public class AgentPerformance {
         this.totalContactsHandled = totalContactsHandled;
     }
 
-    public int getTotalAfterCallwork() {
-        return totalAfterCallwork;
+    public int getTotalAfterCallWork() {
+        return totalAfterCallWork;
     }
 
-    public void setTotalAfterCallwork(int totalAfterCallwork) {
-        this.totalAfterCallwork = totalAfterCallwork;
+    public void setTotalAfterCallWork(int totalAfterCallwork) {
+        this.totalAfterCallWork = totalAfterCallwork;
     }
 
     public float getAdherencePercentage() {

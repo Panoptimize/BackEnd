@@ -1,8 +1,9 @@
 package com.itesm.panoptimize.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
 
-import java.util.UUID;
+import java.util.Set;
 
 @Entity
 @Table(name = "user")
@@ -10,13 +11,13 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private int id;
+    private Integer id;
 
     @Column(name = "connect_id", nullable = false, unique = true)
     private String connectId;
 
     @Column(name = "firebase_id", nullable = false, unique = true)
-    private UUID firebaseId;
+    private String firebaseId;
 
     @Column(nullable = false)
     private String email;
@@ -27,6 +28,12 @@ public class User {
     @Column(name = "image_path")
     private String imagePath;
 
+    @Column(name = "routing_profile_id", nullable = false)
+    private String routingProfileId;
+
+    @Column(name = "can_switch", nullable = false)
+    private Boolean canSwitch = true;
+
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
@@ -35,8 +42,24 @@ public class User {
     @JoinColumn(name = "user_type_id", nullable = false)
     private UserType userType;
 
-    public int getId() {
+    @ManyToMany
+    @JoinTable(
+            name = "agents_have_supervisors",
+            joinColumns = @JoinColumn(name = "agent_id"),
+            inverseJoinColumns = @JoinColumn(name = "supervisor_id")
+    )
+    private Set<User> supervisors;
+
+    @ManyToMany(mappedBy = "supervisors")
+    private Set<User> agents;
+
+    // Getters and Setters
+    public Integer getId() {
         return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getConnectId() {
@@ -47,11 +70,13 @@ public class User {
         this.connectId = connectId;
     }
 
-    public UUID getFirebaseId() {
+    public String getFirebaseId() {
         return firebaseId;
     }
 
-    public void setFirebaseId(UUID firebaseId) { this.firebaseId = firebaseId; }
+    public void setFirebaseId(String firebaseId) {
+        this.firebaseId = firebaseId;
+    }
 
     public String getEmail() {
         return email;
@@ -77,6 +102,22 @@ public class User {
         this.imagePath = imagePath;
     }
 
+    public String getRoutingProfileId() {
+        return routingProfileId;
+    }
+
+    public void setRoutingProfileId(String routingProfileId) {
+        this.routingProfileId = routingProfileId;
+    }
+
+    public boolean isCanSwitch() {
+        return canSwitch;
+    }
+
+    public void setCanSwitch(boolean canSwitch) {
+        this.canSwitch = canSwitch;
+    }
+
     public Company getCompany() {
         return company;
     }
@@ -93,4 +134,19 @@ public class User {
         this.userType = userType;
     }
 
+    public Set<User> getSupervisors() {
+        return supervisors;
+    }
+
+    public void setSupervisors(Set<User> supervisors) {
+        this.supervisors = supervisors;
+    }
+
+    public Set<User> getAgents() {
+        return agents;
+    }
+
+    public void setAgents(Set<User> agents) {
+        this.agents = agents;
+    }
 }

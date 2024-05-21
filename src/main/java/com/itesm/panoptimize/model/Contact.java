@@ -1,8 +1,10 @@
 package com.itesm.panoptimize.model;
 
+import com.itesm.panoptimize.enumerator.SatisfactionLevel;
 import jakarta.persistence.*;
 
 import java.util.Date;
+import java.util.Set;
 
 /**
  * Entity representing a contact.
@@ -14,7 +16,7 @@ public class Contact {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "contact_id")
-    private int id;
+    private Integer id;
 
     @Column(name = "start_time")
     private Date startTime;
@@ -22,29 +24,28 @@ public class Contact {
     @Column(name = "end_time")
     private Date endTime;
 
-    @Column(name = "resolution_status")
-    private String resolutionStatus;
+    @ManyToOne
+    @JoinColumn(name = "agent_id", nullable = false)
+    private User agent;
 
-    @Column(name = "first_contact_resolution")
-    private boolean firstContactResolution;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "satisfaction_level")
+    private SatisfactionLevel satisfactionLevel;
 
-    @Column(name = "sentiment_negative")
-    private float sentimentNegative;
+    @OneToOne(mappedBy = "contact")
+    private ContactMetric contactMetrics;
 
-    @Column(name = "sentiment_positive")
-    private float sentimentPositive;
+    @OneToMany(mappedBy = "contact")
+    private Set<Feedback> feedbacks;
 
-    @Column(name = "agent_id")
-    private int agentId;
+    @OneToMany(mappedBy = "contact")
+    private Set<Notification> notifications;
 
-    @Column(name = "satisfaction")
-    private int satisfaction;
-
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -64,51 +65,43 @@ public class Contact {
         this.endTime = endTime;
     }
 
-    public String getResolutionStatus() {
-        return resolutionStatus;
+    public User getAgent() {
+        return agent;
     }
 
-    public void setResolutionStatus(String resolutionStatus) {
-        this.resolutionStatus = resolutionStatus;
+    public void setAgent(User agent) {
+        this.agent = agent;
     }
 
-    public boolean isFirstContactResolution() {
-        return firstContactResolution;
+    public SatisfactionLevel getSatisfactionLevel() {
+        return satisfactionLevel;
     }
 
-    public void setFirstContactResolution(boolean firstContactResolution) {
-        this.firstContactResolution = firstContactResolution;
+    public void setSatisfactionLevel(SatisfactionLevel satisfactionLevel) {
+        this.satisfactionLevel = satisfactionLevel;
     }
 
-    public float getSentimentNegative() {
-        return sentimentNegative;
+    public ContactMetric getContactMetrics() {
+        return contactMetrics;
     }
 
-    public void setSentimentNegative(float sentimentNegative) {
-        this.sentimentNegative = sentimentNegative;
+    public void setContactMetrics(ContactMetric contactMetrics) {
+        this.contactMetrics = contactMetrics;
     }
 
-    public float getSentimentPositive() {
-        return sentimentPositive;
+    public Set<Feedback> getFeedbacks() {
+        return feedbacks;
     }
 
-    public void setSentimentPositive(float sentimentPositive) {
-        this.sentimentPositive = sentimentPositive;
+    public void setFeedbacks(Set<Feedback> feedbacks) {
+        this.feedbacks = feedbacks;
     }
 
-    public int getAgentId() {
-        return agentId;
+    public Set<Notification> getNotifications() {
+        return notifications;
     }
 
-    public void setAgentId(int agentId) {
-        this.agentId = agentId;
-    }
-
-    public int getSatisfaction() {
-        return satisfaction;
-    }
-
-    public void setSatisfaction(int satisfaction) {
-        this.satisfaction = satisfaction;
+    public void setNotifications(Set<Notification> notifications) {
+        this.notifications = notifications;
     }
 }
