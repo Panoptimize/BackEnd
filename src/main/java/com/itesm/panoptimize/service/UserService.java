@@ -3,6 +3,7 @@ package com.itesm.panoptimize.service;
 import com.itesm.panoptimize.dto.agent.AgentDTO;
 import com.itesm.panoptimize.dto.supervisor.SupervisorCreateDTO;
 import com.itesm.panoptimize.dto.supervisor.SupervisorDTO;
+import com.itesm.panoptimize.dto.supervisor.SupervisorUpdateDTO;
 import com.itesm.panoptimize.dto.supervisor.SupervisorUserDTO;
 import com.itesm.panoptimize.model.AgentPerformance;
 import com.itesm.panoptimize.model.User;
@@ -10,9 +11,15 @@ import com.itesm.panoptimize.repository.AgentPerformanceRepository;
 import com.itesm.panoptimize.repository.UserRepository;
 import com.itesm.panoptimize.repository.UserTypeRepository;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class UserService {
@@ -31,10 +38,6 @@ public class UserService {
 
     private AgentDTO convertToAgentDTO(User agent) {
         return modelMapper.map(agent, AgentDTO.class);
-    }
-
-    private User convertToEntity(SupervisorCreateDTO supervisorCreateDTO) {
-        return modelMapper.map(supervisorCreateDTO, User.class);
     }
 
     private SupervisorUserDTO convertToSupervisorDTO(User supervisor) {
@@ -83,4 +86,64 @@ public class UserService {
         return agentPerformanceToUpdate;
     }
 
+    public SupervisorUserDTO getSupervisor(Integer id) {
+        return convertToSupervisorDTO(userRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("Invalid supervisor ID")
+        ));
+    }
+
+    public SupervisorUserDTO getSupervisorWithConnectId(String connectId) {
+        return convertToSupervisorDTO(userRepository.connectId(connectId).orElseThrow(
+                () -> new IllegalArgumentException("Invalid supervisor ID")
+        ));
+    }
+
+    public void deleteSupervisor(Integer id) {
+        userRepository.deleteById(id);
+    }
+
+    public SupervisorUserDTO updateSupervisor(Integer id, SupervisorUpdateDTO supervisorUserDTO) {
+        User supervisorToUpdate = userRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("Invalid supervisor ID")
+        );
+        if(supervisorUserDTO.getConnectId() != null) {
+            supervisorToUpdate.setConnectId(supervisorUserDTO.getConnectId());
+        }
+
+        if(supervisorUserDTO.getFirebaseId() != null) {
+            supervisorToUpdate.setFirebaseId(supervisorUserDTO.getFirebaseId());
+        }
+
+        if(supervisorUserDTO.getEmail() != null) {
+            supervisorToUpdate.setEmail(supervisorUserDTO.getEmail());
+        }
+
+        if(supervisorUserDTO.getFullName() != null) {
+            supervisorToUpdate.setFullName(supervisorUserDTO.getFullName());
+        }
+
+        if(supervisorUserDTO.getImagePath() != null) {
+            supervisorToUpdate.setImagePath(supervisorUserDTO.getImagePath());
+        }
+
+        if(supervisorUserDTO.getRoutingProfileId() != null) {
+            supervisorToUpdate.setRoutingProfileId(supervisorUserDTO.getRoutingProfileId());
+        }
+
+        if(supervisorUserDTO.isCanSwitch() != null) {
+            supervisorToUpdate.setCanSwitch(supervisorUserDTO.isCanSwitch());
+        }
+        return convertToSupervisorDTO(userRepository.save(supervisorToUpdate));
+    }
+
+    public void associateAgentWithSupervisor(Integer supervisorId, Integer agentId) {
+        User supervisor = userRepository.findById(supervisorId).orElseThrow(
+                () -> new IllegalArgumentException("Invalid supervisor ID")
+        );
+        User agent = userRepository.findById(agentId).orElseThrow(
+                () -> new IllegalArgumentException("Invalid agent ID")
+        );
+        supervisor.getAgents().add(agent);
+        userRepository.save(supervisor);
+    }
 }

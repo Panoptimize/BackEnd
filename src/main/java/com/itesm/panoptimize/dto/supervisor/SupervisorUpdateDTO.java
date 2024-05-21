@@ -1,26 +1,32 @@
 package com.itesm.panoptimize.dto.supervisor;
 
-import jakarta.persistence.Column;
-import jakarta.validation.constraints.NotNull;
+import com.itesm.panoptimize.model.Company;
+import com.itesm.panoptimize.model.UserType;
+import jakarta.persistence.*;
 
-public class SupervisorUserDTO {
-    @NotNull(message = "Id is required")
+import java.util.List;
+import java.util.Set;
+
+public class SupervisorUpdateDTO {
     private Integer id;
-    @NotNull(message = "ConnectId is required")
+
     private String connectId;
-    @NotNull(message = "FirebaseId is required")
+
     private String firebaseId;
-    @NotNull(message = "Email is required")
+
     private String email;
-    @NotNull(message = "FullName is required")
+
     private String fullName;
+
     private String imagePath;
-    @NotNull(message = "RoutingProfileId is required")
+
     private String routingProfileId;
+
     private Boolean canSwitch;
 
-    @NotNull(message = "CompanyId is required")
-    private Integer companyId;
+    private Company company;
+
+    private UserType userType;
 
     public Integer getId() {
         return id;
@@ -84,5 +90,21 @@ public class SupervisorUserDTO {
 
     public void setCanSwitch(Boolean canSwitch) {
         this.canSwitch = canSwitch;
+    }
+
+    public Company getCompany() {
+        return company;
+    }
+
+    public void setCompany(Company company) {
+        this.company = company;
+    }
+
+    public UserType getUserType() {
+        return userType;
+    }
+
+    public void setUserType(UserType userType) {
+        this.userType = userType;
     }
 }

@@ -1,9 +1,9 @@
 package com.itesm.panoptimize.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
 
 import java.util.Set;
-import java.util.UUID;
 
 @Entity
 @Table(name = "user")
@@ -32,7 +32,7 @@ public class User {
     private String routingProfileId;
 
     @Column(name = "can_switch", nullable = false)
-    private boolean canSwitch = true;
+    private Boolean canSwitch = true;
 
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)
@@ -45,20 +45,21 @@ public class User {
     @ManyToMany
     @JoinTable(
             name = "agents_have_supervisors",
-            joinColumns = @JoinColumn(name = "supervisor_id"),
-            inverseJoinColumns = @JoinColumn(name = "agent_id")
+            joinColumns = @JoinColumn(name = "agent_id"),
+            inverseJoinColumns = @JoinColumn(name = "supervisor_id")
     )
+    private Set<User> supervisors;
+
+    @ManyToMany(mappedBy = "supervisors")
     private Set<User> agents;
 
-    @ManyToMany(mappedBy = "agents")
-    private Set<User> supervisors;
+    // Getters and Setters
+    public Integer getId() {
+        return id;
+    }
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public Integer getId() {
-        return id;
     }
 
     public String getConnectId() {
@@ -73,7 +74,9 @@ public class User {
         return firebaseId;
     }
 
-    public void setFirebaseId(String firebaseId) { this.firebaseId = firebaseId; }
+    public void setFirebaseId(String firebaseId) {
+        this.firebaseId = firebaseId;
+    }
 
     public String getEmail() {
         return email;
@@ -99,6 +102,22 @@ public class User {
         this.imagePath = imagePath;
     }
 
+    public String getRoutingProfileId() {
+        return routingProfileId;
+    }
+
+    public void setRoutingProfileId(String routingProfileId) {
+        this.routingProfileId = routingProfileId;
+    }
+
+    public boolean isCanSwitch() {
+        return canSwitch;
+    }
+
+    public void setCanSwitch(boolean canSwitch) {
+        this.canSwitch = canSwitch;
+    }
+
     public Company getCompany() {
         return company;
     }
@@ -115,14 +134,6 @@ public class User {
         this.userType = userType;
     }
 
-    public Set<User> getAgents() {
-        return agents;
-    }
-
-    public void setAgents(Set<User> agents) {
-        this.agents = agents;
-    }
-
     public Set<User> getSupervisors() {
         return supervisors;
     }
@@ -131,19 +142,11 @@ public class User {
         this.supervisors = supervisors;
     }
 
-    public String getRoutingProfileId() {
-        return routingProfileId;
+    public Set<User> getAgents() {
+        return agents;
     }
 
-    public void setRoutingProfileId(String routingProfileId) {
-        this.routingProfileId = routingProfileId;
-    }
-
-    public boolean isCanSwitch() {
-        return canSwitch;
-    }
-
-    public void setCanSwitch(boolean canSwitch) {
-        this.canSwitch = canSwitch;
+    public void setAgents(Set<User> agents) {
+        this.agents = agents;
     }
 }

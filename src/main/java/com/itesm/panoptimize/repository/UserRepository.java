@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
@@ -17,4 +18,10 @@ public interface UserRepository extends JpaRepository<User, Integer> {
      */
     @Query("SELECT u FROM User u INNER JOIN u.userType ut WHERE ut.typeName = :type")
     Page<User> getUsersByType(String type, Pageable pageable);
+
+    /**
+     * Get users with a specific amazon connect id
+     * @param amazonConnectId Amazon connect id
+     */
+    Optional<User> connectId(String amazonConnectId);
 }
