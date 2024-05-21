@@ -1,6 +1,9 @@
 package com.itesm.panoptimize.service;
 
+import com.itesm.panoptimize.dto.agent.AgentCreateDTO;
 import com.itesm.panoptimize.dto.agent.AgentDTO;
+import com.itesm.panoptimize.dto.agent.AgentUpdateDTO;
+import com.itesm.panoptimize.dto.agent.AgentUserDTO;
 import com.itesm.panoptimize.dto.supervisor.SupervisorCreateDTO;
 import com.itesm.panoptimize.dto.supervisor.SupervisorDTO;
 import com.itesm.panoptimize.dto.supervisor.SupervisorUpdateDTO;
@@ -36,14 +39,14 @@ public class UserService {
         this.userTypeRepository = userTypeRepository;
     }
 
-    private AgentDTO convertToAgentDTO(User agent) {
-        return modelMapper.map(agent, AgentDTO.class);
+    private AgentUserDTO convertToAgentDTO(User agent) {
+        return modelMapper.map(agent, AgentUserDTO.class);
     }
 
     private SupervisorUserDTO convertToSupervisorDTO(User supervisor) {
         return modelMapper.map(supervisor, SupervisorUserDTO.class);
     }
-    public Page<AgentDTO> getAllAgents(Pageable pageable) {
+    public Page<AgentUserDTO> getAllAgents(Pageable pageable) {
         return userRepository.getUsersByType("agent", pageable).map(this::convertToAgentDTO);
     }
 
@@ -59,6 +62,66 @@ public class UserService {
         User supervisor = modelMapper.map(supervisorCreateDTO, User.class);
         supervisor.setUserType(userTypeRepository.typeName("supervisor"));
         return convertToSupervisorDTO(userRepository.save(supervisor));
+    }
+
+    public AgentUserDTO createAgent(AgentCreateDTO agentUserDTO) {
+        User agent = modelMapper.map(agentUserDTO, User.class);
+        agent.setUserType(userTypeRepository.typeName("agent"));
+        return modelMapper.map(userRepository.save(agent), AgentUserDTO.class);
+    }
+
+    public Page<AgentUserDTO> getallAgents(Pageable pageable) {
+        return userRepository.getUsersByType("agent", pageable).map(user -> modelMapper.map(user, AgentUserDTO.class));
+    }
+
+    public AgentUserDTO getAgent(Integer id) {
+        return convertToAgentDTO(userRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("Invalid supervisor ID")
+        ));
+    }
+
+    public AgentUserDTO getAgentWithConnectId(String connectId) {
+        return convertToAgentDTO(userRepository.connectId(connectId).orElseThrow(
+                () -> new IllegalArgumentException("Invalid supervisor ID")
+        ));
+    }
+
+    public void deleteAgent(Integer id) {
+        userRepository.deleteById(id);
+    }
+
+    public AgentUserDTO updateAgent(Integer id, AgentUpdateDTO agentUserDTO) {
+        User agentToUpdate = userRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("Invalid supervisor ID")
+        );
+        if(agentUserDTO.getConnectId() != null) {
+            agentToUpdate.setConnectId(agentUserDTO.getConnectId());
+        }
+
+        if(agentUserDTO.getFirebaseId() != null) {
+            agentToUpdate.setFirebaseId(agentUserDTO.getFirebaseId());
+        }
+
+        if(agentUserDTO.getEmail() != null) {
+            agentToUpdate.setEmail(agentUserDTO.getEmail());
+        }
+
+        if(agentUserDTO.getFullName() != null) {
+            agentToUpdate.setFullName(agentUserDTO.getFullName());
+        }
+
+        if(agentUserDTO.getImagePath() != null) {
+            agentToUpdate.setImagePath(agentUserDTO.getImagePath());
+        }
+
+        if(agentUserDTO.getRoutingProfileId() != null) {
+            agentToUpdate.setRoutingProfileId(agentUserDTO.getRoutingProfileId());
+        }
+
+        if(agentUserDTO.isCanSwitch() != null) {
+            agentToUpdate.setCanSwitch(agentUserDTO.isCanSwitch());
+        }
+        return convertToAgentDTO(userRepository.save(agentToUpdate));
     }
 
     public AgentPerformance getAgentPerformance(int id) {

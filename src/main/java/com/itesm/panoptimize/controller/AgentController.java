@@ -1,7 +1,6 @@
 package com.itesm.panoptimize.controller;
 
-import com.itesm.panoptimize.dto.agent.AgentDTO;
-import com.itesm.panoptimize.dto.agent.PostFeedbackDTO;
+import com.itesm.panoptimize.dto.agent.*;
 import com.itesm.panoptimize.model.*;
 import com.itesm.panoptimize.service.FeedbackService;
 import com.itesm.panoptimize.service.UserService;
@@ -17,11 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-
-
-import java.util.List;
 
 
 @RestController
@@ -56,9 +50,8 @@ public class AgentController {
                     content = @Content),
     })
     @GetMapping("/")
-    public ResponseEntity<Page<AgentDTO>> getAllAgents(Pageable pageable) {
-        Page<AgentDTO> agentsPage = userService.getAllAgents(pageable);
-        return ResponseEntity.ok(agentsPage);
+    public ResponseEntity<Page<AgentUserDTO>> getAllAgents(Pageable pageable) {
+        return ResponseEntity.ok(userService.getallAgents(pageable));
     }
 
     @Operation(summary = "Obtener info  de agente", description = "Obtener la info de agente mediante el id" )
@@ -74,31 +67,31 @@ public class AgentController {
                     content = @Content),
     })
 
-    @GetMapping("/agent/{id}")
-    public ResponseEntity<AgentDTO> getAgent(@PathVariable("id") int id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<AgentUserDTO> getAgentById(@PathVariable Integer id) {
+        return ResponseEntity.ok(userService.getAgent(id));
+    }
 
-        User agent = userService.getUser(id);
-
-        if (agent == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        AgentDTO agentDTO = convertToDTO(agent);
-
-
-        return  ResponseEntity.ok(agentDTO);
+    @GetMapping("/connect/{id}")
+    public ResponseEntity<AgentUserDTO> getAgentByConnectId(@PathVariable String id) {
+        return ResponseEntity.ok(userService.getAgentWithConnectId(id));
     }
 
     @PostMapping("/")
-    public ResponseEntity<AgentDTO> createNewAgent(@RequestBody AgentDTO agentDTO) {
-        
-        return ResponseEntity.ok(agentDTO);
+    public ResponseEntity<AgentUserDTO> createAgent(@RequestBody AgentCreateDTO agentUserDTO) {
+        return ResponseEntity.ok(userService.createAgent(agentUserDTO));
     }
     
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteAgentResponse(@PathVariable Long id){
-        return ResponseEntity.ok("Agent " + id + " was deleted.");
-    } 
+    public ResponseEntity<String> deleteAgent(@PathVariable Integer id) {
+        userService.deleteAgent(id);
+        return ResponseEntity.ok("Agent deleted");
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<AgentUserDTO> updateAgent(@PathVariable Integer id, @RequestBody AgentUpdateDTO agentUserDTO) {
+        return ResponseEntity.ok(userService.updateAgent(id, agentUserDTO));
+    }
 
     @PostMapping("/agent/feedback")
     public ResponseEntity<String> postFeedback(@RequestBody PostFeedbackDTO feedbackDTO) {
@@ -120,7 +113,7 @@ public class AgentController {
         userService.deleteAgentPerformance(id);
         return new ResponseEntity<>("Agent performance deleted", HttpStatus.OK);
     }
-    @PatchMapping("/agent/performance/update/{id}")
+    @PutMapping("/agent/performance/update/{id}")
     public ResponseEntity<AgentPerformance> updateNotification(@PathVariable Integer id, @RequestBody AgentPerformance agentPerformance) {
         return ResponseEntity.ok(userService.updateAgentPerformance(id, agentPerformance));
     }
@@ -140,7 +133,7 @@ public class AgentController {
         feedbackService.deleteFeedback(id);
         return new ResponseEntity<>("Feedback deleted", HttpStatus.OK);
     }
-    @PatchMapping("/agent/feedback/update/{id}")
+    @PutMapping("/agent/feedback/update/{id}")
     public ResponseEntity<Feedback> updateFeedback(@PathVariable Integer id, @RequestBody Feedback feedback) {
         return ResponseEntity.ok(feedbackService.updateFeedback(id, feedback));
     }
