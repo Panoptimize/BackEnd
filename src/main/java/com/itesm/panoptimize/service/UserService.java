@@ -18,7 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashSet;
 import java.util.List;
@@ -43,6 +45,10 @@ public class UserService {
         return modelMapper.map(agent, AgentUserDTO.class);
     }
 
+    private User convertToEntity(AgentCreateDTO agentCreateDTO) {
+        return modelMapper.map(agentCreateDTO, User.class);
+    }
+
     private SupervisorUserDTO convertToSupervisorDTO(User supervisor) {
         return modelMapper.map(supervisor, SupervisorUserDTO.class);
     }
@@ -52,10 +58,6 @@ public class UserService {
 
     public Page<SupervisorUserDTO> getAllSupervisors(Pageable pageable) {
         return userRepository.getUsersByType("supervisor", pageable).map(this::convertToSupervisorDTO);
-    }
-
-    public User getUser(int id) {
-        return userRepository.findById(id).orElse(null);
     }
 
     public SupervisorUserDTO createSupervisor(SupervisorCreateDTO supervisorCreateDTO) {
@@ -151,13 +153,13 @@ public class UserService {
 
     public SupervisorUserDTO getSupervisor(Integer id) {
         return convertToSupervisorDTO(userRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("Invalid supervisor ID")
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entity not found")
         ));
     }
 
     public SupervisorUserDTO getSupervisorWithConnectId(String connectId) {
         return convertToSupervisorDTO(userRepository.connectId(connectId).orElseThrow(
-                () -> new IllegalArgumentException("Invalid supervisor ID")
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entity not found")
         ));
     }
 
