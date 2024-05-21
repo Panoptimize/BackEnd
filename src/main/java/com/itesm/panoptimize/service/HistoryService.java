@@ -30,14 +30,12 @@ public class HistoryService {
         this.contactRepository = contactRepository;
     }
 
-    public List<Contact> getContactHistory() {
+    public List<ContactHistoryDTO> getContactHistory() {
         List<Contact> contacts = contactRepository.findAll();
-        return contacts;
-        /**
+
         return contacts.stream()
                 .map(this::convertToContactHistoryDTO)
                 .collect(Collectors.toList());
-         */
     }
 
     private ContactHistoryDTO convertToContactHistoryDTO( Contact contact ){
@@ -97,13 +95,35 @@ public class HistoryService {
     private List<HistoryInsightsDTO> calculateContactInsights( Contact contact ){
         List<HistoryInsightsDTO> results = new ArrayList<HistoryInsightsDTO>();
 
-        //Calculate handle time vs average after_call_work_time
-        double ratio = calculateHandleTimeAfterCallRatio(contact.getAgent().getId(),
+        //Calculate handle_time vs average workspace handle_time
+        double ratioWorkspaceHandleTime = calculateWorkspaceHandleTimeRatio(contact.getAgent().getRouting_profile_id(),
                 contact.getContactMetrics().getHandleTime());
-        if(ratio >= 2){
+        if(ratioWorkspaceHandleTime >= 10)
+        {
+            HistoryInsightsDTO workspaceHandleTimeRatio = new HistoryInsightsDTO();
+            workspaceHandleTimeRatio.setInsight_id(0);
+            workspaceHandleTimeRatio.setInsight_value(ratioWorkspaceHandleTime);
+            results.add(workspaceHandleTimeRatio);
+        }
+
+        //Calculate speed_of_answer vs average workspace speed_of_answer
+        double ratioWorkspaceSpeedOfAnswer = calculateWorkspaceSpeedOfAnswerRatio(contact.getAgent().getRouting_profile_id(),
+                contact.getContactMetrics().getSpeedOfAnswer());
+        if(ratioWorkspaceSpeedOfAnswer >= 10)
+        {
+            HistoryInsightsDTO workspaceSpeedOfAnswerRatio = new HistoryInsightsDTO();
+            workspaceSpeedOfAnswerRatio.setInsight_id(1);
+            workspaceSpeedOfAnswerRatio.setInsight_value(ratioWorkspaceSpeedOfAnswer);
+            results.add(workspaceSpeedOfAnswerRatio);
+        }
+
+        //Calculate handle time vs average after_call_work_time
+        double ratioHandleTimeACWT = calculateHandleTimeAfterCallRatio(contact.getAgent().getId(),
+                contact.getContactMetrics().getHandleTime());
+        if(ratioHandleTimeACWT >= 2){
             HistoryInsightsDTO handleTimeRatio = new HistoryInsightsDTO();
             handleTimeRatio.setInsight_id(2);
-            handleTimeRatio.setInsight_value(ratio);
+            handleTimeRatio.setInsight_value(ratioHandleTimeACWT);
             results.add(handleTimeRatio);
         }
 
@@ -146,6 +166,16 @@ public class HistoryService {
         double averageAfterCallWorkTime = contactRepository.avgAfterCallWorkTime(agentId);
         if(averageAfterCallWorkTime > handle_time) {return averageAfterCallWorkTime / handle_time;}
         else {return -1 * (averageAfterCallWorkTime/handle_time);}
+    }
+
+    private double calculateWorkspaceHandleTimeRatio(String routingProfileId, int contactHandleTime){
+        double avgWorkspaceHandleTime = contactRepository.avgWorkspaceHandleTime(routingProfileId);
+        return((double) contactHandleTime - avgWorkspaceHandleTime) / avgWorkspaceHandleTime * 100;
+    }
+
+    private double calculateWorkspaceSpeedOfAnswerRatio(String routingProfileId, int contactSpeedOfAnswer){
+        double avgWorkspaceSpeedOfAnswer = contactRepository.avgSpeedOfAnswerTime(routingProfileId);
+        return((double) contactSpeedOfAnswer - avgWorkspaceSpeedOfAnswer) / avgWorkspaceSpeedOfAnswer * 100;
     }
 
 }

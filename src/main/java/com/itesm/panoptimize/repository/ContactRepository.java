@@ -16,6 +16,7 @@ import java.util.List;
 public interface ContactRepository extends JpaRepository<Contact, Long> {
     /**
      * Custom query to count contacts grouped by the month of their start time.
+     *
      * @return a list of object arrays where each array contains the month number and the count of contacts for that month
      */
     @Query(value = "SELECT MONTH(c.start_time) as month, COUNT(*) FROM contact c GROUP BY MONTH(c.start_time)", nativeQuery = true)
@@ -23,6 +24,7 @@ public interface ContactRepository extends JpaRepository<Contact, Long> {
 
     /**
      * Custom query to count how many FCR a given agent has.
+     *
      * @param agentId the id of the agent
      * @return an int that denotes the total count of FCR contacts that agent has.
      */
@@ -33,7 +35,8 @@ public interface ContactRepository extends JpaRepository<Contact, Long> {
     /**
      * Custom query to get the contacts from an agent prior to the current contact
      * ordered in descending order by their id
-     * @param agentId the id of the agent
+     *
+     * @param agentId   the id of the agent
      * @param contactId the id of the current contact
      * @return a list of all contacts
      */
@@ -42,9 +45,31 @@ public interface ContactRepository extends JpaRepository<Contact, Long> {
 
     /**
      * Custom query that returns the average after_call_work_time value for all of an agent's contacts
+     *
      * @param agentId the id of the agent
      * @return the average value of the agent's after_call_work_time
      */
     @Query(value = "select avg(cm.afterCallWorkTime) from Contact c join c.contactMetrics cm where c.agent = :agentId")
     Double avgAfterCallWorkTime(@Param("agentId") int agentId);
+
+    /**
+     * Custom query that returns the average handle_time for all the contacts in a workspace
+     *
+     * @param routingProfileId the id of the current contact workspace
+     * @return the average value of the handle_time for contacts in the workspace
+     */
+    @Query(value = "select avg(cm.handleTime) from Contact c join c.contactMetrics cm where " +
+            "c.agent.routing_profile_id = :routingProfileId")
+    Double avgWorkspaceHandleTime(@Param("routingProfileId") String routingProfileId);
+
+    /**
+     * Custom query that returns the average speed_of_answer for all the contacts in a workspace
+     *
+     * @param routingProfileId the id of the current contact workspace
+     * @return the average value of the speed_of_answer for contacts in the workspace
+     */
+    @Query(value = "select avg(cm.speedOfAnswer) from Contact c join c.contactMetrics cm where " +
+            "c.agent.routing_profile_id = :routingProfileId")
+    Double avgSpeedOfAnswerTime(@Param("routingProfileId") String routingProfileId);
+
 }
