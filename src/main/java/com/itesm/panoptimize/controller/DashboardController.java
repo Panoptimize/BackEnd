@@ -208,7 +208,7 @@ public class DashboardController {
 
     @PostMapping("/performance")
     public ResponseEntity<?> calculateAHT(@Valid @RequestBody PerformanceDTO performanceDTO) {
-        Map<String, List<Map<String, Double>>> metricsData = calculatePerformanceService.getMetricsData(performanceDTO);
+        Map<String, List<Double>> metricsData = calculatePerformanceService.getMetricsData(performanceDTO);
 
         if(metricsData.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
