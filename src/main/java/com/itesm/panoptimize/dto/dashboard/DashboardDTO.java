@@ -1,15 +1,21 @@
 package com.itesm.panoptimize.dto.dashboard;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import java.util.Date;
-import java.util.UUID;
 
 public class DashboardDTO {
-
+    @NotNull(message = "Instance ID is required")
+    @Size(min = 36, max = 36, message = "Instance ID must be 36 characters long")
+    private String instanceId;
+    @NotNull(message = "Start date is required")
     private Date startDate;
+    @NotNull(message = "End date is required")
     private Date endDate;
-    private UUID[] agents;
-    // UUID format
-    private UUID[] workspaces;
+    private String[] routingProfiles;
+    private String[] queues;
 
     public Date getStartDate() {
         return startDate;
@@ -27,19 +33,27 @@ public class DashboardDTO {
         this.endDate = endDate;
     }
 
-    public UUID[] getAgents() {
-        return agents;
+    public String[] getRoutingProfiles() {
+        return routingProfiles;
     }
 
-    public void setAgents(UUID[] agents) {
-        this.agents = agents;
+    public void setRoutingProfiles(String[] routingProfiles) {
+        this.routingProfiles = routingProfiles;
     }
 
-    public UUID[] getWorkspaces() {
-        return workspaces;
+    public String[] getQueues() {
+        return queues;
     }
 
-    public void setWorkspaces(UUID[] workspaces) {
-        this.workspaces = workspaces;
+    public void setQueues(String[] queues) {
+        this.queues = queues;
+    }
+
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
     }
 }

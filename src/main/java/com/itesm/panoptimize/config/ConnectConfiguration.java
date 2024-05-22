@@ -13,16 +13,6 @@ import java.time.Duration;
 @Configuration
 public class ConnectConfiguration {
 
-
-    private static final int NUMBER_OF_RETRIES = 3;
-    private static final RetryPolicy RETRY_POLICY = RetryPolicy.builder()
-            .numRetries(NUMBER_OF_RETRIES)
-            .backoffStrategy(EqualJitterBackoffStrategy.builder()
-                    .baseDelay(Duration.ofSeconds(1))
-                    .maxBackoffTime(Duration.ofSeconds(5))
-                    .build())
-            .build();
-
     @Bean
     public ConnectClient connectClient() {
         return ConnectClient.builder()
