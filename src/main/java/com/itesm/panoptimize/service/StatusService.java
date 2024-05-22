@@ -1,94 +1,99 @@
 package com.itesm.panoptimize.service;
 
-import com.itesm.panoptimize.dto.agent.StatusDTO;
+import software.amazon.awssdk.services.connect.ConnectClient;
+import software.amazon.awssdk.services.connect.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
-
-/*
- * Service that manages agent statuses
- * This service is responsible for querying specific agent metrics from an Amazon Connect API simulator.
- * @version 1.2
- */
 @Service
 public class StatusService {
 
-    private final WebClient webClient;
+    private final ConnectClient connectClient;
 
     @Autowired
-    public StatusService(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("http://localhost:8000").build();
+    public StatusService(ConnectClient connectClient) {
+        this.connectClient = connectClient;
     }
 
     /**
-     * This method creates a formatted time string
-     * @return formatted time string
+     * Retrieves the active agent statuses for the specified instance.
+     *
+     * @param instanceId the ID of the Amazon Connect instance
+     * @return a list of active agent statuses
      */
+    public List<AgentStatus> getActiveAgents(String instanceId) {
+        List<String> queueIds = getAllQueueIds(instanceId);
+        if (queueIds.isEmpty()) {
+            throw new RuntimeException("No queues found for instance: " + instanceId);
+        }
 
-    Instant now = Instant.now();
-    LocalDateTime localDateTime = LocalDateTime.ofInstant(now, ZoneId.systemDefault());
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
-    String formattedTime = localDateTime.format(formatter);
+        List<CurrentMetric> metrics = List.of(
+                CurrentMetric.builder().name(CurrentMetricName.AGENTS_ONLINE).unit(Unit.COUNT).build(),
+                CurrentMetric.builder().name(CurrentMetricName.AGENTS_AVAILABLE).unit(Unit.COUNT).build(),
+                CurrentMetric.builder().name(CurrentMetricName.AGENTS_AFTER_CONTACT_WORK).unit(Unit.COUNT).build(),
+                CurrentMetric.builder().name(CurrentMetricName.AGENTS_ON_CALL).unit(Unit.COUNT).build()
 
-
-    /**
-     * This method makes a POST request to the metrics endpoint
-     * and returns the data in a StatusDTO object
-     * @return StatusDTO object with the metrics data
-     */
-
-
-    public StatusDTO filterMetrics() {
-        List<Map<String, String>> metrics = Arrays.asList(
-                createMetric("AGENTS_AVAILABLE", "COUNT"),
-                createMetric("AGENTS_AFTER_CONTACT_WORK", "COUNT"),
-                createMetric("AGENTS_ON_CONTACT", "COUNT"),
-                createMetric("AGENTS_ONLINE", "COUNT")
         );
 
+        GetCurrentMetricDataRequest request = GetCurrentMetricDataRequest.builder()
+                .instanceId(instanceId)
+                .filters(Filters.builder().queues(queueIds).build())
+                .currentMetrics(metrics)
+                .build();
 
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("Metrics", metrics);
-        requestBody.put("DataSnapshotTime", formattedTime);
-        requestBody.put("Filters", new HashMap<String, List<String>>());
-        requestBody.put("Message", null);
+        try {
+            GetCurrentMetricDataResponse response = connectClient.getCurrentMetricData(request);
 
-
-
-        StatusDTO statusDTO = webClient.post()
-                .uri("/status")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(requestBody)
-                .retrieve()
-                .bodyToMono(StatusDTO.class)
-                .block();
-
-        return statusDTO;
+            return response.metricResults().stream()
+                    .flatMap(result -> result.collections().stream())
+                    .filter(collection -> collection.metric().name().equals(CurrentMetricName.AGENTS_ONLINE) ||
+                            collection.metric().name().equals(CurrentMetricName.AGENTS_AVAILABLE))
+                    .map(collection -> new AgentStatus(collection.metric().nameAsString(), collection.value()))
+                    .collect(Collectors.toList());
+        } catch (ConnectException e) {
+            // Log the exception and rethrow or handle it as needed
+            throw new RuntimeException("Failed to retrieve agent metrics", e);
+        }
     }
 
     /**
-     * This method creates a metric map
-     * @param name metric name
-     * @param unit metric unit
-     * @return metric map
+     * Retrieves the IDs of all queues for the specified instance.
+     *
+     * @param instanceId the ID of the Amazon Connect instance
+     * @return a list of queue IDs
      */
+    private List<String> getAllQueueIds(String instanceId) {
+        ListQueuesRequest listQueuesRequest = ListQueuesRequest.builder()
+                .instanceId(instanceId)
+                .build();
 
-    private Map<String, String> createMetric(String name, String unit) {
-        Map<String, String> metric = new HashMap<>();
-        metric.put("Name", name);
-        metric.put("Unit", unit);
-        return metric;
+        ListQueuesResponse listQueuesResponse = connectClient.listQueues(listQueuesRequest);
+
+        return listQueuesResponse.queueSummaryList().stream()
+                .map(QueueSummary::id)
+                .collect(Collectors.toList());
     }
 
+    /**
+     * Inner class representing the status of an agent.
+     */
+    public static class AgentStatus {
+        private final String metricName;
+        private final Double metricValue;
+
+        public AgentStatus(String metricName, Double metricValue) {
+            this.metricName = metricName;
+            this.metricValue = metricValue;
+        }
+
+        public String getMetricName() {
+            return metricName;
+        }
+
+        public Double getMetricValue() {
+            return metricValue;
+        }
+    }
 }

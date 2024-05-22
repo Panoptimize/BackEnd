@@ -1,186 +1,116 @@
 package com.itesm.panoptimize.controller;
-import com.itesm.panoptimize.dto.agent.AgentDTO;
+import com.itesm.panoptimize.dto.supervisor.SupervisorCreateDTO;
 import com.itesm.panoptimize.dto.supervisor.SupervisorDTO;
+import com.itesm.panoptimize.dto.supervisor.SupervisorUpdateDTO;
+import com.itesm.panoptimize.dto.supervisor.SupervisorUserDTO;
+import com.itesm.panoptimize.service.UserService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.ArrayList;
-import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @RestController
-@RequestMapping ("/supervisors")
+@RequestMapping ("/supervisor")
 public class SupervisorController {
-    @Operation(
-            summary = "Get all the supervisors",
-            description = "Get the supervisor name and details without passwords or sensitive data"
-    )
-    @ApiResponses(value={
+    private final UserService supervisorService;
+
+    public SupervisorController(UserService supervisorService) {
+        this.supervisorService = supervisorService;
+    }
+
+    @Operation(summary = "Obtener todos los supervisores", description = "Obtener todos los supervisores registrados en el sistema" )
+    @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
-                    description = "Supervisors found",
+                    description = "Supervisores encontrados.",
                     content = {
                             @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = SupervisorDTO.class))
                     }),
             @ApiResponse(responseCode = "404",
-                    description = "Supervisors not found",
+                    description = "Supervisores no encontrados.",
                     content = @Content),
     })
-    @GetMapping("/supervisors/all")
-    public ResponseEntity<List<SupervisorDTO>> getController(){
-        List<SupervisorDTO> posts = new ArrayList<>();
-        SupervisorDTO supervisorDto= new SupervisorDTO ();
-        supervisorDto.setName("Caligula de Argona");
-        supervisorDto.setFloor("Sales_Floor");
-        supervisorDto.setVerified(true);
-        supervisorDto.setPicture("https://example.com/Caligula.jpg");
-        SupervisorDTO superDto = new SupervisorDTO();
-        superDto.setName("Steven Smith");
-        superDto.setFloor("CostumerSupport_Floor");
-        superDto.setVerified(true);
-        superDto.setPicture("https://example.com/StevenSmith.jpg");
-
-
-        posts.add(supervisorDto);
-        posts.add(superDto);
-
-        return ResponseEntity.ok(posts);
+    @GetMapping("/")
+    public ResponseEntity<Page<SupervisorUserDTO>> getAllSupervisors(Pageable pageable) {
+        return ResponseEntity.ok(supervisorService.getAllSupervisors(pageable));
     }
 
-    @Operation(summary = "Deleting a supervisor", description = "Director deletes a supervisor.")
+    @Operation(summary = "Crear un supervisor", description = "Crear un supervisor en el sistema" )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
-                    description = "Supervisor deleted",
-                    content = @Content),
-            @ApiResponse(responseCode = "404",
-                    description = "Unable to delete",
-                    content = @Content)
-    })
-    @DeleteMapping("/supervisor/{id}")
-    public ResponseEntity<String> deleteSupervisorResponse(@PathVariable Long id){
-        return ResponseEntity.ok("Supervisor " + id + " was deleted.");
-    }
-
-    @PatchMapping("/{id}")
-    @Operation(summary = "Update a supervisor", description = "Updates the details of an existing supervisor by ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Supervisor updated successfully",
+                    description = "Supervisor creado.",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = SupervisorDTO.class))
+                                    schema = @Schema(implementation = SupervisorUserDTO.class))
                     }),
             @ApiResponse(responseCode = "404",
-                    description = "Supervisor not found",
-                    content = @Content)
+                    description = "Supervisor no creado.",
+                    content = @Content),
     })
-    public ResponseEntity<SupervisorDTO> updateSupervisor(@PathVariable int id, @RequestBody SupervisorDTO supervisorDetails) {
-        SupervisorDTO initialSupervisor = new SupervisorDTO();
-        createSupervisor(initialSupervisor);
-
-        return ResponseEntity.ok(initialSupervisor);
+    @PostMapping("/")
+    public ResponseEntity<SupervisorUserDTO> createSupervisor(@RequestBody SupervisorCreateDTO supervisorUserDTO) {
+        return ResponseEntity.ok(supervisorService.createSupervisor(supervisorUserDTO));
     }
 
+    @Operation(summary = "Obtener info de supervisor", description = "Obtener la info de supervisor mediante el id" )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Supervisor encontrado.",
+                    content = {
+                            @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = SupervisorUserDTO.class))
+                    }),
+            @ApiResponse(responseCode = "404",
+                    description = "Supervisor no encontrado.",
+                    content = @Content),
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<SupervisorDTO> getSupervisorById(@PathVariable int id) {
-        List<SupervisorDTO> supervisors = new ArrayList<>();
-        SupervisorDTO initialSupervisor = new SupervisorDTO();
-        createSupervisor(initialSupervisor);
-        List<AgentDTO> supervisedAgents = new ArrayList<>();
-        AgentDTO agent1 = new AgentDTO("Dave Lombardo", "Sales", "Call", (int) (Math.random() * 101));
-        AgentDTO agent2 = new AgentDTO("Trevor Strnad", "Sales", "Call", (int) (Math.random() * 101));
-        supervisedAgents.add(agent1);
-        supervisedAgents.add(agent2);
-
-        initialSupervisor.setSupervisedAgents(supervisedAgents);
-
-        supervisors.add(initialSupervisor);
-        //API to get a supervisor by ID
-        for (SupervisorDTO supervisor : supervisors) {
-            if (supervisor.getId() == id) {
-                return ResponseEntity.ok(supervisor);
-            }
-        }
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<SupervisorUserDTO> getSupervisorById(@PathVariable Integer id) {
+        return ResponseEntity.ok(supervisorService.getSupervisor(id));
     }
 
-
-    @Operation(
-            summary = "Get all the agents from the supervisor",
-            description = "Get the id's of all the agents under the supervisors command"
-    )
-    @ApiResponses(value={
+    @Operation(summary = "Obtener info de supervisor", description = "Obtener la info de supervisor mediante el id de connect" )
+    @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
-                    description = "Agents found",
+                    description = "Supervisor encontrado.",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = SupervisorDTO.class))
+                                    schema = @Schema(implementation = SupervisorUserDTO.class))
                     }),
             @ApiResponse(responseCode = "404",
-                    description = "Agents not found",
+                    description = "Supervisor no encontrado.",
                     content = @Content),
     })
-    @GetMapping("/{id}/agents")
-    public ResponseEntity<List<AgentDTO>> getAgentsUnderSupervision(@PathVariable int id){
-        
-        SupervisorDTO supervisorDto0 = new SupervisorDTO ();
-        supervisorDto0.setId(0);
-        SupervisorDTO supervisorDto1 = new SupervisorDTO ();
-        supervisorDto1.setId(1);
-        SupervisorDTO supervisorDto2 = new SupervisorDTO ();
-        supervisorDto2.setId(2);
+    @GetMapping("/connect/{id}")
+    public ResponseEntity<SupervisorUserDTO> getSupervisorByConnectId(@PathVariable String id) {
+        return ResponseEntity.ok(supervisorService.getSupervisorWithConnectId(id));
+    }
 
-        List<AgentDTO> agentList0 = new ArrayList<>();
-        List<AgentDTO> agentList1 = new ArrayList<>();
-        List<AgentDTO> agentList2 = new ArrayList<>();
+    @Operation(summary = "Eliminar supervisor", description = "Eliminar supervisor mediante el id" )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Supervisor eliminado.",
+                    content = {
+                            @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = String.class))
+                    }),
+            @ApiResponse(responseCode = "400",
+                    description = "Supervisor no eliminado.",
+                    content = @Content),
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteSupervisor(@PathVariable Integer id) {
+        supervisorService.deleteSupervisor(id);
+        return ResponseEntity.ok("Supervisor deleted");
+    }
 
-        AgentDTO agent1 = new AgentDTO("Dave Lombardo", "Sales", "Call", (int) (Math.random() * 101));
-        agentList0.add(agent1);
-        AgentDTO agent2 = new AgentDTO("Trevor Strnad", "Sales", "Call", (int) (Math.random() * 101));
-        agentList0.add(agent2);
-        AgentDTO agent3 = new AgentDTO("Mikael Akerfeldt", "Sales", "Call", (int) (Math.random() * 101));
-        agentList1.add(agent3);
-        AgentDTO agent4 = new AgentDTO("George Fisher", "Sales", "Call", (int) (Math.random() * 101));
-        agentList2.add(agent4);
-        AgentDTO agent5 = new AgentDTO("Angela Gossow", "Sales", "Call", (int) (Math.random() * 101));
-        agentList2.add(agent5);
-        AgentDTO agent6 = new AgentDTO("Phil Bozeman", "Sales", "Call", (int) (Math.random() * 101));
-        agentList2.add(agent6);
-
-        supervisorDto0.setSupervisedAgents(agentList0);
-        supervisorDto1.setSupervisedAgents(agentList1);
-        supervisorDto2.setSupervisedAgents(agentList2);
-
-        List<SupervisorDTO> supervisors = new ArrayList<>();
-        supervisors.add(supervisorDto0);
-        supervisors.add(supervisorDto1);
-        supervisors.add(supervisorDto2);
-
-        for (SupervisorDTO supervisor : supervisors) {
-                if (supervisor.getId() == id) {
-                    return ResponseEntity.ok(supervisor.getSupervisedAgents());
-                }
-            }
-
-        return ResponseEntity.notFound().build();
-
-        }
-
-
-
-    // Temporal method, to not repeat code
-    private void createSupervisor(SupervisorDTO initialSupervisor) {
-        initialSupervisor.setId(1);
-        initialSupervisor.setName("Supervisor Uno");
-        initialSupervisor.setEmail("supervisor1@empresa.com");
-        initialSupervisor.setUsername("supervisorUno");
-        initialSupervisor.setPassword("123456");
-        initialSupervisor.setFloor("Main Floor");
-        initialSupervisor.setVerified(true);
-        initialSupervisor.setPicture("https://example.com/supervisorUno.jpg");
+    @PutMapping("/{id}")
+    public ResponseEntity<SupervisorUserDTO> updateSupervisor(@PathVariable Integer id, @RequestBody SupervisorUpdateDTO supervisorUserDTO) {
+        return ResponseEntity.ok(supervisorService.updateSupervisor(id, supervisorUserDTO));
     }
 }
