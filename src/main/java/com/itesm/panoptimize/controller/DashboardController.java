@@ -127,9 +127,10 @@ public class DashboardController {
     @Autowired
     private DashboardService metricService;
 
-    @GetMapping("/values")
-    public Mono<List<Integer>> getValues() {
-        return apiClient.getMetricResults()
+    //Get the current number of agents in each channel from connect
+    @PostMapping("/values")
+    public Mono<Map<String, Integer>> getValues(@Valid @RequestBody DashboardDTO dashboardDTO) {
+        return apiClient.getMetricResults(dashboardDTO)
                 .map(metricService::extractValues);
     }
 
