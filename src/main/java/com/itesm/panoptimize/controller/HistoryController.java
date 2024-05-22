@@ -80,6 +80,4 @@ public class HistoryController {
         historyService.addContactMetric(contactMetric);
         return new ResponseEntity<>("Contact updated", HttpStatus.OK);
     }
-
-
 }

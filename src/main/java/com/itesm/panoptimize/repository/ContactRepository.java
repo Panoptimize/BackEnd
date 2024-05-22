@@ -59,7 +59,7 @@ public interface ContactRepository extends JpaRepository<Contact, Integer> {
      * @return the average value of the handle_time for contacts in the workspace
      */
     @Query(value = "select avg(cm.handleTime) from Contact c join c.contactMetrics cm where " +
-            "c.agent.routing_profile_id = :routingProfileId")
+            "c.agent.routingProfileId = :routingProfileId")
     Double avgWorkspaceHandleTime(@Param("routingProfileId") String routingProfileId);
 
     /**
@@ -69,7 +69,7 @@ public interface ContactRepository extends JpaRepository<Contact, Integer> {
      * @return the average value of the speed_of_answer for contacts in the workspace
      */
     @Query(value = "select avg(cm.speedOfAnswer) from Contact c join c.contactMetrics cm where " +
-            "c.agent.routing_profile_id = :routingProfileId")
+            "c.agent.routingProfileId = :routingProfileId")
     Double avgSpeedOfAnswerTime(@Param("routingProfileId") String routingProfileId);
 
 }

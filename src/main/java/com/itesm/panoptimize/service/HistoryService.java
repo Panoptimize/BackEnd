@@ -5,10 +5,8 @@ import com.itesm.panoptimize.dto.history.ContactHistoryDTO;
 import com.itesm.panoptimize.dto.history.HistoryInsightsDTO;
 import com.itesm.panoptimize.model.Contact;
 import com.itesm.panoptimize.model.ContactMetric;
-import com.itesm.panoptimize.model.User;
 import com.itesm.panoptimize.repository.ContactMetricRepository;
 import com.itesm.panoptimize.repository.ContactRepository;
-import com.itesm.panoptimize.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -76,7 +73,7 @@ public class HistoryService {
 
         contactDetailsDTO.setFull_name(contact.getAgent().getFullName());
         contactDetailsDTO.setEmail(contact.getAgent().getEmail());
-        //Workspaces = routing profile?
+
         contactDetailsDTO.setWorkspaces(contact.getAgent().getRoutingProfileId());
         contactDetailsDTO.setFcr(contact.getContactMetrics().getFirstContactResolution());
         contactDetailsDTO.setAfter_call_worktime(contact.getContactMetrics().getAfterCallWorkTime());
@@ -91,13 +88,13 @@ public class HistoryService {
         contactDetailsDTO.setDate(contact.getStartTime().toLocalDate());
         contactDetailsDTO.setTime(contact.getStartTime().toLocalTime());
 
-
+        contactDetailsDTO.setInsights(calculateContactInsights(contact));
 
         return contactDetailsDTO;
     }
 
     private List<HistoryInsightsDTO> calculateContactInsights( Contact contact ){
-        List<HistoryInsightsDTO> results = new ArrayList<HistoryInsightsDTO>();
+        List<HistoryInsightsDTO> results = new ArrayList<>();
 
         //Calculate handle_time vs average workspace handle_time
         double ratioWorkspaceHandleTime = calculateWorkspaceHandleTimeRatio(contact.getAgent().getRoutingProfileId(),
