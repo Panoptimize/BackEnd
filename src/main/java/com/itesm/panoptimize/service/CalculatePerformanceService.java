@@ -129,5 +129,4 @@ public class CalculatePerformanceService {
         bd = bd.setScale(1, RoundingMode.HALF_UP);
         return bd.doubleValue();
     }
-
 }

@@ -103,13 +103,28 @@ public class DownloadController {
     }
     */
 
-    @GetMapping("/getAnyJSON")
-    public ResponseEntity<String> getAnyJSONData() {
-        String GET_DB_JSON_URL = " ";
+    @GetMapping("/getCalculatePerformanceJSON")
+    public ResponseEntity<String> getCalculatePerformanceJSON() {
+        String GET_DB_JSON_URL = "http://127.0.0.1:8080/dashboard/performance";
+
+        RestTemplate restTemplate = new RestTemplate();
+        Map<String, Object> jsonBodyCPer = new HashMap<>();
+
+        jsonBodyCPer.put("instanceId", "7c78bd60-4a9f-40e5-b461-b7a0dfaad848");
+        jsonBodyCPer.put("startDate", "2024-05-11");
+        jsonBodyCPer.put("endDate", "2024-05-14");
+        jsonBodyCPer.put("routingProfiles", new String[]{"4896ae34-a93e-41bc-8231-bf189e7628b1"});
+        jsonBodyCPer.put("queues", new String[]{});
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(jsonBodyCPer, headers);
+
         ResponseEntity<JsonNode> response = restTemplate.exchange(
                 GET_DB_JSON_URL,
-                HttpMethod.GET,
-                null,
+                HttpMethod.POST,
+                requestEntity,
                 new ParameterizedTypeReference<JsonNode>() {}
         );
         JsonNode data = response.getBody();
@@ -119,13 +134,14 @@ public class DownloadController {
         }
 
         try {
-            String filePath = "./BackEnd/data.csv";
+            String filePath = "D:\\Tec\\Semestre 2024-1\\Panoptimise\\performancePerAgent.csv";
             FileWriter fileWriter = new FileWriter(filePath);
             CSVWriter csvWriter = new CSVWriter(fileWriter);
 
             // Extract field names (header)
             Iterator<Map.Entry<String, JsonNode>> fields = data.fields();
             List<String> header = new ArrayList<>();
+            List<String> valuess = new ArrayList<>();
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> field = fields.next();
                 header.add(field.getKey());
@@ -142,7 +158,8 @@ public class DownloadController {
                     for (JsonNode item : fieldValue) {
                         listValues.add(item.asText());
                     }
-                    values.add(String.join(";", listValues)); // Using ";" to separate list values
+                    values.add(String.join(", ", listValues));
+
                 } else {
                     values.add(fieldValue.asText());
                 }
