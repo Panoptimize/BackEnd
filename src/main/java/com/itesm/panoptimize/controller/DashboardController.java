@@ -1,6 +1,7 @@
 package com.itesm.panoptimize.controller;
 
 
+import com.itesm.panoptimize.dto.TestDTO;
 import com.itesm.panoptimize.dto.dashboard.DashMetricData;
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
 import com.itesm.panoptimize.service.DashboardService;
@@ -46,6 +47,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Principal;
 import java.util.*;
 
 import java.text.ParseException;
@@ -200,4 +202,15 @@ public class DashboardController {
 
         return  ResponseEntity.ok(performanceData);
     }
+
+    // Endpoint de prueba para autenticación
+    /*
+    @PostMapping("/auth")
+    public ResponseEntity<?> suma(@RequestBody TestDTO valores, Principal principal){
+        System.out.println(principal.getName());
+        Map<String,Object> response = new HashMap<>();
+        response.put("resultado", valores.getValor1()+valores.getValor2());
+        return ResponseEntity.ok(response);
+    }
+     */
 }
