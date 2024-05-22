@@ -1,6 +1,5 @@
 package com.itesm.panoptimize.dto.dashboard;
 
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -15,7 +14,18 @@ public class DashboardDTO {
     @NotNull(message = "End date is required")
     private Date endDate;
     private String[] routingProfiles;
-    private String[] queues;
+    private String[] agents;
+
+    public DashboardDTO() {
+    }
+
+    public DashboardDTO(String instanceId, Date startDate, Date endDate, String[] routingProfiles, String[] agents) {
+        this.instanceId = instanceId;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.routingProfiles = routingProfiles;
+        this.agents = agents;
+    }
 
     public Date getStartDate() {
         return startDate;
@@ -41,12 +51,12 @@ public class DashboardDTO {
         this.routingProfiles = routingProfiles;
     }
 
-    public String[] getQueues() {
-        return queues;
+    public String[] getAgents() {
+        return agents;
     }
 
-    public void setQueues(String[] queues) {
-        this.queues = queues;
+    public void setAgents(String[] agents) {
+        this.agents = agents;
     }
 
     public String getInstanceId() {

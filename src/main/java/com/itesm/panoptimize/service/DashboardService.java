@@ -1,5 +1,8 @@
 package com.itesm.panoptimize.service;
 
+import com.itesm.panoptimize.dto.dashboard.AWSObjDTO;
+import com.itesm.panoptimize.dto.dashboard.DashboardFiltersDTO;
+import com.itesm.panoptimize.dto.dashboard.MetricResponseDTO;
 import com.itesm.panoptimize.model.Notification;
 import com.itesm.panoptimize.repository.NotificationRepository;
 import com.itesm.panoptimize.util.Constants;
@@ -64,10 +67,10 @@ public class DashboardService {
             filters.add(routingProfileFilter);
         }
 
-        if (dashboardDTO.getQueues().length > 0) {
+        if (dashboardDTO.getAgents().length > 0) {
             FilterV2 queueFilter = FilterV2.builder()
-                    .filterKey("QUEUE")
-                    .filterValues(Arrays.asList(dashboardDTO.getQueues()))
+                    .filterKey("AGENT")
+                    .filterValues(Arrays.asList(dashboardDTO.getAgents()))
                     .build();
             filters.add(queueFilter);
         }
@@ -81,7 +84,7 @@ public class DashboardService {
                 .metrics(metrics)
                 .build());
     }
-    public Map<String, Double> getMetricsData(DashboardDTO dashboardDTO) {
+    public MetricResponseDTO getMetricsData(DashboardDTO dashboardDTO) {
         // Set up metrics
         List<MetricV2> metricList = new ArrayList<>();
 
@@ -96,12 +99,12 @@ public class DashboardService {
 
         metricList.add(serviceLevel);
 
-        // Average Speed of Answer
-        MetricV2 averageSpeedOfAnswer = MetricV2.builder()
+        // Abandonment rate
+        MetricV2 abandonmentRate = MetricV2.builder()
                 .name("ABANDONMENT_RATE")
                 .build();
 
-        metricList.add(averageSpeedOfAnswer);
+        metricList.add(abandonmentRate);
 
         // Average Hold Time
         MetricV2 averageHoldTime = MetricV2.builder()
@@ -116,6 +119,24 @@ public class DashboardService {
                 .build();
 
         metricList.add(scheduleAdherence);
+
+        // Average speed of answer
+        // First we need total handle time and total contacts
+        MetricV2 totalHandleTime = MetricV2.builder()
+                .name("SUM_HANDLE_TIME")
+                .build();
+        metricList.add(totalHandleTime);
+
+        MetricV2 totalContacts = MetricV2.builder()
+                .name("CONTACTS_HANDLED")
+                .build();
+        metricList.add(totalContacts);
+
+        // Occupancy
+        MetricV2 occupancy = MetricV2.builder()
+                .name("AGENT_OCCUPANCY")
+                .build();
+        metricList.add(occupancy);
 
         // First Contact Resolution
         MetricV2 firstContactResolution = MetricV2.builder()
@@ -134,7 +155,19 @@ public class DashboardService {
             }
         }
 
-        return metricsData;
+        double averageSpeedOfAnswer = metricsData.get("SUM_HANDLE_TIME") / metricsData.get("CONTACTS_HANDLED");
+
+        MetricResponseDTO metricResponseDTO = new
+                MetricResponseDTO(
+                metricsData.get("AVG_HOLD_TIME"),
+                metricsData.get("PERCENT_CASES_FIRST_CONTACT_RESOLVED"),
+                metricsData.get("ABANDONMENT_RATE"),
+                metricsData.get("SERVICE_LEVEL"),
+                metricsData.get("AGENT_SCHEDULE_ADHERENCE"),
+                averageSpeedOfAnswer
+        );
+
+        return metricResponseDTO;
     }
 
     public Mono<MetricResultsDTO> getMetricResults() {
@@ -203,4 +236,39 @@ public class DashboardService {
         return notificationToUpdate;
     }
 
+    public DashboardFiltersDTO getFilters(String instanceId) {
+        // Get routing profiles
+        List<RoutingProfileSummary> routingProfiles = connectClient.listRoutingProfiles(ListRoutingProfilesRequest.builder()
+                .instanceId(instanceId)
+                .build())
+                .routingProfileSummaryList();
+
+        // Get agents
+        List<UserSummary> agents = connectClient.listUsers(ListUsersRequest.builder()
+                .instanceId(instanceId)
+                .build())
+                .userSummaryList();
+
+        List<AWSObjDTO> routingProfilesDTO = new ArrayList<>();
+        for (RoutingProfileSummary routingProfile : routingProfiles) {
+            AWSObjDTO routingProfileDTO = new AWSObjDTO();
+            routingProfileDTO.setId(routingProfile.id());
+            routingProfileDTO.setName(routingProfile.name());
+            routingProfilesDTO.add(routingProfileDTO);
+        }
+
+        List<AWSObjDTO> agentsDTO = new ArrayList<>();
+        for (UserSummary agent : agents) {
+            AWSObjDTO agentDTO = new AWSObjDTO();
+            agentDTO.setId(agent.id());
+            agentDTO.setName(agent.username());
+            agentsDTO.add(agentDTO);
+        }
+
+        DashboardFiltersDTO dashboardFiltersDTO = new DashboardFiltersDTO();
+        dashboardFiltersDTO.setWorkspaces(routingProfilesDTO);
+        dashboardFiltersDTO.setAgents(agentsDTO);
+
+        return dashboardFiltersDTO;
+    }
 }
