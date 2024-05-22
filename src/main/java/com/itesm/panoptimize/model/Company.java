@@ -2,31 +2,37 @@ package com.itesm.panoptimize.model;
 
 import jakarta.persistence.*;
 
+import java.util.Set;
+
 @Entity
-@Table(name = "company")
+@Table(name = "company", indexes = {
+        @Index(name = "company_name_index", columnList = "name")
+})
 public class Company {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "company_id")
-    private Long companyId;
+    private Integer id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, length = 20, unique = true)
     private String name;
 
-    @Column(name = "slogan")
+    @Column(name = "slogan", length = 50)
     private String slogan;
 
-    @Column(name = "logo_path")
+    @Column(name = "logo_path", length = 100, unique = true)
     private String logoPath;
 
-    // Getters and setters
-    public Long getCompanyId() {
-        return companyId;
+    @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
+    private Set<User> users;
+
+    public Integer getId() {
+        return id;
     }
 
-    public void setCompanyId(Long companyId) {
-        this.companyId = companyId;
+    public void setId(Integer companyId) {
+        this.id = companyId;
     }
 
     public String getName() {
@@ -51,5 +57,13 @@ public class Company {
 
     public void setLogoPath(String logoPath) {
         this.logoPath = logoPath;
+    }
+
+    public Set<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(Set<User> users) {
+        this.users = users;
     }
 }

@@ -25,9 +25,13 @@ import java.util.stream.Collectors;
 public class HistoryService {
 
     private final ContactRepository contactRepository;
+    private final ContactMetricRepository contactMetricRepository;
+
     @Autowired
-    public HistoryService(ContactRepository contactRepository) {
+    public HistoryService(ContactRepository contactRepository,
+                          ContactMetricRepository contactMetricRepository) {
         this.contactRepository = contactRepository;
+        this.contactMetricRepository = contactMetricRepository;
     }
 
     public List<ContactHistoryDTO> getContactHistory() {
@@ -57,7 +61,7 @@ public class HistoryService {
         return contactHistoryDTO;
     }
 
-    public ContactDetailsDTO getContactDetails(long id){
+    public ContactDetailsDTO getContactDetails(int id){
         Optional<Contact> contactOptional = contactRepository.findById(id);
         ContactDetailsDTO results = new ContactDetailsDTO();
         if(contactOptional.isPresent()) {
@@ -73,7 +77,7 @@ public class HistoryService {
         contactDetailsDTO.setFull_name(contact.getAgent().getFullName());
         contactDetailsDTO.setEmail(contact.getAgent().getEmail());
         //Workspaces = routing profile?
-        contactDetailsDTO.setWorkspaces(contact.getAgent().getRouting_profile_id());
+        contactDetailsDTO.setWorkspaces(contact.getAgent().getRoutingProfileId());
         contactDetailsDTO.setFcr(contact.getContactMetrics().getFirstContactResolution());
         contactDetailsDTO.setAfter_call_worktime(contact.getContactMetrics().getAfterCallWorkTime());
         contactDetailsDTO.setSatisfaction(contact.getSatisfactionLevel().name());
@@ -96,7 +100,7 @@ public class HistoryService {
         List<HistoryInsightsDTO> results = new ArrayList<HistoryInsightsDTO>();
 
         //Calculate handle_time vs average workspace handle_time
-        double ratioWorkspaceHandleTime = calculateWorkspaceHandleTimeRatio(contact.getAgent().getRouting_profile_id(),
+        double ratioWorkspaceHandleTime = calculateWorkspaceHandleTimeRatio(contact.getAgent().getRoutingProfileId(),
                 contact.getContactMetrics().getHandleTime());
         if(ratioWorkspaceHandleTime >= 10)
         {
@@ -107,7 +111,7 @@ public class HistoryService {
         }
 
         //Calculate speed_of_answer vs average workspace speed_of_answer
-        double ratioWorkspaceSpeedOfAnswer = calculateWorkspaceSpeedOfAnswerRatio(contact.getAgent().getRouting_profile_id(),
+        double ratioWorkspaceSpeedOfAnswer = calculateWorkspaceSpeedOfAnswerRatio(contact.getAgent().getRoutingProfileId(),
                 contact.getContactMetrics().getSpeedOfAnswer());
         if(ratioWorkspaceSpeedOfAnswer >= 10)
         {
@@ -176,6 +180,51 @@ public class HistoryService {
     private double calculateWorkspaceSpeedOfAnswerRatio(String routingProfileId, int contactSpeedOfAnswer){
         double avgWorkspaceSpeedOfAnswer = contactRepository.avgSpeedOfAnswerTime(routingProfileId);
         return((double) contactSpeedOfAnswer - avgWorkspaceSpeedOfAnswer) / avgWorkspaceSpeedOfAnswer * 100;
+    }
+    public Contact getContactById(Integer id){
+        return contactRepository.findById(id).orElseThrow();
+    }
+    public Contact addContact(Contact contact){
+        return contactRepository.save(contact);
+    }
+    public boolean deleteContact(Integer id){
+        boolean exists = contactRepository.existsById(id);
+        contactRepository.deleteById(id);
+        return exists;
+    }
+    public Contact updateContact(Integer id, Contact contact){
+        Contact contactToUpdate = contactRepository.findById(id).orElseThrow();
+        contactToUpdate.setStartTime(contact.getStartTime());
+        contactToUpdate.setEndTime(contact.getEndTime());
+        contactToUpdate.setAgent(contact.getAgent());
+        contactToUpdate.setContactMetrics(contact.getContactMetrics());
+        contactToUpdate.setSatisfactionLevel(contact.getSatisfactionLevel());
+        contactRepository.save(contactToUpdate);
+        return contactToUpdate;
+    }
+    public ContactMetric getContactMetrics(Integer id){
+        return contactRepository.findById(id).orElseThrow().getContactMetrics();
+    }
+    public ContactMetric addContactMetric(ContactMetric contactMetric){
+        return contactMetricRepository.save(contactMetric);
+    }
+    public boolean deleteContactMetric(Integer id){
+        boolean exists = contactMetricRepository.existsById(id);
+        contactMetricRepository.deleteById(id);
+        return exists;
+    }
+    public ContactMetric updateContactMetric(Integer id, ContactMetric contactMetric){
+        ContactMetric contactMetricToUpdate = contactMetricRepository.findById(id).orElseThrow();
+        contactMetricToUpdate.setContact(contactMetric.getContact());
+        contactMetricToUpdate.setContactStatus(contactMetric.getContactStatus());
+        contactMetricToUpdate.setSpeedOfAnswer(contactMetric.getSpeedOfAnswer());
+        contactMetricToUpdate.setHandleTime(contactMetric.getHandleTime());
+        contactMetricToUpdate.setAfterCallWorkTime(contactMetric.getAfterCallWorkTime());
+        contactMetricToUpdate.setAbandoned(contactMetric.getAbandoned());
+        contactMetricToUpdate.setFirstContactResolution(contactMetric.getFirstContactResolution());
+        contactMetricToUpdate.setSentimentNegative(contactMetric.getSentimentNegative());
+        contactMetricRepository.save(contactMetricToUpdate);
+        return contactMetricToUpdate;
     }
 
 }
