@@ -3,6 +3,7 @@ package com.itesm.panoptimize.controller;
 
 import com.itesm.panoptimize.dto.dashboard.DashMetricData;
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
+import com.itesm.panoptimize.dto.performance.AgentPerformanceDTO;
 import com.itesm.panoptimize.service.DashboardService;
 import com.itesm.panoptimize.service.FCRService;
 
@@ -44,6 +45,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import software.amazon.awssdk.thirdparty.jackson.core.JsonProcessingException;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -206,14 +208,10 @@ public class DashboardController {
 
 
 
+
     @PostMapping("/performance")
-    public ResponseEntity<?> calculateAHT(@Valid @RequestBody PerformanceDTO performanceDTO) {
-        Map<String, List<Double>> metricsData = calculatePerformanceService.getMetricsData(performanceDTO);
-
-        if(metricsData.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        return new ResponseEntity<>(metricsData, HttpStatus.OK);
+    public List<AgentPerformanceDTO> getMetricsData(@RequestBody PerformanceDTO performanceDTO) {
+        return calculatePerformanceService.getMetricsData(performanceDTO);
     }
+
 }
