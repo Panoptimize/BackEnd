@@ -157,7 +157,7 @@ public class DashboardService {
 
         double averageSpeedOfAnswer = metricsData.get("SUM_HANDLE_TIME") / metricsData.get("CONTACTS_HANDLED");
 
-        MetricResponseDTO metricResponseDTO = new
+        return new
                 MetricResponseDTO(
                 metricsData.get("AVG_HOLD_TIME"),
                 metricsData.get("PERCENT_CASES_FIRST_CONTACT_RESOLVED"),
@@ -166,8 +166,6 @@ public class DashboardService {
                 metricsData.get("AGENT_SCHEDULE_ADHERENCE"),
                 averageSpeedOfAnswer
         );
-
-        return metricResponseDTO;
     }
 
     public Mono<MetricResultsDTO> getMetricResults() {
