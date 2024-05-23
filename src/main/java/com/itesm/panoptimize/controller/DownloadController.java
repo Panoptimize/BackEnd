@@ -56,7 +56,8 @@ public class DownloadController {
                 GET_DB_JSON_URL,
                 HttpMethod.POST,
                 requestEntity,
-                new ParameterizedTypeReference<JsonNode>() {}
+                new ParameterizedTypeReference<>() {
+                }
         );
         JsonNode data = response.getBody();
 
@@ -64,33 +65,43 @@ public class DownloadController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Invalid JSON response");
         }
 
-        try {
-            String filePath = "D:\\Tec\\Semestre 2024-1\\Panoptimise\\performancePerAgent.xlsx";
-            JsonNode headerNode = data.get("header");
-            JsonNode bodyNode = data.get("body");
-            System.out.println("Header: " + headerNode);
-            System.out.println("Body: " + bodyNode);
+        try{
+            String filePath = "E:\\Files\\Tec\\2024\\Panoptimize\\BackEnd\\performancePerAgent.xlsx";
 
-            if (headerNode == null || !headerNode.isArray() || bodyNode == null || !bodyNode.isArray()) {
+            JsonNode json = objectMapper.readTree(data.toString());
+
+            List<String> keys = new ArrayList<>();
+            List<Object> values = new ArrayList<>();
+
+            Iterator<Map.Entry<String, JsonNode>> fieldValues = json.fields();
+            while (fieldValues.hasNext()) {
+                Map.Entry<String, JsonNode> entry = fieldValues.next();
+                keys.add(entry.getKey());
+                values.add(entry.getValue());
+            }
+            System.out.println("Keys: " + keys);
+            System.out.println("Values: " + values);
+
+
+            if (keys.isEmpty() || values.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Invalid JSON structure");
             }
 
             XSSFWorkbook workbook = new XSSFWorkbook();
             XSSFSheet sheet = workbook.createSheet("Performance Per Agent");
 
-            // Write header
             Row headerRow = sheet.createRow(0);
             int colNum = 0;
-            for (JsonNode headerField : headerNode) {
-                headerRow.createCell(colNum++).setCellValue(headerField.asText());
+            int rowNum = 1;
+
+            for (String key : keys) {
+                headerRow.createCell(colNum++).setCellValue(key);
             }
 
-            // Write body
-            int rowNum = 1;
-            for (JsonNode rowNode : bodyNode) {
+            for (Object value : values) {
                 Row row = sheet.createRow(rowNum++);
                 colNum = 0;
-                for (JsonNode field : rowNode) {
+                for (JsonNode field : (JsonNode) value) {
                     row.createCell(colNum++).setCellValue(field.asText());
                 }
             }
@@ -101,9 +112,13 @@ public class DownloadController {
             workbook.close();
 
             return ResponseEntity.ok("Excel file saved at: " + filePath);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error generating CSV file: " + e.getMessage());
+
+        }catch (IOException e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while processing JSON data");
         }
+
+
+
     }
 
 }
