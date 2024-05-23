@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.net.ConnectException;
+
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -17,6 +19,12 @@ public class GlobalExceptionHandler {
         );
 
         return new ResponseEntity<>(errorResponse, ex.getStatusCode());
+    }
+
+    @ExceptionHandler(ConnectException.class)
+    public ResponseEntity<ConnectException> handleConnectException(ConnectException ex) {
+
+        return new ResponseEntity<>(ex, HttpStatus.SERVICE_UNAVAILABLE);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

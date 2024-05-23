@@ -1,27 +1,22 @@
 package com.itesm.panoptimize.service;
 
-import com.itesm.panoptimize.dto.dashboard.AWSObjDTO;
-import com.itesm.panoptimize.dto.dashboard.DashboardFiltersDTO;
-import com.itesm.panoptimize.dto.dashboard.MetricResponseDTO;
+import com.itesm.panoptimize.dto.connect.*;
+import com.itesm.panoptimize.dto.connect.Collection;
+import com.itesm.panoptimize.dto.connect.MetricInterval;
+import com.itesm.panoptimize.dto.connect.Threshold;
+import com.itesm.panoptimize.dto.dashboard.*;
 import com.itesm.panoptimize.model.Notification;
 import com.itesm.panoptimize.repository.NotificationRepository;
 import com.itesm.panoptimize.util.Constants;
-import com.itesm.panoptimize.dto.contact.CollectionDTO;
 import com.itesm.panoptimize.dto.contact.MetricResultDTO;
-import com.itesm.panoptimize.dto.contact.MetricResultsDTO;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Mono;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
-import org.springframework.beans.factory.annotation.Autowired;
 import software.amazon.awssdk.services.connect.ConnectClient;
 import software.amazon.awssdk.services.connect.model.*;
 
@@ -29,13 +24,12 @@ import java.util.*;
 
 @Service
 public class DashboardService {
-    private final WebClient webClient;
+    private static final long INTERVAL_CHECK = 7;
+
     private final ConnectClient connectClient;
     private final NotificationRepository notificationRepository;
 
-    @Autowired
-    public DashboardService(WebClient.Builder webClientBuilder, ConnectClient connectClient, NotificationRepository notificationRepository){
-        this.webClient = webClientBuilder.baseUrl("http://localhost:8000").build();
+    public DashboardService(ConnectClient connectClient, NotificationRepository notificationRepository){
         this.connectClient = connectClient;
         this.notificationRepository = notificationRepository;
     }
@@ -50,7 +44,10 @@ public class DashboardService {
      * @param dashboardDTO is the DTO that contains the filters to get the KPIs
      * @return a list of KPIs
      */
-    private GetMetricDataV2Response getKPIs(@NotNull DashboardDTO dashboardDTO, List<MetricV2> metrics) {
+    private GetMetricDataV2Response getKPIs(@NotNull DashboardDTO dashboardDTO,
+                                            @NotNull List<MetricV2> metrics,
+                                            List<String> groupings,
+                                            IntervalDetails intervalDetails) {
         String instanceId = dashboardDTO.getInstanceId();
 
         Instant startTime = dashboardDTO.getStartDate().toInstant();
@@ -82,6 +79,8 @@ public class DashboardService {
                 .resourceArn(Constants.BASE_ARN + ":instance/" + instanceId)
                 .filters(filters)
                 .metrics(metrics)
+                .groupings(groupings)
+                .interval(intervalDetails)
                 .build());
     }
     public MetricResponseDTO getMetricsData(DashboardDTO dashboardDTO) {
@@ -144,7 +143,7 @@ public class DashboardService {
                 .build();
 
         metricList.add(firstContactResolution);
-        GetMetricDataV2Response response = getKPIs(dashboardDTO, metricList);
+        GetMetricDataV2Response response = getKPIs(dashboardDTO, metricList, null, null);
 
         Map<String, Double> metricsData = new HashMap<>();
 
@@ -168,45 +167,6 @@ public class DashboardService {
         );
     }
 
-    public Mono<MetricResultsDTO> getMetricResults() {
-        String requestBody = "{"
-                + "\"InstanceId\": \"example-instance-id\","
-                + "\"Filters\": {},"
-                + "\"Groupings\": [\"CHANNEL\"],"
-                + "\"CurrentMetrics\": ["
-                + "{ \"Name\": \"CONTACTS_IN_PROGRESS\", \"Unit\": \"COUNT\" }"
-                + "]"
-                + "}";
-
-        return webClient.post()
-                .uri("/metrics")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(requestBody)
-                .retrieve()
-                .bodyToMono(MetricResultsDTO.class)
-                .onErrorResume(WebClientResponseException.class, ex -> {
-                    System.err.println("Error al llamar a la API: " + ex.getStatusCode() + " - " + ex.getResponseBodyAsString());
-                    return Mono.empty();
-                });
-    }
-
-
-    public List<Integer> extractValues(MetricResultsDTO metricResults) {
-        List<Integer> values = new ArrayList<>();
-        if (metricResults == null || metricResults.getMetricResults() == null) {
-            return values;
-        }
-
-        for (MetricResultDTO metricResult : metricResults.getMetricResults()) {
-            if (metricResult.getCollections() != null) {
-                for (CollectionDTO collection : metricResult.getCollections()) {
-                    values.add(collection.getValue());
-                }
-            }
-        }
-
-        return values;
-    }
     public List<Notification> getNotifications() {
         return notificationRepository.findAll();
     }
@@ -268,5 +228,44 @@ public class DashboardService {
         dashboardFiltersDTO.setAgents(agentsDTO);
 
         return dashboardFiltersDTO;
+    }
+
+    public ActivityResponseDTO getActivity(DashboardDTO dashboardDTO) {
+        IntervalPeriod interval;
+
+        if(ChronoUnit.DAYS.between(
+                dashboardDTO.getStartDate().toInstant(),
+                dashboardDTO.getEndDate().toInstant()) > INTERVAL_CHECK ) {
+            interval = IntervalPeriod.DAY;
+        } else {
+            interval = IntervalPeriod.HOUR;
+        }
+
+        List<MetricV2> metricList = new ArrayList<>();
+        MetricV2 totalContacts = MetricV2.builder()
+                .name("CONTACTS_HANDLED")
+                .build();
+        metricList.add(totalContacts);
+
+        GetMetricDataV2Response response = getKPIs(dashboardDTO,
+                metricList,
+                null,
+                IntervalDetails.builder().intervalPeriod(interval).build());
+
+        ActivityResponseDTO activityResponseDTO = new ActivityResponseDTO();
+        List<ActivityDTO> activities = new ArrayList<>();
+
+        for (MetricResultV2 metricData : response.metricResults()) {
+            ActivityDTO activityDTO = new ActivityDTO();
+            MetricDataV2 metric = metricData.collections().get(0);
+
+            activityDTO.setValue(metric.value());
+            activityDTO.setStartTime(metricData.metricInterval().startTime());
+
+            activities.add(activityDTO);
+        }
+        activityResponseDTO.setActivities(activities);
+
+        return activityResponseDTO;
     }
 }
