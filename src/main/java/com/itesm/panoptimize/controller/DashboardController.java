@@ -4,12 +4,16 @@ package com.itesm.panoptimize.controller;
 import com.itesm.panoptimize.dto.connect.GetMetricResponseDTO;
 import com.itesm.panoptimize.dto.dashboard.*;
 import com.itesm.panoptimize.model.Notification;
+import com.itesm.panoptimize.dto.dashboard.DashMetricData;
+import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
+import com.itesm.panoptimize.dto.performance.AgentPerformanceDTO;
 import com.itesm.panoptimize.service.DashboardService;
 
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
 import com.itesm.panoptimize.service.CalculateSatisfactionService;
 
 import com.itesm.panoptimize.dto.performance.PerformanceDTO;
+import com.itesm.panoptimize.service.CalculatePerformanceService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,6 +21,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -28,26 +40,32 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+import software.amazon.awssdk.thirdparty.jackson.core.JsonProcessingException;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.*;
 
 import java.util.List;
 
-import static com.itesm.panoptimize.service.CalculatePerformance.performanceCalculation;
 
 @RestController
 @RequestMapping("/dashboard")
 public class DashboardController {
     private final CalculateSatisfactionService satisfactionService;
     private final DashboardService dashboardService;
+    private final CalculatePerformanceService calculatePerformanceService;
 
     @Autowired
-    public DashboardController(DashboardService dashboardService, CalculateSatisfactionService satisfactionService) {
+    public DashboardController(DashboardService dashboardService, CalculateSatisfactionService satisfactionService, CalculatePerformanceService calculatePerformanceService) {
         this.dashboardService = dashboardService;
         this.satisfactionService = satisfactionService;
+        this.calculatePerformanceService = calculatePerformanceService;
     }
 
 
@@ -121,18 +139,12 @@ public class DashboardController {
                     content = @Content),
     })
 
-    @GetMapping("/performance") //cambiar dependiendo al timeframe y los otros parametros (checar si los recibe el endpoint en si o el de dashboard)
-    public ResponseEntity<PerformanceDTO> getPerformanceData (){
-        PerformanceDTO performanceData = new PerformanceDTO();
-
-        //TODO Creacion de endpoints para extraer esos datos
-        List<Map<String, List <Double>>> agent_performance = new ArrayList<>();;
 
 
-        performanceCalculation(agent_performance);
-        performanceData.setPerformanceData(agent_performance);
 
-        return  ResponseEntity.ok(performanceData);
+    @PostMapping("/performance")
+    public List<AgentPerformanceDTO> getMetricsData(@RequestBody PerformanceDTO performanceDTO) {
+        return calculatePerformanceService.getMetricsData(performanceDTO);
     }
 
     @GetMapping("/Notifications")
@@ -179,5 +191,6 @@ public class DashboardController {
 
         return ResponseEntity.ok(filters);
     }
+
 
 }
