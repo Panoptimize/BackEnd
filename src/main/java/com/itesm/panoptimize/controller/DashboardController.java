@@ -3,17 +3,14 @@ package com.itesm.panoptimize.controller;
 
 
 import com.itesm.panoptimize.dto.company.CompanyDTO;
-import com.itesm.panoptimize.dto.dashboard.DashMetricData;
-import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
+import com.itesm.panoptimize.dto.dashboard.*;
 import com.itesm.panoptimize.model.Notification;
 import com.itesm.panoptimize.service.DashboardService;
 import com.itesm.panoptimize.service.FCRService;
 
-import com.itesm.panoptimize.dto.dashboard.CallMetricsDTO;
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
 import com.itesm.panoptimize.service.CalculateSatisfactionService;
 
-import com.itesm.panoptimize.dto.dashboard.MetricsDTO;
 import com.itesm.panoptimize.service.DashboardService;
 
 import com.itesm.panoptimize.dto.performance.PerformanceDTO;
@@ -167,14 +164,10 @@ public class DashboardController {
                     content = @Content),
     })
     @PostMapping("/metrics")
-    public ResponseEntity<Map<String, Double>> getMetrics(@Valid @RequestBody DashboardDTO dashboardDTO) {
-        Map<String, Double> metricsData = dashboardService.getMetricsData(dashboardDTO);
+    public ResponseEntity<MetricResponseDTO> getMetrics(@Valid @RequestBody DashboardDTO dashboardDTO) {
+        MetricResponseDTO metricsData = dashboardService.getMetricsData(dashboardDTO);
 
-        if(metricsData.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        return new ResponseEntity<>(metricsData, HttpStatus.OK);
+        return ResponseEntity.ok(metricsData);
     }
 
     @GetMapping("/metricFCR")
@@ -259,4 +252,14 @@ public class DashboardController {
     public ResponseEntity<Notification> updateNotification(@PathVariable Long id, @RequestBody Notification notification) {
         return ResponseEntity.ok(dashboardService.updateNotification(id, notification));
     }
+
+    @GetMapping("/filters/{instanceId}")
+    public ResponseEntity<DashboardFiltersDTO> getFilters(@PathVariable String instanceId) {
+        DashboardFiltersDTO filters = dashboardService.getFilters(instanceId);
+
+        System.out.println(instanceId);
+
+        return ResponseEntity.ok(filters);
+    }
+
 }
