@@ -12,6 +12,8 @@ import com.itesm.panoptimize.dto.contact.MetricResultDTO;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -24,7 +26,7 @@ import java.util.*;
 
 @Service
 public class DashboardService {
-    private static final long INTERVAL_CHECK = 7;
+    private static final long INTERVAL_CHECK = 3;
 
     private final ConnectClient connectClient;
     private final NotificationRepository notificationRepository;
