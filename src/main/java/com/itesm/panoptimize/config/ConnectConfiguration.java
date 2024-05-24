@@ -1,5 +1,6 @@
 package com.itesm.panoptimize.config;
 
+import com.itesm.panoptimize.util.AwsRequestSigner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
@@ -19,5 +20,9 @@ public class ConnectConfiguration {
                 .region(Region.of(System.getenv("AWS_REGION")))
                 .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
                 .build();
+    }
+    @Bean
+    public AwsRequestSigner awsRequestSigner() {
+        return new AwsRequestSigner();
     }
 }

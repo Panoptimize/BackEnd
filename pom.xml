@@ -88,6 +88,16 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>apache-client</artifactId>
+			<version>${aws.java.sdk.version}</version>
+		</dependency>
+		<dependency>
+		   <groupId>software.amazon.awssdk</groupId>
+		   <artifactId>auth</artifactId>
+		   <version>${aws.java.sdk.version}</version>
+		</dependency>
 
 	</dependencies>
 
