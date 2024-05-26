@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.SdkHttpMethod;
+import software.amazon.awssdk.services.connect.ConnectClient;
+import software.amazon.awssdk.services.connectcontactlens.ConnectContactLensClient;
 
 import java.net.URI;
 import java.util.Map;
@@ -17,12 +19,22 @@ import java.util.Map;
 public class CurrentUserDataService {
     private final AwsRequestSigner awsRequestSigner;
     private final RestTemplate restTemplate;
+    private final ConnectClient connectClient;
+    private final ConnectContactLensClient connectContactLensClient;
 
     @Autowired
-    public CurrentUserDataService(AwsRequestSigner awsRequestSigner, RestTemplate restTemplate) {
+    public CurrentUserDataService(AwsRequestSigner awsRequestSigner, RestTemplate restTemplate,
+                                  ConnectClient connectClient, ConnectContactLensClient connectContactLensClient) {
         this.awsRequestSigner = awsRequestSigner;
         this.restTemplate = restTemplate;
+        this.connectClient = connectClient;
+        this.connectContactLensClient = connectContactLensClient;
     }
+
+    private void sentimentAnalysis() {
+        
+    }
+
     public Object getCurrentUserData(String instanceId, Map<String, Object> requestPayload) {
         // Construye la URI completa incluyendo el ID de la instancia
         //String urlString = "https://connect.us-east-1.amazonaws.com/metrics/userdata/7c78bd60-4a9f-40e5-b461-b7a0dfaad848";
