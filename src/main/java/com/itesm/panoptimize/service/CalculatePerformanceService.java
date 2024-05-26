@@ -22,7 +22,7 @@ public class CalculatePerformanceService {
         this.connectClient = connectClient;
     }
 
-    private GetMetricDataV2Response getKPIs(PerformanceDTO performanceDTO, List<MetricV2> metrics) {
+    private GetMetricDataV2Response getKPIs(PerformanceDTO performanceDTO, List<MetricV2> metrics, String agentId) {
         String instanceId = performanceDTO.getInstanceId();
         Instant startTime = performanceDTO.getStartDate().toInstant();
         Instant endTime = performanceDTO.getEndDate().toInstant();
@@ -40,17 +40,22 @@ public class CalculatePerformanceService {
                     .filterValues(Arrays.asList(performanceDTO.getQueues()))
                     .build());
         }
+        if (agentId != null && !agentId.isEmpty()) {
+            filters.add(FilterV2.builder()
+                    .filterKey("AGENT")
+                    .filterValues(Collections.singletonList(agentId))
+                    .build());
+        }
 
         IntervalDetails intervalDetails = IntervalDetails.builder()
                 .timeZone("UTC")
-                .intervalPeriod("HOUR")
+                .intervalPeriod("DAY")
                 .build();
 
         return connectClient.getMetricDataV2(GetMetricDataV2Request.builder()
                 .startTime(startTime)
                 .endTime(endTime)
                 .interval(intervalDetails)
-                .groupings(Arrays.asList("AGENT"))
                 .resourceArn(Constants.BASE_ARN + ":instance/" + instanceId)
                 .filters(filters)
                 .metrics(metrics)
@@ -65,47 +70,73 @@ public class CalculatePerformanceService {
                 MetricV2.builder().name("AVG_ABANDON_TIME").build()
         ));
 
-        GetMetricDataV2Response response = getKPIs(performanceDTO, metricList);
-        Map<String, List<Double>> agentPerformancesMap = new HashMap<>();
+        Map<String, String> agentMap = getAgentIdsAndNames(performanceDTO.getInstanceId());
+        List<AgentPerformanceDTO> agentPerformancesList = new ArrayList<>();
 
-        for (MetricResultV2 result : response.metricResults()) {
-            String agentId = result.dimensions().getOrDefault("AGENT", "Unknown Agent");
-            agentPerformancesMap.putIfAbsent(agentId, new ArrayList<>());
+        for (Map.Entry<String, String> entry : agentMap.entrySet()) {
+            String agentId = entry.getKey();
+            String agentName = entry.getValue();
 
-            double avgHandleTime = 0.0;
-            double avgAfterContactWorkTime = 0.0;
-            double avgHoldTime = 0.0;
-            double avgAbandonTime = 0.0;
+            GetMetricDataV2Response response = getKPIs(performanceDTO, metricList, agentId);
+            Map<String, Double> metricsMap = new HashMap<>();
 
-            for (MetricDataV2 data : result.collections()) {
-                double value = getValue(data, data.metric().name());
+            for (MetricResultV2 result : response.metricResults()) {
+                double avgHandleTime = 0.0;
+                double avgAfterContactWorkTime = 0.0;
+                double avgHoldTime = 0.0;
+                double avgAbandonTime = 0.0;
 
-                switch (data.metric().name()) {
-                    case "AVG_HANDLE_TIME":
-                        avgHandleTime += value;
-                        break;
-                    case "AVG_AFTER_CONTACT_WORK_TIME":
-                        avgAfterContactWorkTime += value;
-                        break;
-                    case "AVG_HOLD_TIME":
-                        avgHoldTime += value;
-                        break;
-                    case "AVG_ABANDON_TIME":
-                        avgAbandonTime += value;
-                        break;
+                for (MetricDataV2 data : result.collections()) {
+                    double value = getValue(data, data.metric().name());
+
+                    switch (data.metric().name()) {
+                        case "AVG_HANDLE_TIME":
+                            avgHandleTime += value;
+                            break;
+                        case "AVG_AFTER_CONTACT_WORK_TIME":
+                            avgAfterContactWorkTime += value;
+                            break;
+                        case "AVG_HOLD_TIME":
+                            avgHoldTime += value;
+                            break;
+                        case "AVG_ABANDON_TIME":
+                            avgAbandonTime += value;
+                            break;
+                    }
                 }
+
+                double performanceScore = calculateAgentPerformanceScore(avgHandleTime, avgAfterContactWorkTime, avgHoldTime, avgAbandonTime);
+                metricsMap.put(agentName, performanceScore);
             }
 
-            double performanceScore = calculateAgentPerformanceScore(avgHandleTime, avgAfterContactWorkTime, avgHoldTime, avgAbandonTime);
-            agentPerformancesMap.get(agentId).add(performanceScore);
-        }
-
-        List<AgentPerformanceDTO> agentPerformancesList = new ArrayList<>();
-        for (Map.Entry<String, List<Double>> entry : agentPerformancesMap.entrySet()) {
-            agentPerformancesList.add(new AgentPerformanceDTO(entry.getKey(), entry.getValue()));
+            for (Map.Entry<String, Double> metricEntry : metricsMap.entrySet()) {
+                agentPerformancesList.add(new AgentPerformanceDTO(metricEntry.getKey(), Collections.singletonList(metricEntry.getValue())));
+            }
         }
 
         return agentPerformancesList;
+    }
+
+    private Map<String, String> getAgentIdsAndNames(String instanceId) {
+        Map<String, String> agentMap = new HashMap<>();
+        String nextToken = null;
+
+        do {
+            ListUsersRequest request = ListUsersRequest.builder()
+                    .instanceId(instanceId)
+                    .nextToken(nextToken)
+                    .maxResults(100)
+                    .build();
+
+            ListUsersResponse response = connectClient.listUsers(request);
+            for (UserSummary userSummary : response.userSummaryList()) {
+                agentMap.put(userSummary.id(), userSummary.username());
+            }
+
+            nextToken = response.nextToken();
+        } while (nextToken != null);
+
+        return agentMap;
     }
 
     private double getValue(MetricDataV2 data, String metricName) {

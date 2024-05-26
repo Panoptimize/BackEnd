@@ -210,8 +210,9 @@ public class DashboardController {
 
 
     @PostMapping("/performance")
-    public List<AgentPerformanceDTO> getMetricsData(@RequestBody PerformanceDTO performanceDTO) {
-        return calculatePerformanceService.getMetricsData(performanceDTO);
+    public ResponseEntity<List<AgentPerformanceDTO>> getPerformance(@RequestBody PerformanceDTO performanceDTO) {
+        List<AgentPerformanceDTO> performanceData = calculatePerformanceService.getMetricsData(performanceDTO);
+        return ResponseEntity.ok(performanceData);
     }
 
 }
