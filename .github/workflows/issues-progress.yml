@@ -1,0 +1,16 @@
+name: Assign "in progress" Status to New Issues
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  assign-in-progress:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Assign "in progress" status
+      uses: actions-ecosystem/action-add-labels@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        labels: "in progress"
