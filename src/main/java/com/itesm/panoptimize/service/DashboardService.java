@@ -1,11 +1,15 @@
 package com.itesm.panoptimize.service;
 
+
+import com.itesm.panoptimize.dto.dashboard.AWSObjDTO;
+import com.itesm.panoptimize.dto.dashboard.DashboardFiltersDTO;
+import com.itesm.panoptimize.dto.dashboard.MetricResponseDTO;
+
+import com.itesm.panoptimize.dto.contact.*;
+
 import com.itesm.panoptimize.model.Notification;
 import com.itesm.panoptimize.repository.NotificationRepository;
 import com.itesm.panoptimize.util.Constants;
-import com.itesm.panoptimize.dto.contact.CollectionDTO;
-import com.itesm.panoptimize.dto.contact.MetricResultDTO;
-import com.itesm.panoptimize.dto.contact.MetricResultsDTO;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -23,6 +27,7 @@ import software.amazon.awssdk.services.connect.ConnectClient;
 import software.amazon.awssdk.services.connect.model.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class DashboardService {
@@ -64,10 +69,10 @@ public class DashboardService {
             filters.add(routingProfileFilter);
         }
 
-        if (dashboardDTO.getQueues().length > 0) {
+        if (dashboardDTO.getAgents().length > 0) {
             FilterV2 queueFilter = FilterV2.builder()
-                    .filterKey("QUEUE")
-                    .filterValues(Arrays.asList(dashboardDTO.getQueues()))
+                    .filterKey("AGENT")
+                    .filterValues(Arrays.asList(dashboardDTO.getAgents()))
                     .build();
             filters.add(queueFilter);
         }
@@ -81,7 +86,7 @@ public class DashboardService {
                 .metrics(metrics)
                 .build());
     }
-    public Map<String, Double> getMetricsData(DashboardDTO dashboardDTO) {
+    public MetricResponseDTO getMetricsData(DashboardDTO dashboardDTO) {
         // Set up metrics
         List<MetricV2> metricList = new ArrayList<>();
 
@@ -96,12 +101,12 @@ public class DashboardService {
 
         metricList.add(serviceLevel);
 
-        // Average Speed of Answer
-        MetricV2 averageSpeedOfAnswer = MetricV2.builder()
+        // Abandonment rate
+        MetricV2 abandonmentRate = MetricV2.builder()
                 .name("ABANDONMENT_RATE")
                 .build();
 
-        metricList.add(averageSpeedOfAnswer);
+        metricList.add(abandonmentRate);
 
         // Average Hold Time
         MetricV2 averageHoldTime = MetricV2.builder()
@@ -116,6 +121,24 @@ public class DashboardService {
                 .build();
 
         metricList.add(scheduleAdherence);
+
+        // Average speed of answer
+        // First we need total handle time and total contacts
+        MetricV2 totalHandleTime = MetricV2.builder()
+                .name("SUM_HANDLE_TIME")
+                .build();
+        metricList.add(totalHandleTime);
+
+        MetricV2 totalContacts = MetricV2.builder()
+                .name("CONTACTS_HANDLED")
+                .build();
+        metricList.add(totalContacts);
+
+        // Occupancy
+        MetricV2 occupancy = MetricV2.builder()
+                .name("AGENT_OCCUPANCY")
+                .build();
+        metricList.add(occupancy);
 
         // First Contact Resolution
         MetricV2 firstContactResolution = MetricV2.builder()
@@ -134,34 +157,92 @@ public class DashboardService {
             }
         }
 
-        return metricsData;
+        double averageSpeedOfAnswer = metricsData.get("SUM_HANDLE_TIME") / metricsData.get("CONTACTS_HANDLED");
+
+        MetricResponseDTO metricResponseDTO = new
+                MetricResponseDTO(
+                metricsData.get("AVG_HOLD_TIME"),
+                metricsData.get("PERCENT_CASES_FIRST_CONTACT_RESOLVED"),
+                metricsData.get("ABANDONMENT_RATE"),
+                metricsData.get("SERVICE_LEVEL"),
+                metricsData.get("AGENT_SCHEDULE_ADHERENCE"),
+                averageSpeedOfAnswer
+        );
+
+        return metricResponseDTO;
     }
 
-    public Mono<MetricResultsDTO> getMetricResults() {
-        String requestBody = "{"
-                + "\"InstanceId\": \"example-instance-id\","
-                + "\"Filters\": {},"
-                + "\"Groupings\": [\"CHANNEL\"],"
-                + "\"CurrentMetrics\": ["
-                + "{ \"Name\": \"CONTACTS_IN_PROGRESS\", \"Unit\": \"COUNT\" }"
-                + "]"
-                + "}";
+    // Get the current number of agents on each channel
+    public Mono<MetricResultsDTO> getMetricResults(@NotNull DashboardDTO dashboardDTO) {
+        String instanceId = dashboardDTO.getInstanceId();
+        String routingProfile = dashboardDTO.getRoutingProfiles()[0];
+        List<Channel> channels = Arrays.asList(Channel.VOICE, Channel.CHAT);
+        Filters filters = Filters.builder()
+                .routingProfiles(Collections.singletonList(routingProfile))
+                .channels(channels)
+                .routingStepExpressions(Collections.emptyList())
+                .build();
 
-        return webClient.post()
-                .uri("/metrics")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(requestBody)
-                .retrieve()
-                .bodyToMono(MetricResultsDTO.class)
-                .onErrorResume(WebClientResponseException.class, ex -> {
-                    System.err.println("Error al llamar a la API: " + ex.getStatusCode() + " - " + ex.getResponseBodyAsString());
-                    return Mono.empty();
-                });
+        GetCurrentMetricDataRequest request = GetCurrentMetricDataRequest.builder()
+                .instanceId(instanceId)
+                .filters(filters)
+                .currentMetrics(CurrentMetric.builder()
+                        .name(CurrentMetricName.AGENTS_ONLINE)
+                        .unit(Unit.COUNT)
+                        .build())
+                .groupings(Grouping.CHANNEL)
+                .build();
+
+        try {
+            GetCurrentMetricDataResponse response = connectClient.getCurrentMetricData(request);
+            MetricResultsDTO result = convertToDTO(response);
+            return Mono.just(result);
+        } catch (ConnectException e) {
+            return Mono.empty();
+        }
     }
 
+    //Converts the raw channel response into the DTO
+    private MetricResultsDTO convertToDTO(GetCurrentMetricDataResponse response) {
+        MetricResultsDTO dto = new MetricResultsDTO();
 
-    public List<Integer> extractValues(MetricResultsDTO metricResults) {
-        List<Integer> values = new ArrayList<>();
+
+        List<MetricResultDTO> metricResultDTOs = response.metricResults().stream().map(metricResult -> {
+            MetricResultDTO metricResultDTO = new MetricResultDTO();
+
+
+            DimensionDTO dimensionDTO = new DimensionDTO();
+            dimensionDTO.setChannel(metricResult.dimensions().channel().toString());
+            metricResultDTO.setDimensions(dimensionDTO);
+
+
+            List<CollectionDTO> collectionDTOs = metricResult.collections().stream().map(collection -> {
+                CollectionDTO collectionDTO = new CollectionDTO();
+
+
+                MetricDTO metricDTO = new MetricDTO();
+                metricDTO.setName(collection.metric().name().toString());
+                metricDTO.setUnit(collection.metric().unit().toString());
+                collectionDTO.setMetric(metricDTO);
+
+
+                collectionDTO.setValue(collection.value().intValue());
+
+                return collectionDTO;
+            }).collect(Collectors.toList());
+
+            metricResultDTO.setCollections(collectionDTOs);
+            return metricResultDTO;
+        }).collect(Collectors.toList());
+
+        dto.setMetricResults(metricResultDTOs);
+        dto.setNextToken(response.nextToken());
+        return dto;
+    }
+
+    //Extracts the number of agents on each channel and returns it as a map with the desired format
+    public Map<String, Integer> extractValues(MetricResultsDTO metricResults) {
+        Map<String, Integer> values = new HashMap<>();
         if (metricResults == null || metricResults.getMetricResults() == null) {
             return values;
         }
@@ -169,7 +250,8 @@ public class DashboardService {
         for (MetricResultDTO metricResult : metricResults.getMetricResults()) {
             if (metricResult.getCollections() != null) {
                 for (CollectionDTO collection : metricResult.getCollections()) {
-                    values.add(collection.getValue());
+                    String channel = metricResult.getDimensions().getChannel().toLowerCase();
+                    values.put(channel, collection.getValue());
                 }
             }
         }
@@ -203,4 +285,39 @@ public class DashboardService {
         return notificationToUpdate;
     }
 
+    public DashboardFiltersDTO getFilters(String instanceId) {
+        // Get routing profiles
+        List<RoutingProfileSummary> routingProfiles = connectClient.listRoutingProfiles(ListRoutingProfilesRequest.builder()
+                .instanceId(instanceId)
+                .build())
+                .routingProfileSummaryList();
+
+        // Get agents
+        List<UserSummary> agents = connectClient.listUsers(ListUsersRequest.builder()
+                .instanceId(instanceId)
+                .build())
+                .userSummaryList();
+
+        List<AWSObjDTO> routingProfilesDTO = new ArrayList<>();
+        for (RoutingProfileSummary routingProfile : routingProfiles) {
+            AWSObjDTO routingProfileDTO = new AWSObjDTO();
+            routingProfileDTO.setId(routingProfile.id());
+            routingProfileDTO.setName(routingProfile.name());
+            routingProfilesDTO.add(routingProfileDTO);
+        }
+
+        List<AWSObjDTO> agentsDTO = new ArrayList<>();
+        for (UserSummary agent : agents) {
+            AWSObjDTO agentDTO = new AWSObjDTO();
+            agentDTO.setId(agent.id());
+            agentDTO.setName(agent.username());
+            agentsDTO.add(agentDTO);
+        }
+
+        DashboardFiltersDTO dashboardFiltersDTO = new DashboardFiltersDTO();
+        dashboardFiltersDTO.setWorkspaces(routingProfilesDTO);
+        dashboardFiltersDTO.setAgents(agentsDTO);
+
+        return dashboardFiltersDTO;
+    }
 }

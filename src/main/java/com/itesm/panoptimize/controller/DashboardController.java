@@ -1,18 +1,16 @@
 package com.itesm.panoptimize.controller;
 
 
+
 import com.itesm.panoptimize.dto.company.CompanyDTO;
-import com.itesm.panoptimize.dto.dashboard.DashMetricData;
-import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
+import com.itesm.panoptimize.dto.dashboard.*;
 import com.itesm.panoptimize.model.Notification;
 import com.itesm.panoptimize.service.DashboardService;
 import com.itesm.panoptimize.service.FCRService;
 
-import com.itesm.panoptimize.dto.dashboard.CallMetricsDTO;
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
 import com.itesm.panoptimize.service.CalculateSatisfactionService;
 
-import com.itesm.panoptimize.dto.dashboard.MetricsDTO;
 import com.itesm.panoptimize.service.DashboardService;
 
 import com.itesm.panoptimize.dto.performance.PerformanceDTO;
@@ -49,6 +47,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Principal;
 import java.util.*;
 
 import java.text.ParseException;
@@ -127,9 +126,10 @@ public class DashboardController {
     @Autowired
     private DashboardService metricService;
 
-    @GetMapping("/values")
-    public Mono<List<Integer>> getValues() {
-        return apiClient.getMetricResults()
+    //Get the current number of agents in each channel from connect
+    @PostMapping("/values")
+    public Mono<Map<String, Integer>> getValues(@Valid @RequestBody DashboardDTO dashboardDTO) {
+        return apiClient.getMetricResults(dashboardDTO)
                 .map(metricService::extractValues);
     }
 
@@ -164,14 +164,10 @@ public class DashboardController {
                     content = @Content),
     })
     @PostMapping("/metrics")
-    public ResponseEntity<Map<String, Double>> getMetrics(@Valid @RequestBody DashboardDTO dashboardDTO) {
-        Map<String, Double> metricsData = dashboardService.getMetricsData(dashboardDTO);
+    public ResponseEntity<MetricResponseDTO> getMetrics(@Valid @RequestBody DashboardDTO dashboardDTO) {
+        MetricResponseDTO metricsData = dashboardService.getMetricsData(dashboardDTO);
 
-        if(metricsData.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        return new ResponseEntity<>(metricsData, HttpStatus.OK);
+        return ResponseEntity.ok(metricsData);
     }
 
     @GetMapping("/metricFCR")
@@ -216,6 +212,17 @@ public class DashboardController {
         return  ResponseEntity.ok(performanceData);
     }
 
+    // Endpoint de prueba para autenticación
+    /*
+    @PostMapping("/auth")
+    public ResponseEntity<?> suma(@RequestBody TestDTO valores, Principal principal){
+        System.out.println(principal.getName());
+        Map<String,Object> response = new HashMap<>();
+        response.put("resultado", valores.getValor1()+valores.getValor2());
+        return ResponseEntity.ok(response);
+    }
+     */
+
     @GetMapping("/Notifications")
     public ResponseEntity<List<Notification>> getNotifications() {
         List<Notification> notifications = dashboardService.getNotifications().stream().toList();
@@ -245,4 +252,14 @@ public class DashboardController {
     public ResponseEntity<Notification> updateNotification(@PathVariable Long id, @RequestBody Notification notification) {
         return ResponseEntity.ok(dashboardService.updateNotification(id, notification));
     }
+
+    @GetMapping("/filters/{instanceId}")
+    public ResponseEntity<DashboardFiltersDTO> getFilters(@PathVariable String instanceId) {
+        DashboardFiltersDTO filters = dashboardService.getFilters(instanceId);
+
+        System.out.println(instanceId);
+
+        return ResponseEntity.ok(filters);
+    }
+
 }

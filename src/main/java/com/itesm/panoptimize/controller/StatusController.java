@@ -1,6 +1,7 @@
 package com.itesm.panoptimize.controller;
 
 
+import com.itesm.panoptimize.dto.agent.StatusDTO;
 import com.itesm.panoptimize.service.StatusService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +21,7 @@ public class StatusController {
     }
 
     @GetMapping("/status")
-    public List<StatusService.AgentStatus> getStatus(@RequestParam String instanceId) {
+    public List<StatusDTO> getStatus(@RequestParam String instanceId) {
         return statusService.getActiveAgents(instanceId);
     }
 }
