@@ -4,6 +4,7 @@ package com.itesm.panoptimize.controller;
 
 import com.itesm.panoptimize.dto.company.CompanyDTO;
 import com.itesm.panoptimize.dto.dashboard.*;
+import com.itesm.panoptimize.dto.performance.AgentPerformanceDTO;
 import com.itesm.panoptimize.model.Notification;
 import com.itesm.panoptimize.service.DashboardService;
 import com.itesm.panoptimize.service.FCRService;
@@ -14,7 +15,7 @@ import com.itesm.panoptimize.service.CalculateSatisfactionService;
 import com.itesm.panoptimize.service.DashboardService;
 
 import com.itesm.panoptimize.dto.performance.PerformanceDTO;
-import com.itesm.panoptimize.service.CalculatePerformance;
+import com.itesm.panoptimize.service.CalculatePerformanceService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -54,8 +55,6 @@ import java.text.ParseException;
 
 import java.util.List;
 
-import static com.itesm.panoptimize.service.CalculatePerformance.performanceCalculation;
-
 @RestController
 @RequestMapping("/dashboard")
 public class DashboardController {
@@ -85,7 +84,7 @@ public class DashboardController {
                     content = @Content),
     })
 
-    
+
     @PostMapping("/data/download")
     public ResponseEntity<Resource> downloadData(@RequestBody DashboardDTO dashboardDTO) throws IOException {
         Path pathFile = Paths.get("../utils/dummy.txt").toAbsolutePath().normalize();
@@ -184,45 +183,6 @@ public class DashboardController {
     }
 
 
-    //Performance
-    @Operation(summary = "Download the dashboard data", description = "Download the dashboard data by time frame, agent and workspace number")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Calculated Performance data succesfully",
-                    content = {
-                            @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = PerformanceDTO.class))
-                    }),
-            @ApiResponse(responseCode = "404",
-                    description = "Data not found or calculated incorrectly.",
-                    content = @Content),
-    })
-
-    @GetMapping("/performance") //cambiar dependiendo al timeframe y los otros parametros (checar si los recibe el endpoint en si o el de dashboard)
-    public ResponseEntity<PerformanceDTO> getPerformanceData (){
-        PerformanceDTO performanceData = new PerformanceDTO();
-
-        //TODO Creacion de endpoints para extraer esos datos
-        List<Map<String, List <Double>>> agent_performance = new ArrayList<>();;
-
-
-        performanceCalculation(agent_performance);
-        performanceData.setPerformanceData(agent_performance);
-
-        return  ResponseEntity.ok(performanceData);
-    }
-
-    // Endpoint de prueba para autenticación
-    /*
-    @PostMapping("/auth")
-    public ResponseEntity<?> suma(@RequestBody TestDTO valores, Principal principal){
-        System.out.println(principal.getName());
-        Map<String,Object> response = new HashMap<>();
-        response.put("resultado", valores.getValor1()+valores.getValor2());
-        return ResponseEntity.ok(response);
-    }
-     */
-
     @GetMapping("/Notifications")
     public ResponseEntity<List<Notification>> getNotifications() {
         List<Notification> notifications = dashboardService.getNotifications().stream().toList();
@@ -260,6 +220,28 @@ public class DashboardController {
         System.out.println(instanceId);
 
         return ResponseEntity.ok(filters);
+    }
+
+    @Autowired
+    private CalculatePerformanceService calculatePerformanceService;
+
+    //Performance
+    @Operation(summary = "Download the dashboard data", description = "Download the dashboard data by time frame, agent and workspace number")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Calculated Performance data succesfully",
+                    content = {
+                            @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = PerformanceDTO.class))
+                    }),
+            @ApiResponse(responseCode = "404",
+                    description = "Data not found or calculated incorrectly.",
+                    content = @Content),
+    })
+    @PostMapping("/performance")
+    public ResponseEntity<List<AgentPerformanceDTO>> getPerformance(@RequestBody PerformanceDTO performanceDTO) {
+        List<AgentPerformanceDTO> performanceData = calculatePerformanceService.getMetricsData(performanceDTO);
+        return ResponseEntity.ok(performanceData);
     }
 
 }
