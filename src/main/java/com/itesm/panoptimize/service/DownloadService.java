@@ -12,10 +12,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class DownloadService {
@@ -33,10 +30,9 @@ public class DownloadService {
         XSSFWorkbook workbook = new XSSFWorkbook();
 
         getCalculatePerformance(workbook);
-        //getRestOfData(workbook);
+        getRestOfData(workbook);
+        getActivities(workbook);
 
-        //TODO
-        //Here we are going to add the other functions that to get the rest of the data, 4 more to go.
 
         try (FileOutputStream outputStream = new FileOutputStream(url)) {
             workbook.write(outputStream);
@@ -50,26 +46,14 @@ public class DownloadService {
     }
 
     public XSSFWorkbook getCalculatePerformance(XSSFWorkbook workbook) {
-
         JsonNode performanceData = getPerformance();
         try{
             JsonNode jsonArray = objectMapper.readTree(performanceData.toString());
-            //System.out.println(json.isArray());
 
             if (!jsonArray.isArray()) {
                 throw new IOException("Expected an array of JSON objects");
             }
-            /*
-            List<String> keys = new ArrayList<>();
-            List<Object> values = new ArrayList<>();
 
-            Iterator<Map.Entry<String, JsonNode>> fieldValues = json.fields();
-            while (fieldValues.hasNext()) {
-                Map.Entry<String, JsonNode> entry = fieldValues.next();
-                keys.add(entry.getKey());
-                values.add(entry.getValue());
-            }
-            */
             String sheetname = "Performance Per Agent";
             XSSFSheet sheet = workbook.createSheet(sheetname);
 
@@ -85,7 +69,6 @@ public class DownloadService {
                     String agentID = json.get("agentID").asText();
                     JsonNode performances = json.get("performances");
 
-                    // Check if performances is an array
                     if (performances.isArray()) {
                         for (JsonNode performance : performances) {
                             Row row = sheet.createRow(rowNum++);
@@ -97,7 +80,6 @@ public class DownloadService {
                 }
             }
 
-            // Auto-size columns
             for (int i = 0; i < headerRow.getLastCellNum(); i++) {
                 sheet.autoSizeColumn(i);
             }
@@ -115,42 +97,120 @@ public class DownloadService {
         try{
             JsonNode json = objectMapper.readTree(allData.toString());
 
+            String sheetname = "General KPIs";
+            XSSFSheet sheet = workbook.createSheet(sheetname);
+
+            List<String> keys = new ArrayList<>();
+            List<Object> values = new ArrayList<>();
+            List<Object> keys2 = new ArrayList<>();
+            List<Object> values2 = new ArrayList<>();
+
+            Iterator<Map.Entry<String, JsonNode>> fieldValues = json.fields();
+            while (fieldValues.hasNext()) {
+                Map.Entry<String, JsonNode> entry = fieldValues.next();
+                if(!entry.getKey().equals("activities") && !entry.getKey().equals("voice") && !entry.getKey().equals("chat")){
+                    keys.add(entry.getKey());
+                    values.add(entry.getValue());
+                }
+                else if(entry.getKey().equals("voice") || entry.getKey().equals("chat")){
+                    keys2.add(entry.getKey());
+                    values2.add(entry.getValue());
+                }
+
+            }
+
+            Row headerRow = sheet.createRow(0);
+            headerRow.createCell(0).setCellValue("KPI");
+            headerRow.createCell(1).setCellValue("Value");
+            headerRow.createCell(2).setCellValue("Type of Interaction");
+            headerRow.createCell(3).setCellValue("Total Interactions");
+
+            int rowNum = 1;
+            Row row = sheet.createRow(rowNum);
+            for (int i = 0; i < keys.size(); i++) {
+                row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(keys.get(i));
+                row.createCell(1).setCellValue(values.get(i).toString());
+            }
+
+            rowNum = 1;
+            for (int i = 0; i < keys2.size(); i++) {
+                Row row2 = sheet.getRow(rowNum++);
+                row2.createCell(2).setCellValue(keys2.get(i).toString());
+                row2.createCell(3).setCellValue(values2.get(i).toString());
+            }
+
+
+            sheet.autoSizeColumn(0);
+            sheet.autoSizeColumn(1);
+            sheet.autoSizeColumn(2);
+            sheet.autoSizeColumn(3);
+
+            return workbook;
+        }catch (IOException e){
+            return null;
+        }
+
+    }
+
+    public XSSFWorkbook getActivities(XSSFWorkbook workbook){
+        JsonNode allData = getAllData();
+        try{
+            JsonNode json = objectMapper.readTree(allData.toString());
+
+            String sheetname = "Total Agent Activities";
+            XSSFSheet sheet = workbook.createSheet(sheetname);
+
             List<String> keys = new ArrayList<>();
             List<Object> values = new ArrayList<>();
 
             Iterator<Map.Entry<String, JsonNode>> fieldValues = json.fields();
             while (fieldValues.hasNext()) {
                 Map.Entry<String, JsonNode> entry = fieldValues.next();
-                keys.add(entry.getKey());
-                values.add(entry.getValue());
+                if(entry.getKey().equals("activities") ){
+                    keys.add(entry.getKey());
+                    values.add(entry.getValue());
+                }
+
             }
-            String sheetname = "All Data";
-            XSSFSheet sheet = workbook.createSheet(sheetname);
 
             Row headerRow = sheet.createRow(0);
             int colNum = 0;
             int rowNum = 1;
-            int alingCol = 0;
 
-            for (String key : keys) {
-                headerRow.createCell(colNum++).setCellValue(key);
-                sheet.autoSizeColumn(alingCol);
-                alingCol++;
-            }
+            headerRow.createCell(colNum++).setCellValue("Total Agent Activities");
+            headerRow.createCell(colNum++).setCellValue("Date");
 
-            for (Object value : values) {
-                Row row = sheet.createRow(rowNum++);
-                colNum = 0;
-                for (JsonNode field : (JsonNode) value) {
-                    row.createCell(colNum++).setCellValue(field.asText());
+            for (int i = 0; i < keys.size(); i++) {
+                JsonNode activities = (JsonNode) values.get(i);
+                if (activities.isArray()) {
+                    for (JsonNode activity : activities) {
+                        if (activity.has("value") && activity.has("startTime")) {
+
+                            int value = activity.get("value").asInt();
+                            String startTime = activity.get("startTime").asText();
+                            Row row = sheet.createRow(rowNum++);
+                            colNum = 0;
+
+                            row.createCell(colNum++).setCellValue(value);
+                            row.createCell(colNum++).setCellValue(startTime);
+                        }
+                    }
                 }
             }
+
+            for (int i = 0; i < headerRow.getLastCellNum(); i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+
             return workbook;
-        }catch (IOException e){
+
+        }
+        catch (IOException e){
             return null;
         }
 
-        //return allData.toString();
     }
 
     private JsonNode getPerformance(){
@@ -194,7 +254,6 @@ public class DownloadService {
                 .bodyToMono(JsonNode.class)
                 .block();
     }
-    //TODO
-    //We Will need the rest of the functions to get the data from the other endpoints
+
 
 }

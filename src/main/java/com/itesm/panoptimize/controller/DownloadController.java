@@ -26,20 +26,10 @@ public class DownloadController {
     @GetMapping("/getDownload")
     public ResponseEntity<String> getReport() {
         String homedir = System.getProperty("user.home");
-        String filePath = Paths.get(homedir, "Downloads", "DataReport.xlsx").toString();
+        String filePath = Paths.get(homedir, "Downloads", "DataReport1.xlsx").toString();
         downloadService.getFinalReport(filePath);
         return ResponseEntity.ok("Excel file saved at: " + filePath);
     }
 
-
-    /*
-    @GetMapping("/test1")
-    public ResponseEntity<String> test1() {
-        String homedir = System.getProperty("user.home");
-        String filePath = Paths.get(homedir, "Downloads", "DataReport.xlsx").toString();
-        downloadService.getRestOfData();
-        return ResponseEntity.ok("Test 1");
-    }
-     */
 
 }
