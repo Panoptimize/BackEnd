@@ -1,11 +1,12 @@
 package com.itesm.panoptimize.service;
 
-import com.itesm.panoptimize.dto.connect.*;
-import com.itesm.panoptimize.dto.connect.Collection;
-import com.itesm.panoptimize.dto.connect.MetricInterval;
-import com.itesm.panoptimize.dto.connect.Threshold;
 import com.itesm.panoptimize.dto.contact.*;
 import com.itesm.panoptimize.dto.dashboard.*;
+
+import com.itesm.panoptimize.dto.dashboard.AWSObjDTO;
+import com.itesm.panoptimize.dto.dashboard.DashboardFiltersDTO;
+import com.itesm.panoptimize.dto.dashboard.MetricResponseDTO;
+
 import com.itesm.panoptimize.model.Notification;
 import com.itesm.panoptimize.repository.NotificationRepository;
 import com.itesm.panoptimize.util.Constants;
@@ -25,6 +26,8 @@ import software.amazon.awssdk.services.connect.model.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.itesm.panoptimize.util.Constants.roundMetric;
 
 @Service
 public class DashboardService {
@@ -159,15 +162,21 @@ public class DashboardService {
         }
 
         double averageSpeedOfAnswer = metricsData.get("SUM_HANDLE_TIME") / metricsData.get("CONTACTS_HANDLED");
+        Double averageHoldTimeRounded = roundMetric(metricsData.get("AVG_HOLD_TIME"));
+        Double percentageFirstContactResolution = roundMetric(metricsData.get("PERCENT_CASES_FIRST_CONTACT_RESOLVED"));
+        Double abandonmentRateRounded = roundMetric(metricsData.get("ABANDONMENT_RATE"));
+        Double serviceLevelRounded = roundMetric(metricsData.get("SERVICE_LEVEL"));
+        Double scheduleAdherenceRounded = roundMetric(metricsData.get("AGENT_SCHEDULE_ADHERENCE"));
+        Double averageSpeedOfAnswerRounded = roundMetric(averageSpeedOfAnswer);
 
         return new
                 MetricResponseDTO(
-                metricsData.get("AVG_HOLD_TIME"),
-                metricsData.get("PERCENT_CASES_FIRST_CONTACT_RESOLVED"),
-                metricsData.get("ABANDONMENT_RATE"),
-                metricsData.get("SERVICE_LEVEL"),
-                metricsData.get("AGENT_SCHEDULE_ADHERENCE"),
-                averageSpeedOfAnswer
+                averageHoldTimeRounded,
+                percentageFirstContactResolution,
+                abandonmentRateRounded,
+                serviceLevelRounded,
+                scheduleAdherenceRounded,
+                averageSpeedOfAnswerRounded
         );
     }
 
