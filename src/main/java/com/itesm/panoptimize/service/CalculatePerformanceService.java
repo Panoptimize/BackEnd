@@ -1,18 +1,15 @@
 package com.itesm.panoptimize.service;
 
+import com.itesm.panoptimize.dto.performance.AgentPerformanceDTO;
 import com.itesm.panoptimize.dto.performance.PerformanceDTO;
 import com.itesm.panoptimize.util.Constants;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.connect.ConnectClient;
+import software.amazon.awssdk.services.connect.model.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.Duration;
-
-import software.amazon.awssdk.services.connect.model.*;
-
 import java.time.Instant;
 import java.util.*;
 
@@ -25,8 +22,7 @@ public class CalculatePerformanceService {
         this.connectClient = connectClient;
     }
 
-
-    private GetMetricDataV2Response getKPIs(@NotNull PerformanceDTO performanceDTO, List<MetricV2> metrics) {
+    private GetMetricDataV2Response getKPIs(PerformanceDTO performanceDTO, List<MetricV2> metrics) {
         String instanceId = performanceDTO.getInstanceId();
         Instant startTime = performanceDTO.getStartDate().toInstant();
         Instant endTime = performanceDTO.getEndDate().toInstant();
@@ -61,7 +57,7 @@ public class CalculatePerformanceService {
                 .build());
     }
 
-    public Map<String, List<Double>> getMetricsData(PerformanceDTO performanceDTO) {
+    public List<AgentPerformanceDTO> getMetricsData(PerformanceDTO performanceDTO) {
         List<MetricV2> metricList = new ArrayList<>(Arrays.asList(
                 MetricV2.builder().name("AVG_HANDLE_TIME").build(),
                 MetricV2.builder().name("AVG_AFTER_CONTACT_WORK_TIME").build(),
@@ -70,13 +66,11 @@ public class CalculatePerformanceService {
         ));
 
         GetMetricDataV2Response response = getKPIs(performanceDTO, metricList);
-        Map<String, List<Double>> agentPerformances = new HashMap<>();
+        Map<String, List<Double>> agentPerformancesMap = new HashMap<>();
 
         for (MetricResultV2 result : response.metricResults()) {
             String agentId = result.dimensions().getOrDefault("AGENT", "Unknown Agent");
-            if (!agentPerformances.containsKey(agentId)) {
-                agentPerformances.put(agentId, new ArrayList<>());
-            }
+            agentPerformancesMap.putIfAbsent(agentId, new ArrayList<>());
 
             double avgHandleTime = 0.0;
             double avgAfterContactWorkTime = 0.0;
@@ -103,10 +97,15 @@ public class CalculatePerformanceService {
             }
 
             double performanceScore = calculateAgentPerformanceScore(avgHandleTime, avgAfterContactWorkTime, avgHoldTime, avgAbandonTime);
-            agentPerformances.get(agentId).add(performanceScore);
+            agentPerformancesMap.get(agentId).add(performanceScore);
         }
 
-        return agentPerformances;
+        List<AgentPerformanceDTO> agentPerformancesList = new ArrayList<>();
+        for (Map.Entry<String, List<Double>> entry : agentPerformancesMap.entrySet()) {
+            agentPerformancesList.add(new AgentPerformanceDTO(entry.getKey(), entry.getValue()));
+        }
+
+        return agentPerformancesList;
     }
 
     private double getValue(MetricDataV2 data, String metricName) {

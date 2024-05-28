@@ -1,25 +1,22 @@
 package com.itesm.panoptimize.dto.contact;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.itesm.panoptimize.dto.contact.DimensionDTO;
+import com.itesm.panoptimize.dto.contact.CollectionDTO;
+import com.itesm.panoptimize.dto.contact.MetricDTO;
 
 import java.util.List;
 
 
 public class MetricResultDTO {
-    @JsonProperty("Dimensions")
-    private DimensionDTO dimensions;
 
     @JsonProperty("Collections")
     private List<CollectionDTO> collections;
 
-    // Getters y Setters
-    public DimensionDTO getDimensions() {
-        return dimensions;
-    }
+    @JsonProperty("Dimensions")
+    private DimensionDTO dimensions;
 
-    public void setDimensions(DimensionDTO dimensions) {
-        this.dimensions = dimensions;
-    }
+    // Getters y Setters
 
     public List<CollectionDTO> getCollections() {
         return collections;
@@ -27,5 +24,13 @@ public class MetricResultDTO {
 
     public void setCollections(List<CollectionDTO> collections) {
         this.collections = collections;
+    }
+
+    public DimensionDTO getDimensions() {
+        return dimensions;
+    }
+
+    public void setDimensions(DimensionDTO dimensions) {
+        this.dimensions = dimensions;
     }
 }

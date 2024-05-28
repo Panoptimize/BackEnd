@@ -65,4 +65,44 @@ public class Contact {
         this.endTime = endTime;
     }
 
+    public User getAgent() {
+        return agent;
+    }
+
+    public void setAgent(User agent) {
+        this.agent = agent;
+    }
+
+    public SatisfactionLevel getSatisfactionLevel() {
+        return satisfactionLevel;
+    }
+
+    public void setSatisfactionLevel(SatisfactionLevel satisfactionLevel) {
+        this.satisfactionLevel = satisfactionLevel;
+    }
+
+    public ContactMetric getContactMetrics() {
+        return contactMetrics;
+    }
+
+    public void setContactMetrics(ContactMetric contactMetrics) {
+        this.contactMetrics = contactMetrics;
+    }
+
+    public Set<Feedback> getFeedbacks() {
+        return feedbacks;
+    }
+
+    public void setFeedbacks(Set<Feedback> feedbacks) {
+        this.feedbacks = feedbacks;
+    }
+
+    public Set<Notification> getNotifications() {
+        return notifications;
+    }
+
+    public void setNotifications(Set<Notification> notifications) {
+        this.notifications = notifications;
+    }
+
 }
