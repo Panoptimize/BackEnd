@@ -1,5 +1,6 @@
 package com.itesm.panoptimize.service;
 import com.itesm.panoptimize.dto.dashboard.CallMetricsDTO;
+import com.itesm.panoptimize.dto.dashboard.CustomerSatisfactionDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ public class CalculateSatisfactionService {
                 .block();
     }
 
+    /*
     public static int calcAnswerTimeQuality(int answer_time){
         int quality=30;//we assign 30 max points for answer time and 70 to handle time
         int leniency=20;//time we give the agent (in seconds) to answer without any penalty
@@ -84,4 +86,11 @@ public class CalculateSatisfactionService {
         else if (satisfaction < 80) { return 3; }
         else { return 4; }
     }
+    */
+
+    public CustomerSatisfactionDTO getSatisfactionLevels(){
+        CustomerSatisfactionDTO result = new CustomerSatisfactionDTO();
+        return result;
+    };
+
 }

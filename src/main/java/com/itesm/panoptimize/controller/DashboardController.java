@@ -114,9 +114,9 @@ public class DashboardController {
     private FCRService fcrService;
 
     @GetMapping("/customer-satisfaction")
-    public ResponseEntity<List<Integer>> calculateSatisfaction() {
-        List<CallMetricsDTO> metrics = satisfactionService.getCallMetrics();
-        return ResponseEntity.ok(satisfactionService.calculateSatisfaction(metrics));
+    public ResponseEntity<CustomerSatisfactionDTO> calculateSatisfaction() {
+        CustomerSatisfactionDTO result = satisfactionService.getSatisfactionLevels();
+        return ResponseEntity.ok(result);
     }
 
     @Autowired
