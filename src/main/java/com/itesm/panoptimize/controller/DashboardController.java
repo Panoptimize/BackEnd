@@ -105,6 +105,17 @@ public class DashboardController {
         List<CallMetricsDTO> metrics = satisfactionService.getCallMetrics();
         return ResponseEntity.ok(satisfactionService.calculateSatisfaction(metrics));
     }
+    @Autowired
+    private DashboardService apiClient;
+    @Autowired
+    private DashboardService metricService;
+
+    //Get the current number of agents in each channel from connect
+    @PostMapping("/values")
+    public Mono<Map<String, Integer>> getValues(@Valid @RequestBody DashboardDTO dashboardDTO) {
+        return apiClient.getMetricResults(dashboardDTO)
+                .map(metricService::extractValues);
+    }
 
     @Operation(summary = "Get the metrics data", description = "Get the metrics data by time frame, agent and workspace number")
     @ApiResponses(value = {
@@ -124,6 +135,30 @@ public class DashboardController {
 
         return ResponseEntity.ok(metricsData);
     }
+
+    @PostMapping("/combined-metrics")
+    public ResponseEntity<Map<String, Object>> getCombinedMetrics(@Valid @RequestBody DashboardDTO dashboardDTO) {
+        Map<String, Object> combinedMetrics = new HashMap<>();
+
+        // Call the first service method
+        Mono<Map<String, Integer>> valuesMono = apiClient.getMetricResults(dashboardDTO).map(metricService::extractValues);
+        valuesMono.subscribe(values -> combinedMetrics.putAll(values));
+        // Call the second service method
+        MetricResponseDTO metricsData = dashboardService.getMetricsData(dashboardDTO);
+        combinedMetrics.put("avgHoldTime", metricsData.getAvgHoldTime());
+        combinedMetrics.put("firstContactResolution", metricsData.getFirstContactResolution());
+        combinedMetrics.put("abandonmentRate", metricsData.getAbandonmentRate());
+        combinedMetrics.put("serviceLevel", metricsData.getServiceLevel());
+        combinedMetrics.put("agentScheduleAdherence", metricsData.getAgentScheduleAdherence());
+        combinedMetrics.put("avgSpeedOfAnswer", metricsData.getAvgSpeedOfAnswer());
+
+        // Call the activity service
+        ActivityResponseDTO activityData = dashboardService.getActivity(dashboardDTO);
+        combinedMetrics.put("activities", activityData.getActivities());
+
+        return ResponseEntity.ok(combinedMetrics);
+    }
+
 
     //Performance
     @Operation(summary = "Download the dashboard data", description = "Download the dashboard data by time frame, agent and workspace number")

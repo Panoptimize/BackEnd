@@ -4,11 +4,11 @@ import com.itesm.panoptimize.dto.connect.*;
 import com.itesm.panoptimize.dto.connect.Collection;
 import com.itesm.panoptimize.dto.connect.MetricInterval;
 import com.itesm.panoptimize.dto.connect.Threshold;
+import com.itesm.panoptimize.dto.contact.*;
 import com.itesm.panoptimize.dto.dashboard.*;
 import com.itesm.panoptimize.model.Notification;
 import com.itesm.panoptimize.repository.NotificationRepository;
 import com.itesm.panoptimize.util.Constants;
-import com.itesm.panoptimize.dto.contact.MetricResultDTO;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
@@ -19,10 +19,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
+import reactor.core.publisher.Mono;
 import software.amazon.awssdk.services.connect.ConnectClient;
 import software.amazon.awssdk.services.connect.model.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class DashboardService {
@@ -169,6 +171,92 @@ public class DashboardService {
         );
     }
 
+    // Get the current number of agents on each channel
+    public Mono<MetricResultsDTO> getMetricResults(@NotNull DashboardDTO dashboardDTO) {
+        String instanceId = dashboardDTO.getInstanceId();
+        String routingProfile = dashboardDTO.getRoutingProfiles()[0];
+        List<Channel> channels = Arrays.asList(Channel.VOICE, Channel.CHAT);
+        Filters filters = Filters.builder()
+                .routingProfiles(Collections.singletonList(routingProfile))
+                .channels(channels)
+                .routingStepExpressions(Collections.emptyList())
+                .build();
+
+        GetCurrentMetricDataRequest request = GetCurrentMetricDataRequest.builder()
+                .instanceId(instanceId)
+                .filters(filters)
+                .currentMetrics(CurrentMetric.builder()
+                        .name(CurrentMetricName.AGENTS_ONLINE)
+                        .unit(Unit.COUNT)
+                        .build())
+                .groupings(Grouping.CHANNEL)
+                .build();
+
+        try {
+            GetCurrentMetricDataResponse response = connectClient.getCurrentMetricData(request);
+            MetricResultsDTO result = convertToDTO(response);
+            return Mono.just(result);
+        } catch (ConnectException e) {
+            return Mono.empty();
+        }
+    }
+
+    //Converts the raw channel response into the DTO
+    private MetricResultsDTO convertToDTO(GetCurrentMetricDataResponse response) {
+        MetricResultsDTO dto = new MetricResultsDTO();
+
+
+        List<MetricResultDTO> metricResultDTOs = response.metricResults().stream().map(metricResult -> {
+            MetricResultDTO metricResultDTO = new MetricResultDTO();
+
+
+            DimensionDTO dimensionDTO = new DimensionDTO();
+            dimensionDTO.setChannel(metricResult.dimensions().channel().toString());
+            metricResultDTO.setDimensions(dimensionDTO);
+
+
+            List<CollectionDTO> collectionDTOs = metricResult.collections().stream().map(collection -> {
+                CollectionDTO collectionDTO = new CollectionDTO();
+
+
+                MetricDTO metricDTO = new MetricDTO();
+                metricDTO.setName(collection.metric().name().toString());
+                metricDTO.setUnit(collection.metric().unit().toString());
+                collectionDTO.setMetric(metricDTO);
+
+
+                collectionDTO.setValue(collection.value().intValue());
+
+                return collectionDTO;
+            }).collect(Collectors.toList());
+
+            metricResultDTO.setCollections(collectionDTOs);
+            return metricResultDTO;
+        }).collect(Collectors.toList());
+
+        dto.setMetricResults(metricResultDTOs);
+        dto.setNextToken(response.nextToken());
+        return dto;
+    }
+
+    //Extracts the number of agents on each channel and returns it as a map with the desired format
+    public Map<String, Integer> extractValues(MetricResultsDTO metricResults) {
+        Map<String, Integer> values = new HashMap<>();
+        if (metricResults == null || metricResults.getMetricResults() == null) {
+            return values;
+        }
+
+        for (MetricResultDTO metricResult : metricResults.getMetricResults()) {
+            if (metricResult.getCollections() != null) {
+                for (CollectionDTO collection : metricResult.getCollections()) {
+                    String channel = metricResult.getDimensions().getChannel().toLowerCase();
+                    values.put(channel, collection.getValue());
+                }
+            }
+        }
+        return values;
+    }
+
     public List<Notification> getNotifications() {
         return notificationRepository.findAll();
     }
@@ -270,4 +358,6 @@ public class DashboardService {
 
         return activityResponseDTO;
     }
+
+
 }
