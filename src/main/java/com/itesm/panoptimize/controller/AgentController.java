@@ -1,7 +1,10 @@
 package com.itesm.panoptimize.controller;
 
 import com.itesm.panoptimize.dto.agent.*;
+import com.itesm.panoptimize.dto.dashboard.DashboardFiltersDTO;
 import com.itesm.panoptimize.model.*;
+import com.itesm.panoptimize.service.AgentListService;
+import com.itesm.panoptimize.service.DashboardService;
 import com.itesm.panoptimize.service.FeedbackService;
 import com.itesm.panoptimize.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,11 +29,14 @@ public class AgentController {
     private final ModelMapper modelMapper;
     private final FeedbackService feedbackService;
 
+    private final AgentListService agentListService;
+
     @Autowired
-    public AgentController(UserService userService, ModelMapper modelMapper, FeedbackService feedbackService) {
+    public AgentController(UserService userService, ModelMapper modelMapper, FeedbackService feedbackService, AgentListService agentListService) {
         this.userService = userService;
         this.modelMapper = modelMapper;
         this.feedbackService = feedbackService;
+        this.agentListService = agentListService;
     }
 
     private AgentDTO convertToDTO(User user) {
@@ -136,6 +142,26 @@ public class AgentController {
     @PutMapping("/agent/feedback/update/{id}")
     public ResponseEntity<Feedback> updateFeedback(@PathVariable Integer id, @RequestBody Feedback feedback) {
         return ResponseEntity.ok(feedbackService.updateFeedback(id, feedback));
+    }
+
+    @GetMapping("/list/{instanceId}")
+    public ResponseEntity<DashboardFiltersDTO> getFilters(@PathVariable String instanceId) {
+        DashboardFiltersDTO filters = agentListService.getAgentList(instanceId);
+
+        System.out.println(instanceId);
+
+        return ResponseEntity.ok(filters);
+    }
+
+    @GetMapping("/detail/{instanceId}/{agentId}")
+    public ResponseEntity<AgentDetailsDTO> getAgentDetails(@PathVariable String agentId,@PathVariable String instanceId) {
+        System.out.println(agentId);
+        System.out.println(instanceId);
+        AgentDetailsDTO agent = agentListService.getAgentDetails(agentId, instanceId);
+
+        System.out.println(agentId);
+
+        return ResponseEntity.ok(agent);
     }
 
 }
