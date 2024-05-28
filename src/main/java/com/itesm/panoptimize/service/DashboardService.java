@@ -1,43 +1,42 @@
 package com.itesm.panoptimize.service;
 
+import com.itesm.panoptimize.dto.contact.*;
+import com.itesm.panoptimize.dto.dashboard.*;
 
 import com.itesm.panoptimize.dto.dashboard.AWSObjDTO;
 import com.itesm.panoptimize.dto.dashboard.DashboardFiltersDTO;
 import com.itesm.panoptimize.dto.dashboard.MetricResponseDTO;
 
-import com.itesm.panoptimize.dto.contact.*;
-
 import com.itesm.panoptimize.model.Notification;
 import com.itesm.panoptimize.repository.NotificationRepository;
 import com.itesm.panoptimize.util.Constants;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import reactor.core.publisher.Mono;
 import software.amazon.awssdk.services.connect.ConnectClient;
 import software.amazon.awssdk.services.connect.model.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.itesm.panoptimize.util.Constants.roundMetric;
+
 @Service
 public class DashboardService {
-    private final WebClient webClient;
+    private static final long INTERVAL_CHECK = 3;
+
     private final ConnectClient connectClient;
     private final NotificationRepository notificationRepository;
 
-    @Autowired
-    public DashboardService(WebClient.Builder webClientBuilder, ConnectClient connectClient, NotificationRepository notificationRepository){
-        this.webClient = webClientBuilder.baseUrl("http://localhost:8000").build();
+    public DashboardService(ConnectClient connectClient, NotificationRepository notificationRepository){
         this.connectClient = connectClient;
         this.notificationRepository = notificationRepository;
     }
@@ -52,7 +51,10 @@ public class DashboardService {
      * @param dashboardDTO is the DTO that contains the filters to get the KPIs
      * @return a list of KPIs
      */
-    private GetMetricDataV2Response getKPIs(@NotNull DashboardDTO dashboardDTO, List<MetricV2> metrics) {
+    private GetMetricDataV2Response getKPIs(@NotNull DashboardDTO dashboardDTO,
+                                            @NotNull List<MetricV2> metrics,
+                                            List<String> groupings,
+                                            IntervalDetails intervalDetails) {
         String instanceId = dashboardDTO.getInstanceId();
 
         Instant startTime = dashboardDTO.getStartDate().toInstant();
@@ -84,6 +86,8 @@ public class DashboardService {
                 .resourceArn(Constants.BASE_ARN + ":instance/" + instanceId)
                 .filters(filters)
                 .metrics(metrics)
+                .groupings(groupings)
+                .interval(intervalDetails)
                 .build());
     }
     public MetricResponseDTO getMetricsData(DashboardDTO dashboardDTO) {
@@ -146,7 +150,7 @@ public class DashboardService {
                 .build();
 
         metricList.add(firstContactResolution);
-        GetMetricDataV2Response response = getKPIs(dashboardDTO, metricList);
+        GetMetricDataV2Response response = getKPIs(dashboardDTO, metricList, null, null);
 
         Map<String, Double> metricsData = new HashMap<>();
 
@@ -158,18 +162,22 @@ public class DashboardService {
         }
 
         double averageSpeedOfAnswer = metricsData.get("SUM_HANDLE_TIME") / metricsData.get("CONTACTS_HANDLED");
+        Double averageHoldTimeRounded = roundMetric(metricsData.get("AVG_HOLD_TIME"));
+        Double percentageFirstContactResolution = roundMetric(metricsData.get("PERCENT_CASES_FIRST_CONTACT_RESOLVED"));
+        Double abandonmentRateRounded = roundMetric(metricsData.get("ABANDONMENT_RATE"));
+        Double serviceLevelRounded = roundMetric(metricsData.get("SERVICE_LEVEL"));
+        Double scheduleAdherenceRounded = roundMetric(metricsData.get("AGENT_SCHEDULE_ADHERENCE"));
+        Double averageSpeedOfAnswerRounded = roundMetric(averageSpeedOfAnswer);
 
-        MetricResponseDTO metricResponseDTO = new
+        return new
                 MetricResponseDTO(
-                metricsData.get("AVG_HOLD_TIME"),
-                metricsData.get("PERCENT_CASES_FIRST_CONTACT_RESOLVED"),
-                metricsData.get("ABANDONMENT_RATE"),
-                metricsData.get("SERVICE_LEVEL"),
-                metricsData.get("AGENT_SCHEDULE_ADHERENCE"),
-                averageSpeedOfAnswer
+                averageHoldTimeRounded,
+                percentageFirstContactResolution,
+                abandonmentRateRounded,
+                serviceLevelRounded,
+                scheduleAdherenceRounded,
+                averageSpeedOfAnswerRounded
         );
-
-        return metricResponseDTO;
     }
 
     // Get the current number of agents on each channel
@@ -255,9 +263,9 @@ public class DashboardService {
                 }
             }
         }
-
         return values;
     }
+
     public List<Notification> getNotifications() {
         return notificationRepository.findAll();
     }
@@ -320,4 +328,45 @@ public class DashboardService {
 
         return dashboardFiltersDTO;
     }
+
+    public ActivityResponseDTO getActivity(DashboardDTO dashboardDTO) {
+        IntervalPeriod interval;
+
+        if(ChronoUnit.DAYS.between(
+                dashboardDTO.getStartDate().toInstant(),
+                dashboardDTO.getEndDate().toInstant()) > INTERVAL_CHECK ) {
+            interval = IntervalPeriod.DAY;
+        } else {
+            interval = IntervalPeriod.HOUR;
+        }
+
+        List<MetricV2> metricList = new ArrayList<>();
+        MetricV2 totalContacts = MetricV2.builder()
+                .name("CONTACTS_HANDLED")
+                .build();
+        metricList.add(totalContacts);
+
+        GetMetricDataV2Response response = getKPIs(dashboardDTO,
+                metricList,
+                null,
+                IntervalDetails.builder().intervalPeriod(interval).build());
+
+        ActivityResponseDTO activityResponseDTO = new ActivityResponseDTO();
+        List<ActivityDTO> activities = new ArrayList<>();
+
+        for (MetricResultV2 metricData : response.metricResults()) {
+            ActivityDTO activityDTO = new ActivityDTO();
+            MetricDataV2 metric = metricData.collections().get(0);
+
+            activityDTO.setValue(metric.value());
+            activityDTO.setStartTime(metricData.metricInterval().startTime());
+
+            activities.add(activityDTO);
+        }
+        activityResponseDTO.setActivities(activities);
+
+        return activityResponseDTO;
+    }
+
+
 }

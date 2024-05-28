@@ -104,4 +104,5 @@ public class Contact {
     public void setNotifications(Set<Notification> notifications) {
         this.notifications = notifications;
     }
+
 }
