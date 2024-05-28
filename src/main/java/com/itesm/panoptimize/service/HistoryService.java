@@ -44,8 +44,8 @@ public class HistoryService {
         contactHistoryDTO.setContact_id(contact.getId());
         contactHistoryDTO.setDate(contact.getStartTime());
         contactHistoryDTO.setTime(contact.getStartTime());
-        contactHistoryDTO.setAgent_name(contact.getAgent().getFullName());
-        contactHistoryDTO.setResolution_status(contact.getContactMetrics().getContactStatus());
+        //contactHistoryDTO.setAgent_name(contact.getAgent().getFullName());
+        //contactHistoryDTO.setResolution_status(contact.getContactMetrics().getContactStatus());
 
         return contactHistoryDTO;
     }
@@ -68,15 +68,15 @@ public class HistoryService {
         Contact contactToUpdate = contactRepository.findById(id).orElseThrow();
         contactToUpdate.setStartTime(contact.getStartTime());
         contactToUpdate.setEndTime(contact.getEndTime());
-        contactToUpdate.setAgent(contact.getAgent());
-        contactToUpdate.setContactMetrics(contact.getContactMetrics());
-        contactToUpdate.setSatisfactionLevel(contact.getSatisfactionLevel());
+        //contactToUpdate.setId(contact.getAgent());
+        //contactToUpdate.setContactMetrics(contact.getContactMetrics());
+        //contactToUpdate.setSatisfactionLevel(contact.getSatisfactionLevel());
         contactRepository.save(contactToUpdate);
         return contactToUpdate;
     }
-    public ContactMetric getContactMetrics(Integer id){
-        return contactRepository.findById(id).orElseThrow().getContactMetrics();
-    }
+    //public ContactMetric getContactMetrics(Integer id){
+        //return contactRepository.findById(id).orElseThrow().getContactMetrics();
+   //}
     public ContactMetric addContactMetric(ContactMetric contactMetric){
         return contactMetricRepository.save(contactMetric);
     }

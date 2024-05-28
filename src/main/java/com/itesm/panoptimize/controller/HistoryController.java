@@ -52,11 +52,13 @@ public class HistoryController {
         return new ResponseEntity<>("Contact updated", HttpStatus.OK);
     }
 
+    /*
     @GetMapping("/contact/metrics/:id")
     public ResponseEntity<ContactMetric> getContactMetrics(@PathVariable("id") Integer id){
         ContactMetric contactMetric = historyService.getContactMetrics(id);
         return new ResponseEntity<>(contactMetric, HttpStatus.OK);
     }
+     */
     @PostMapping("/contact/metrics/new")
     public ResponseEntity<String> addContactMetrics(){
         ContactMetric contactMetric = new ContactMetric();
