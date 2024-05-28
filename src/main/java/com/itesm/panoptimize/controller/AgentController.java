@@ -2,11 +2,13 @@ package com.itesm.panoptimize.controller;
 
 import com.itesm.panoptimize.dto.agent.*;
 import com.itesm.panoptimize.dto.dashboard.DashboardFiltersDTO;
+import com.itesm.panoptimize.dto.agent.AgentResponseDTO;
 import com.itesm.panoptimize.model.*;
 import com.itesm.panoptimize.service.AgentListService;
 import com.itesm.panoptimize.service.DashboardService;
 import com.itesm.panoptimize.service.FeedbackService;
 import com.itesm.panoptimize.service.UserService;
+import com.itesm.panoptimize.service.AgentListService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,6 +21,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 
 @RestController
@@ -32,11 +37,12 @@ public class AgentController {
     private final AgentListService agentListService;
 
     @Autowired
-    public AgentController(UserService userService, ModelMapper modelMapper, FeedbackService feedbackService, AgentListService agentListService) {
+    public AgentController(UserService userService, ModelMapper modelMapper, FeedbackService feedbackService, AgentListService agentListService, AgentListService agentsService) {
         this.userService = userService;
         this.modelMapper = modelMapper;
         this.feedbackService = feedbackService;
         this.agentListService = agentListService;
+        this.agentsService = agentsService;
     }
 
     private AgentDTO convertToDTO(User user) {
@@ -162,6 +168,15 @@ public class AgentController {
         System.out.println(agentId);
 
         return ResponseEntity.ok(agent);
+    }
+
+    private final AgentListService agentsService;
+
+
+    @PostMapping("/agentslist")
+    public Mono<AgentResponseDTO> getAllAgents(@RequestParam String instanceId) {
+        return agentsService.getAllAgents(instanceId)
+                .map(AgentResponseDTO::new);
     }
 
 }

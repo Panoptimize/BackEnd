@@ -3,6 +3,7 @@ package com.itesm.panoptimize.service;
 import com.itesm.panoptimize.dto.agent.AgentDetailsDTO;
 import com.itesm.panoptimize.dto.agent.IdentityInfoDTO;
 import com.itesm.panoptimize.dto.dashboard.AWSObjDTO;
+import com.itesm.panoptimize.dto.agent.AgentListDTO;
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
 import com.itesm.panoptimize.dto.dashboard.DashboardFiltersDTO;
 import com.itesm.panoptimize.repository.NotificationRepository;
@@ -11,14 +12,18 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 import software.amazon.awssdk.identity.spi.Identity;
 import software.amazon.awssdk.services.connect.ConnectClient;
 import software.amazon.awssdk.services.connect.model.*;
 
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AgentListService {
@@ -106,4 +111,133 @@ public class AgentListService {
     }
 
 
+
+    public Mono<List<AgentListDTO>> getAllAgents(String instanceId) {
+        ListUsersRequest request = ListUsersRequest.builder()
+                .instanceId(instanceId)
+                .build();
+
+        try {
+            ListUsersResponse response = connectClient.listUsers(request);
+
+            // Imprime la lista de usuarios recibida
+            System.out.println("List of Users:");
+            response.userSummaryList().forEach(userSummary -> System.out.println(userSummary.toString()));
+
+            List<AgentListDTO> agents = response.userSummaryList().stream()
+                    .map(userSummary -> getAgentListDetails(instanceId, userSummary.id()))
+                    .collect(Collectors.toList());
+
+            return Mono.just(agents);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Mono.error(new RuntimeException("Failed to retrieve agents", e));
+        }
+    }
+
+    private AgentListDTO getAgentListDetails(String instanceId, String userId) {
+        DescribeUserRequest describeRequest = DescribeUserRequest.builder()
+                .instanceId(instanceId)
+                .userId(userId)
+                .build();
+
+        DescribeUserResponse describeResponse = connectClient.describeUser(describeRequest);
+        User user = describeResponse.user();
+
+        // Imprime los detalles del usuario recibido
+        System.out.println("User Details:");
+        System.out.println(user.toString());
+
+        AgentListDTO agent = new AgentListDTO(user.id(), user.username(),getWorkspaceInfo(instanceId, user.routingProfileId()),getAgentCurrentState(instanceId, user.routingProfileId()), 100, instanceId);
+        /*
+        agent.setId(user.id());
+        agent.setName(user.username());
+        agent.setWorkspace(getWorkspaceInfo(instanceId, user.routingProfileId()));
+        agent.setStatus(getAgentCurrentState(instanceId, user.routingProfileId()));
+
+         */
+
+        return agent;
+    }
+
+    private String getWorkspaceInfo(String instanceId, String routingProfileId) {
+        if (routingProfileId == null || routingProfileId.isEmpty()) {
+            return "No routing profile assigned";
+        }
+
+        DescribeRoutingProfileRequest routingProfileRequest = DescribeRoutingProfileRequest.builder()
+                .instanceId(instanceId)
+                .routingProfileId(routingProfileId)
+                .build();
+
+        DescribeRoutingProfileResponse routingProfileResponse = connectClient.describeRoutingProfile(routingProfileRequest);
+        if (routingProfileResponse.routingProfile() != null) {
+            // Imprime los detalles del perfil de enrutamiento recibido
+            System.out.println("Routing Profile Details:");
+            System.out.println(routingProfileResponse.routingProfile().toString());
+
+            return routingProfileResponse.routingProfile().name();
+        } else {
+            return "Unknown routing profile";
+        }
+    }
+
+    private String getAgentCurrentState(String instanceId, String routingProfileId) {
+        if (routingProfileId == null || routingProfileId.isEmpty()) {
+            return "No routing profile assigned";
+        }
+
+        Filters filters = Filters.builder()
+                .routingProfiles(Collections.singletonList(routingProfileId))
+                .build();
+
+        GetCurrentMetricDataRequest metricDataRequest = GetCurrentMetricDataRequest.builder()
+                .instanceId(instanceId)
+                .filters(filters)
+                .currentMetrics(
+                        List.of(
+                                CurrentMetric.builder().name(CurrentMetricName.AGENTS_AVAILABLE).unit(Unit.COUNT).build(),
+                                CurrentMetric.builder().name(CurrentMetricName.AGENTS_ON_CALL).unit(Unit.COUNT).build(),
+                                CurrentMetric.builder().name(CurrentMetricName.AGENTS_AFTER_CONTACT_WORK).unit(Unit.COUNT).build()
+                        )
+                )
+                .build();
+
+        try {
+            GetCurrentMetricDataResponse metricDataResponse = connectClient.getCurrentMetricData(metricDataRequest);
+
+            // Imprime los detalles de las métricas actuales del agente
+            System.out.println("Metric Data Request:");
+            System.out.println(metricDataRequest);
+            System.out.println("Agent Metric Data:");
+            System.out.println(metricDataResponse);
+
+            // Procesa las métricas para obtener el estado actual del agente
+            if (metricDataResponse.metricResults().isEmpty()) {
+                return "Unknown state";
+            } else {
+                for (CurrentMetricResult result : metricDataResponse.metricResults()) {
+                    for (CurrentMetricData metricData : result.collections()) {
+                        if (metricData.metric().name().equals(CurrentMetricName.AGENTS_AVAILABLE)) {
+                            if (metricData.value().doubleValue() > 0) {
+                                return "Available";
+                            }
+                        } else if (metricData.metric().name().equals(CurrentMetricName.AGENTS_ON_CALL)) {
+                            if (metricData.value().doubleValue() > 0) {
+                                return "On Call";
+                            }
+                        } else if (metricData.metric().name().equals(CurrentMetricName.AGENTS_AFTER_CONTACT_WORK)) {
+                            if (metricData.value().doubleValue() > 0) {
+                                return "After Contact Work";
+                            }
+                        }
+                    }
+                }
+                return "Offline";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Error retrieving agent state";
+        }
+    }
 }

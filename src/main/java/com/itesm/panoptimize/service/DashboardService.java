@@ -192,10 +192,13 @@ public class DashboardService {
                         .build())
                 .groupings(Grouping.CHANNEL)
                 .build();
+        System.out.println("Request: " + request);
 
         try {
             GetCurrentMetricDataResponse response = connectClient.getCurrentMetricData(request);
             MetricResultsDTO result = convertToDTO(response);
+            System.out.println("Response: " + response);
+            System.out.println("Result: " + result);
             return Mono.just(result);
         } catch (ConnectException e) {
             return Mono.empty();
