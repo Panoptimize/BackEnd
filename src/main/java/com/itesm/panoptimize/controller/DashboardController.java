@@ -2,17 +2,13 @@ package com.itesm.panoptimize.controller;
 
 
 
-import com.itesm.panoptimize.dto.company.CompanyDTO;
 import com.itesm.panoptimize.dto.dashboard.*;
 import com.itesm.panoptimize.dto.performance.AgentPerformanceDTO;
 import com.itesm.panoptimize.model.Notification;
 import com.itesm.panoptimize.service.DashboardService;
-import com.itesm.panoptimize.service.FCRService;
 
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
 import com.itesm.panoptimize.service.CalculateSatisfactionService;
-
-import com.itesm.panoptimize.service.DashboardService;
 
 import com.itesm.panoptimize.dto.performance.PerformanceDTO;
 import com.itesm.panoptimize.service.CalculatePerformanceService;
@@ -30,9 +26,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -42,16 +35,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.Principal;
 import java.util.*;
-
-import java.text.ParseException;
 
 import java.util.List;
 
@@ -111,8 +100,6 @@ public class DashboardController {
         return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
     }
 
-    private FCRService fcrService;
-
     @GetMapping("/customer-satisfaction")
     public ResponseEntity<CustomerSatisfactionDTO> calculateSatisfaction() {
         CustomerSatisfactionDTO result = satisfactionService.getSatisfactionLevels();
@@ -168,20 +155,6 @@ public class DashboardController {
 
         return ResponseEntity.ok(metricsData);
     }
-
-    @GetMapping("/metricFCR")
-    public ResponseEntity<String> FCRService() throws JSONException {
-        float firstResponseKPI = fcrService.fcrMetrics();
-
-        JSONObject responseJSON = new JSONObject();
-        responseJSON.put("FRC-KPI", firstResponseKPI);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        return new ResponseEntity<>(responseJSON.toString(), headers, HttpStatus.OK);
-    }
-
 
     @GetMapping("/Notifications")
     public ResponseEntity<List<Notification>> getNotifications() {
