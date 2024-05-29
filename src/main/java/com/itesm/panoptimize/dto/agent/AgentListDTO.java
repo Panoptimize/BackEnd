@@ -8,7 +8,6 @@ public class AgentListDTO {
         private String status;
         private String workspace;
         private String instanceID;
-        private int score;
 
     public String getInstanceID() {
         return instanceID;
@@ -24,24 +23,16 @@ public class AgentListDTO {
 
 
 
-    public AgentListDTO(String id, String name, String status, String workspace, int score, String instanceID){
+    public AgentListDTO(String id, String name, String status, String workspace, String instanceID){
         this.id = id;
         this.name = name;
         this.status = status;
         this.workspace = workspace;
-        this.score = score;
         this.instanceID = instanceID;
     }
 
 
 
-    public int getScore() {
-        return score;
-    }
-
-    public void setScore(int score) {
-        this.score = score;
-    }
 
 
     public String getId() {

@@ -6,6 +6,8 @@ import com.itesm.panoptimize.dto.dashboard.AWSObjDTO;
 import com.itesm.panoptimize.dto.agent.AgentListDTO;
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
 import com.itesm.panoptimize.dto.dashboard.DashboardFiltersDTO;
+import com.itesm.panoptimize.dto.performance.PerformanceDTO;
+import com.itesm.panoptimize.service.CalculatePerformanceService;
 import com.itesm.panoptimize.repository.NotificationRepository;
 import com.itesm.panoptimize.util.Constants;
 import org.jetbrains.annotations.NotNull;
@@ -19,10 +21,7 @@ import software.amazon.awssdk.services.connect.model.*;
 
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -120,7 +119,7 @@ public class AgentListService {
         try {
             ListUsersResponse response = connectClient.listUsers(request);
 
-            // Imprime la lista de usuarios recibida
+
             System.out.println("List of Users:");
             response.userSummaryList().forEach(userSummary -> System.out.println(userSummary.toString()));
 
@@ -130,7 +129,6 @@ public class AgentListService {
 
             return Mono.just(agents);
         } catch (Exception e) {
-            e.printStackTrace();
             return Mono.error(new RuntimeException("Failed to retrieve agents", e));
         }
     }
@@ -144,18 +142,13 @@ public class AgentListService {
         DescribeUserResponse describeResponse = connectClient.describeUser(describeRequest);
         User user = describeResponse.user();
 
-        // Imprime los detalles del usuario recibido
         System.out.println("User Details:");
         System.out.println(user.toString());
 
-        AgentListDTO agent = new AgentListDTO(user.id(), user.username(),getWorkspaceInfo(instanceId, user.routingProfileId()),getAgentCurrentState(instanceId, user.routingProfileId()), 100, instanceId);
-        /*
-        agent.setId(user.id());
-        agent.setName(user.username());
-        agent.setWorkspace(getWorkspaceInfo(instanceId, user.routingProfileId()));
-        agent.setStatus(getAgentCurrentState(instanceId, user.routingProfileId()));
 
-         */
+
+
+        AgentListDTO agent = new AgentListDTO(user.id(), user.username(),getAgentCurrentState(instanceId, user.routingProfileId()),getWorkspaceInfo(instanceId, user.routingProfileId()), instanceId);
 
         return agent;
     }
@@ -172,7 +165,6 @@ public class AgentListService {
 
         DescribeRoutingProfileResponse routingProfileResponse = connectClient.describeRoutingProfile(routingProfileRequest);
         if (routingProfileResponse.routingProfile() != null) {
-            // Imprime los detalles del perfil de enrutamiento recibido
             System.out.println("Routing Profile Details:");
             System.out.println(routingProfileResponse.routingProfile().toString());
 
@@ -212,22 +204,23 @@ public class AgentListService {
             System.out.println("Agent Metric Data:");
             System.out.println(metricDataResponse);
 
-            // Procesa las métricas para obtener el estado actual del agente
+
+
             if (metricDataResponse.metricResults().isEmpty()) {
                 return "Unknown state";
             } else {
                 for (CurrentMetricResult result : metricDataResponse.metricResults()) {
                     for (CurrentMetricData metricData : result.collections()) {
                         if (metricData.metric().name().equals(CurrentMetricName.AGENTS_AVAILABLE)) {
-                            if (metricData.value().doubleValue() > 0) {
+                            if (metricData.value() > 0) {
                                 return "Available";
                             }
                         } else if (metricData.metric().name().equals(CurrentMetricName.AGENTS_ON_CALL)) {
-                            if (metricData.value().doubleValue() > 0) {
+                            if (metricData.value() > 0) {
                                 return "On Call";
                             }
                         } else if (metricData.metric().name().equals(CurrentMetricName.AGENTS_AFTER_CONTACT_WORK)) {
-                            if (metricData.value().doubleValue() > 0) {
+                            if (metricData.value() > 0) {
                                 return "After Contact Work";
                             }
                         }
@@ -236,7 +229,6 @@ public class AgentListService {
                 return "Offline";
             }
         } catch (Exception e) {
-            e.printStackTrace();
             return "Error retrieving agent state";
         }
     }
