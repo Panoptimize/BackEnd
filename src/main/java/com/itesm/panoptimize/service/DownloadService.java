@@ -2,6 +2,9 @@ package com.itesm.panoptimize.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.itesm.panoptimize.dto.performance.AgentPerformanceDTO;
+import com.itesm.panoptimize.dto.performance.PerformanceDTO;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -19,6 +22,9 @@ public class DownloadService {
 
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
+
+    @Autowired
+    private CalculatePerformanceService calculatePerformanceService;
 
     @Autowired
     public DownloadService(WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
@@ -46,7 +52,9 @@ public class DownloadService {
     }
 
     public XSSFWorkbook getCalculatePerformance(XSSFWorkbook workbook) {
-        JsonNode performanceData = getPerformance();
+
+        List<AgentPerformanceDTO> performanceData = getPerformance( new PerformanceDTO());
+
         try{
             JsonNode jsonArray = objectMapper.readTree(performanceData.toString());
 
@@ -63,6 +71,7 @@ public class DownloadService {
 
             headerRow.createCell(colNum++).setCellValue("Agent ID");
             headerRow.createCell(colNum++).setCellValue("Performances");
+            headerRow.getRowStyle().setBorderBottom(BorderStyle.valueOf((short) 1));
 
             for (JsonNode json : jsonArray) {
                 if (json.has("agentID") && json.has("performances")) {
@@ -213,9 +222,10 @@ public class DownloadService {
 
     }
 
-    private JsonNode getPerformance(){
+    private List<AgentPerformanceDTO> getPerformance(PerformanceDTO performanceDTO){
         //TODO
         //When the actual post body comes from an endpoint, changes this to receive the body from the endpoint
+        /*
         String requestBody = "{\n" +
                 "  \"instanceId\": \"7c78bd60-4a9f-40e5-b461-b7a0dfaad848\",\n" +
                 "  \"startDate\": \"2024-05-11\",\n" +
@@ -223,7 +233,9 @@ public class DownloadService {
                 "  \"routingProfiles\": [\"4896ae34-a93e-41bc-8231-bf189e7628b1\"],\n" +
                 "  \"queues\": []\n" +
                 "}";
-
+        */
+        List<AgentPerformanceDTO> performanceData = calculatePerformanceService.getMetricsData(performanceDTO);
+        /*
         return webClient.post()
                 .uri("http://127.0.0.1:8080/dashboard/performance")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -231,6 +243,9 @@ public class DownloadService {
                 .retrieve()
                 .bodyToMono(JsonNode.class)
                 .block();
+
+         */
+        return performanceData;
 
     }
 
