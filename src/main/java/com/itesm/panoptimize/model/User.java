@@ -1,7 +1,6 @@
 package com.itesm.panoptimize.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
 
 import java.util.Set;
 
@@ -28,9 +27,6 @@ public class User {
     @Column(name = "image_path")
     private String imagePath;
 
-    @Column(name = "routing_profile_id", nullable = false)
-    private String routingProfileId;
-
     @Column(name = "can_switch", nullable = false)
     private Boolean canSwitch = true;
 
@@ -52,6 +48,10 @@ public class User {
 
     @ManyToMany(mappedBy = "supervisors")
     private Set<User> agents;
+
+    @ManyToOne
+    @JoinColumn(name = "routing_profile_id", nullable = false)
+    private RoutingProfile routingProfile;
 
     // Getters and Setters
     public Integer getId() {
@@ -102,12 +102,12 @@ public class User {
         this.imagePath = imagePath;
     }
 
-    public String getRoutingProfileId() {
-        return routingProfileId;
+    public RoutingProfile getRoutingProfile() {
+        return routingProfile;
     }
 
-    public void setRoutingProfileId(String routingProfileId) {
-        this.routingProfileId = routingProfileId;
+    public void setRoutingProfile(RoutingProfile routingProfileId) {
+        this.routingProfile = routingProfileId;
     }
 
     public boolean isCanSwitch() {

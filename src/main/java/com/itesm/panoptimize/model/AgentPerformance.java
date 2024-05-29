@@ -2,6 +2,7 @@ package com.itesm.panoptimize.model;
 
 import jakarta.persistence.*;
 
+import java.time.Instant;
 import java.util.Date;
 
 @Entity
@@ -13,16 +14,19 @@ public class AgentPerformance {
     private Integer id;
 
     @Column(nullable = false)
-    private Date date;
+    private Instant date;
 
-    @Column(name = "total_contacts_handled", nullable = false)
-    private int totalContactsHandled;
+    @Column(name = "avg_after_call_work_time", nullable = false)
+    private Double avgAfterCallWork;
 
-    @Column(name = "total_after_call_work", nullable = false)
-    private int totalAfterCallWork;
+    @Column(name = "avg_handle_time", nullable = false)
+    private Double avgHandleTime;
 
-    @Column(name = "adherence_percentage", nullable = false)
-    private float adherencePercentage;
+    @Column(name = "avg_abandon_time", nullable = false)
+    private Double avgAbandonTime;
+
+    @Column(name = "avg_hold_time", nullable = false)
+    private Double avgHoldTime;
 
     @ManyToOne
     @JoinColumn(name = "agent_id", nullable = false)
@@ -36,36 +40,44 @@ public class AgentPerformance {
         this.id = id;
     }
 
-    public Date getDate() {
+    public Instant getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(Instant date) {
         this.date = date;
     }
 
-    public int getTotalContactsHandled() {
-        return totalContactsHandled;
+    public double getAvgAfterCallWork() {
+        return avgAfterCallWork;
     }
 
-    public void setTotalContactsHandled(int totalContactsHandled) {
-        this.totalContactsHandled = totalContactsHandled;
+    public void setAvgAfterCallWork(double avgAfterCallWork) {
+        this.avgAfterCallWork = avgAfterCallWork;
     }
 
-    public int getTotalAfterCallWork() {
-        return totalAfterCallWork;
+    public double getAvgHandleTime() {
+        return avgHandleTime;
     }
 
-    public void setTotalAfterCallWork(int totalAfterCallwork) {
-        this.totalAfterCallWork = totalAfterCallwork;
+    public void setAvgHandleTime(double avgHandleTime) {
+        this.avgHandleTime = avgHandleTime;
     }
 
-    public float getAdherencePercentage() {
-        return adherencePercentage;
+    public double getAvgAbandonTime() {
+        return avgAbandonTime;
     }
 
-    public void setAdherencePercentage(float adherencePercentage) {
-        this.adherencePercentage = adherencePercentage;
+    public void setAvgAbandonTime(double avgAbandonTime) {
+        this.avgAbandonTime = avgAbandonTime;
+    }
+
+    public double getAvgHoldTime() {
+        return avgHoldTime;
+    }
+
+    public void setAvgHoldTime(double avgHoldTime) {
+        this.avgHoldTime = avgHoldTime;
     }
 
     public User getAgent() {

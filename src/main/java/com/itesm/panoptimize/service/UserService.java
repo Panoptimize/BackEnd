@@ -117,7 +117,7 @@ public class UserService {
         }
 
         if(agentUserDTO.getRoutingProfileId() != null) {
-            agentToUpdate.setRoutingProfileId(agentUserDTO.getRoutingProfileId());
+            agentToUpdate.setRoutingProfile(agentUserDTO.getRoutingProfileId());
         }
 
         if(agentUserDTO.isCanSwitch() != null) {
@@ -143,9 +143,10 @@ public class UserService {
         if (agentPerformanceToUpdate != null) {
             agentPerformanceToUpdate.setAgent(agentPerformance.getAgent());
             agentPerformanceToUpdate.setDate(agentPerformance.getDate());
-            agentPerformanceToUpdate.setTotalContactsHandled(agentPerformance.getTotalContactsHandled());
-            agentPerformanceToUpdate.setTotalAfterCallWork(agentPerformance.getTotalAfterCallWork());
-            agentPerformanceToUpdate.setAdherencePercentage(agentPerformance.getAdherencePercentage());
+            agentPerformanceToUpdate.setAvgAfterCallWork(agentPerformance.getAvgAfterCallWork());
+            agentPerformanceToUpdate.setAvgAbandonTime(agentPerformance.getAvgAbandonTime());
+            agentPerformanceToUpdate.setAvgHandleTime(agentPerformance.getAvgHandleTime());
+            agentPerformanceToUpdate.setAvgHoldTime(agentPerformance.getAvgHoldTime());
             agentPerformanceRepository.save(agentPerformanceToUpdate);
         }
         return agentPerformanceToUpdate;
@@ -192,7 +193,7 @@ public class UserService {
         }
 
         if(supervisorUserDTO.getRoutingProfileId() != null) {
-            supervisorToUpdate.setRoutingProfileId(supervisorUserDTO.getRoutingProfileId());
+            supervisorToUpdate.setRoutingProfile(supervisorUserDTO.getRoutingProfileId());
         }
 
         if(supervisorUserDTO.isCanSwitch() != null) {

@@ -1,12 +1,9 @@
 package com.itesm.panoptimize.service;
 
-import com.itesm.panoptimize.model.Feedback;
+import com.itesm.panoptimize.model.Notes;
 import com.itesm.panoptimize.repository.FeedbackRepository;
-import com.itesm.panoptimize.repository.ContactRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class FeedbackService {
@@ -16,27 +13,27 @@ public class FeedbackService {
         this.feedbackRepository = feedbackRepository;
     }
 
-    public Feedback getFeedbackById(Integer id) {
+    public Notes getFeedbackById(Integer id) {
         return feedbackRepository.findById(id).orElseThrow();
     }
-    public Feedback addFeedback(Feedback feedback) {
-        return feedbackRepository.save(feedback);
+    public Notes addFeedback(Notes notes) {
+        return feedbackRepository.save(notes);
     }
     public boolean deleteFeedback(Integer id) {
         boolean exists = feedbackRepository.existsById(id);
         feedbackRepository.deleteById(id);
         return exists;
     }
-    public Feedback updateFeedback(Integer id, Feedback feedback) {
-        Feedback feedbackToUpdate = feedbackRepository.findById(id)
+    public Notes updateFeedback(Integer id, Notes notes) {
+        Notes notesToUpdate = feedbackRepository.findById(id)
                 .orElseThrow();
-        feedbackToUpdate.setContact(feedback.getContact());
-        feedbackToUpdate.setName(feedback.getName());
-        feedbackToUpdate.setDescription(feedback.getDescription());
-        feedbackToUpdate.setUser(feedback.getUser());
-        feedbackToUpdate.setPriority(feedback.getPriority());
-        feedbackRepository.save(feedbackToUpdate);
-        return feedbackToUpdate;
+        notesToUpdate.setContact(notes.getContact());
+        notesToUpdate.setName(notes.getName());
+        notesToUpdate.setDescription(notes.getDescription());
+        notesToUpdate.setUser(notes.getUser());
+        notesToUpdate.setPriority(notes.getPriority());
+        feedbackRepository.save(notesToUpdate);
+        return notesToUpdate;
     }
 
 }

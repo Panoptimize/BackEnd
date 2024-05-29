@@ -27,6 +27,9 @@ public class Company {
     @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
     private Set<User> users;
 
+    @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
+    private Set<RoutingProfile> routingProfiles;
+
     public Integer getId() {
         return id;
     }
@@ -65,5 +68,13 @@ public class Company {
 
     public void setUsers(Set<User> users) {
         this.users = users;
+    }
+
+    public Set<RoutingProfile> getRoutingProfiles() {
+        return routingProfiles;
+    }
+
+    public void setRoutingProfiles(Set<RoutingProfile> routingProfiles) {
+        this.routingProfiles = routingProfiles;
     }
 }

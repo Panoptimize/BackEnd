@@ -15,6 +15,13 @@ public class Notification {
     @Column(name = "date_time")
     private Date dateTime;
 
+    @Column(name = "description")
+    private String description;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     public Date getDateTime() {
         return dateTime;
     }
@@ -38,24 +45,5 @@ public class Notification {
     public void setUser(User user) {
         this.user = user;
     }
-
-    public Contact getContact() {
-        return contact;
-    }
-
-    public void setContact(Contact contact) {
-        this.contact = contact;
-    }
-
-    @Column(name = "description")
-    private String description;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
-    @ManyToOne
-    @JoinColumn(name = "contact_id", nullable = false)
-    private Contact contact;
 
 }

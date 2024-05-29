@@ -2,10 +2,16 @@ package com.itesm.panoptimize.model;
 
 import com.itesm.panoptimize.enumerator.Priority;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Collate;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.CurrentTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.Instant;
 
 @Entity
-@Table(name = "feedback")
-public class Feedback {
+@Table(name = "notes")
+public class Notes {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "feedback_id")
@@ -21,9 +27,16 @@ public class Feedback {
     @Column(name = "priority", nullable = false)
     private Priority priority;
 
-    @ManyToOne
-    @JoinColumn(name = "contact_id")
-    private Contact contact;
+    @Column(name = "solved", nullable = false)
+    private Boolean solved;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
 
     @ManyToOne
     @JoinColumn(name = "agent_id")
@@ -61,19 +74,35 @@ public class Feedback {
         this.priority = priority;
     }
 
-    public Contact getContact() {
-        return contact;
-    }
-
-    public void setContact(Contact contact) {
-        this.contact = contact;
-    }
-
     public User getUser() {
         return user;
     }
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public boolean isSolved() {
+        return solved;
+    }
+
+    public void setSolved(boolean solved) {
+        this.solved = solved;
+    }
+
+    public Instant getCreated_at() {
+        return createdAt;
+    }
+
+    public void setCreated_at(Instant created_at) {
+        this.createdAt = created_at;
+    }
+
+    public Instant getUpdated_at() {
+        return updatedAt;
+    }
+
+    public void setUpdated_at(Instant updated_at) {
+        this.updatedAt = updated_at;
     }
 }

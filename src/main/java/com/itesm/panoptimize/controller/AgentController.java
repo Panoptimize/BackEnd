@@ -4,7 +4,6 @@ import com.itesm.panoptimize.dto.agent.*;
 import com.itesm.panoptimize.dto.dashboard.DashboardFiltersDTO;
 import com.itesm.panoptimize.model.*;
 import com.itesm.panoptimize.service.AgentListService;
-import com.itesm.panoptimize.service.DashboardService;
 import com.itesm.panoptimize.service.FeedbackService;
 import com.itesm.panoptimize.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -124,14 +123,14 @@ public class AgentController {
         return ResponseEntity.ok(userService.updateAgentPerformance(id, agentPerformance));
     }
     @GetMapping("/agent/feedback/{id}")
-    public ResponseEntity<Feedback> getFeedback(@PathVariable("id") Integer id){
-        Feedback feedback = feedbackService.getFeedbackById(id);
-        return new ResponseEntity<>(feedback, HttpStatus.OK);
+    public ResponseEntity<Notes> getFeedback(@PathVariable("id") Integer id){
+        Notes notes = feedbackService.getFeedbackById(id);
+        return new ResponseEntity<>(notes, HttpStatus.OK);
     }
     @PostMapping("/agent/feedback/new")
     public ResponseEntity<String> addFeedback(){
-        Feedback feedback = new Feedback();
-        feedbackService.addFeedback(feedback);
+        Notes notes = new Notes();
+        feedbackService.addFeedback(notes);
         return new ResponseEntity<>("Feedback added", HttpStatus.OK);
     }
     @DeleteMapping("/agent/feedback/delete/{id}")
@@ -140,8 +139,8 @@ public class AgentController {
         return new ResponseEntity<>("Feedback deleted", HttpStatus.OK);
     }
     @PutMapping("/agent/feedback/update/{id}")
-    public ResponseEntity<Feedback> updateFeedback(@PathVariable Integer id, @RequestBody Feedback feedback) {
-        return ResponseEntity.ok(feedbackService.updateFeedback(id, feedback));
+    public ResponseEntity<Notes> updateFeedback(@PathVariable Integer id, @RequestBody Notes notes) {
+        return ResponseEntity.ok(feedbackService.updateFeedback(id, notes));
     }
 
     @GetMapping("/list/{instanceId}")
