@@ -1,32 +1,42 @@
 package com.itesm.panoptimize.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
-import java.util.Date;
+import java.time.Instant;
 
 @Entity
-@Table(name = "agent_performance")
+@Table(name = "agent_performance", indexes = {
+        @Index(name = "agent_created_at_index", columnList = "created_at")
+})
 public class AgentPerformance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "agent_performance_id")
     private Integer id;
 
-    @Column(nullable = false)
-    private Date date;
+    @Column(name = "created_at", nullable = false)
+    @CreationTimestamp
+    private Instant createdAt;
 
-    @Column(name = "total_contacts_handled", nullable = false)
-    private int totalContactsHandled;
+    @Column(name = "avg_after_contact_work_time", nullable = false)
+    private Double avgAfterContactWorkTime;
 
-    @Column(name = "total_after_call_work", nullable = false)
-    private int totalAfterCallWork;
+    @Column(name = "avg_handle_time", nullable = false)
+    private Double avgHandleTime;
 
-    @Column(name = "adherence_percentage", nullable = false)
-    private float adherencePercentage;
+    @Column(name = "avg_abandon_time", nullable = false)
+    private Double avgAbandonTime;
+
+    @Column(name = "avg_hold_time", nullable = false)
+    private Double avgHoldTime;
 
     @ManyToOne
-    @JoinColumn(name = "agent_id", nullable = false)
+    @JoinColumn(name = "agent_id", nullable = false, foreignKey = @ForeignKey(name = "agent_has_performance"))
     private User agent;
+
+    @OneToOne(mappedBy = "agentPerformance")
+    private Note note;
 
     public Integer getId() {
         return id;
@@ -36,36 +46,44 @@ public class AgentPerformance {
         this.id = id;
     }
 
-    public Date getDate() {
-        return date;
+    public Instant getCreatedAt() {
+        return createdAt;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
     }
 
-    public int getTotalContactsHandled() {
-        return totalContactsHandled;
+    public Double getAvgAfterCallWorkTime() {
+        return avgAfterContactWorkTime;
     }
 
-    public void setTotalContactsHandled(int totalContactsHandled) {
-        this.totalContactsHandled = totalContactsHandled;
+    public void setAvgAfterCallWorkTime(Double avgAfterContactWorkTime) {
+        this.avgAfterContactWorkTime = avgAfterContactWorkTime;
     }
 
-    public int getTotalAfterCallWork() {
-        return totalAfterCallWork;
+    public Double getAvgHandleTime() {
+        return avgHandleTime;
     }
 
-    public void setTotalAfterCallWork(int totalAfterCallwork) {
-        this.totalAfterCallWork = totalAfterCallwork;
+    public void setAvgHandleTime(Double avgHandleTime) {
+        this.avgHandleTime = avgHandleTime;
     }
 
-    public float getAdherencePercentage() {
-        return adherencePercentage;
+    public Double getAvgAbandonTime() {
+        return avgAbandonTime;
     }
 
-    public void setAdherencePercentage(float adherencePercentage) {
-        this.adherencePercentage = adherencePercentage;
+    public void setAvgAbandonTime(Double avgAbandonTime) {
+        this.avgAbandonTime = avgAbandonTime;
+    }
+
+    public Double getAvgHoldTime() {
+        return avgHoldTime;
+    }
+
+    public void setAvgHoldTime(Double avgHoldTime) {
+        this.avgHoldTime = avgHoldTime;
     }
 
     public User getAgent() {
@@ -74,5 +92,13 @@ public class AgentPerformance {
 
     public void setAgent(User agent) {
         this.agent = agent;
+    }
+
+    public Note getNotes() {
+        return note;
+    }
+
+    public void setNotes(Note note) {
+        this.note = note;
     }
 }

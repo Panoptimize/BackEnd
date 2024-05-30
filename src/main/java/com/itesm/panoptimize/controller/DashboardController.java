@@ -1,15 +1,11 @@
 package com.itesm.panoptimize.controller;
 
-
-import com.itesm.panoptimize.dto.connect.GetMetricResponseDTO;
 import com.itesm.panoptimize.dto.dashboard.*;
 import com.itesm.panoptimize.model.Notification;
-import com.itesm.panoptimize.dto.dashboard.DashMetricData;
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
 import com.itesm.panoptimize.dto.performance.AgentPerformanceDTO;
-import com.itesm.panoptimize.service.DashboardService;
 
-import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
+import com.itesm.panoptimize.service.DashboardService;
 import com.itesm.panoptimize.service.CalculateSatisfactionService;
 
 import com.itesm.panoptimize.dto.performance.PerformanceDTO;
@@ -21,14 +17,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpHeaders;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -41,34 +29,27 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
-import software.amazon.awssdk.thirdparty.jackson.core.JsonProcessingException;
+
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
 import java.util.*;
 
 import java.util.List;
-
 
 @RestController
 @RequestMapping("/dashboard")
 public class DashboardController {
     private final CalculateSatisfactionService satisfactionService;
     private final DashboardService dashboardService;
-    private final CalculatePerformanceService calculatePerformanceService;
 
     @Autowired
-    public DashboardController(DashboardService dashboardService, CalculateSatisfactionService satisfactionService, CalculatePerformanceService calculatePerformanceService) {
+    public DashboardController(DashboardService dashboardService, CalculateSatisfactionService satisfactionService) {
         this.dashboardService = dashboardService;
         this.satisfactionService = satisfactionService;
-        this.calculatePerformanceService = calculatePerformanceService;
     }
-
-
     @Operation(summary = "Download the dashboard data", description = "Download the dashboard data by time frame, agent and workspace number")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -82,7 +63,7 @@ public class DashboardController {
                     content = @Content),
     })
 
-    
+
     @PostMapping("/data/download")
     public ResponseEntity<Resource> downloadData(@RequestBody DashboardDTO dashboardDTO) throws IOException {
         Path pathFile = Paths.get("../utils/dummy.txt").toAbsolutePath().normalize();
@@ -105,6 +86,10 @@ public class DashboardController {
         List<CallMetricsDTO> metrics = satisfactionService.getCallMetrics();
         return ResponseEntity.ok(satisfactionService.calculateSatisfaction(metrics));
     }
+    @Autowired
+    private DashboardService apiClient;
+    @Autowired
+    private DashboardService metricService;
 
     @Operation(summary = "Get the metrics data", description = "Get the metrics data by time frame, agent and workspace number")
     @ApiResponses(value = {
@@ -118,33 +103,27 @@ public class DashboardController {
                     description = "Data not found",
                     content = @Content),
     })
-    @PostMapping("/metrics")
-    public ResponseEntity<MetricResponseDTO> getMetrics(@Valid @RequestBody DashboardDTO dashboardDTO) {
+    @PostMapping("/combined-metrics")
+    public ResponseEntity<Map<String, Object>> getCombinedMetrics(@Valid @RequestBody DashboardDTO dashboardDTO) {
+        Map<String, Object> combinedMetrics = new HashMap<>();
+
+        // Call the first service method
+        Mono<Map<String, Integer>> valuesMono = apiClient.getMetricResults(dashboardDTO).map(metricService::extractValues);
+        valuesMono.subscribe(values -> combinedMetrics.putAll(values));
+        // Call the second service method
         MetricResponseDTO metricsData = dashboardService.getMetricsData(dashboardDTO);
+        combinedMetrics.put("avgHoldTime", metricsData.getAvgHoldTime());
+        combinedMetrics.put("firstContactResolution", metricsData.getFirstContactResolution());
+        combinedMetrics.put("abandonmentRate", metricsData.getAbandonmentRate());
+        combinedMetrics.put("serviceLevel", metricsData.getServiceLevel());
+        combinedMetrics.put("agentScheduleAdherence", metricsData.getAgentScheduleAdherence());
+        combinedMetrics.put("avgSpeedOfAnswer", metricsData.getAvgSpeedOfAnswer());
 
-        return ResponseEntity.ok(metricsData);
-    }
+        // Call the activity service
+        ActivityResponseDTO activityData = dashboardService.getActivity(dashboardDTO);
+        combinedMetrics.put("activities", activityData.getActivities());
 
-    //Performance
-    @Operation(summary = "Download the dashboard data", description = "Download the dashboard data by time frame, agent and workspace number")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Calculated Performance data succesfully",
-                    content = {
-                            @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = PerformanceDTO.class))
-                    }),
-            @ApiResponse(responseCode = "404",
-                    description = "Data not found or calculated incorrectly.",
-                    content = @Content),
-    })
-
-
-
-
-    @PostMapping("/performance")
-    public List<AgentPerformanceDTO> getMetricsData(@RequestBody PerformanceDTO performanceDTO) {
-        return calculatePerformanceService.getMetricsData(performanceDTO);
+        return ResponseEntity.ok(combinedMetrics);
     }
 
     @GetMapping("/Notifications")
@@ -177,11 +156,6 @@ public class DashboardController {
         return ResponseEntity.ok(dashboardService.updateNotification(id, notification));
     }
 
-    @PostMapping("/activity")
-    public ResponseEntity<ActivityResponseDTO> getActivity(@RequestBody DashboardDTO dashboardDTO) {
-        ActivityResponseDTO response = dashboardService.getActivity(dashboardDTO);
-        return ResponseEntity.ok(response);
-    }
 
     @GetMapping("/filters/{instanceId}")
     public ResponseEntity<DashboardFiltersDTO> getFilters(@PathVariable String instanceId) {
@@ -192,5 +166,26 @@ public class DashboardController {
         return ResponseEntity.ok(filters);
     }
 
+    @Autowired
+    private CalculatePerformanceService calculatePerformanceService;
+
+    //Performance
+    @Operation(summary = "Download the dashboard data", description = "Download the dashboard data by time frame, agent and workspace number")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Calculated Performance data succesfully",
+                    content = {
+                            @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = PerformanceDTO.class))
+                    }),
+            @ApiResponse(responseCode = "404",
+                    description = "Data not found or calculated incorrectly.",
+                    content = @Content),
+    })
+    @PostMapping("/performance")
+    public ResponseEntity<List<AgentPerformanceDTO>> getPerformance(@RequestBody PerformanceDTO performanceDTO) {
+        List<AgentPerformanceDTO> performanceData = calculatePerformanceService.getMetricsData(performanceDTO);
+        return ResponseEntity.ok(performanceData);
+    }
 
 }

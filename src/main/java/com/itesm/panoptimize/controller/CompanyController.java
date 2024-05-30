@@ -22,12 +22,9 @@ import java.util.List;
 public class CompanyController {
 
     private final CompanyService companyService;
-    private final ModelMapper modelMapper;
 
-    @Autowired
-    public CompanyController(CompanyService companyService, ModelMapper modelMapper) {
+    public CompanyController(CompanyService companyService) {
         this.companyService = companyService;
-        this.modelMapper = modelMapper;
     }
 
     @Operation(summary = "Get all companies")

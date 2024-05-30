@@ -1,14 +1,15 @@
 package com.itesm.panoptimize.service;
 
-import com.itesm.panoptimize.dto.connect.*;
-import com.itesm.panoptimize.dto.connect.Collection;
-import com.itesm.panoptimize.dto.connect.MetricInterval;
-import com.itesm.panoptimize.dto.connect.Threshold;
+import com.itesm.panoptimize.dto.contact.*;
 import com.itesm.panoptimize.dto.dashboard.*;
+
+import com.itesm.panoptimize.dto.dashboard.AWSObjDTO;
+import com.itesm.panoptimize.dto.dashboard.DashboardFiltersDTO;
+import com.itesm.panoptimize.dto.dashboard.MetricResponseDTO;
+
 import com.itesm.panoptimize.model.Notification;
 import com.itesm.panoptimize.repository.NotificationRepository;
 import com.itesm.panoptimize.util.Constants;
-import com.itesm.panoptimize.dto.contact.MetricResultDTO;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
@@ -17,14 +18,18 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
+import reactor.core.publisher.Mono;
 import software.amazon.awssdk.services.connect.ConnectClient;
 import software.amazon.awssdk.services.connect.model.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.itesm.panoptimize.util.Constants.roundMetric;
 
 @Service
 public class DashboardService {
-    private static final long INTERVAL_CHECK = 7;
+    private static final long INTERVAL_CHECK = 3;
 
     private final ConnectClient connectClient;
     private final NotificationRepository notificationRepository;
@@ -155,16 +160,125 @@ public class DashboardService {
         }
 
         double averageSpeedOfAnswer = metricsData.get("SUM_HANDLE_TIME") / metricsData.get("CONTACTS_HANDLED");
+        Double averageHoldTimeRounded = roundMetric(metricsData.get("AVG_HOLD_TIME"));
+        Double percentageFirstContactResolution = roundMetric(metricsData.get("PERCENT_CASES_FIRST_CONTACT_RESOLVED"));
+        Double abandonmentRateRounded = roundMetric(metricsData.get("ABANDONMENT_RATE"));
+        Double serviceLevelRounded = roundMetric(metricsData.get("SERVICE_LEVEL"));
+        Double scheduleAdherenceRounded = roundMetric(metricsData.get("AGENT_SCHEDULE_ADHERENCE"));
+        Double averageSpeedOfAnswerRounded = roundMetric(averageSpeedOfAnswer);
 
         return new
                 MetricResponseDTO(
-                metricsData.get("AVG_HOLD_TIME"),
-                metricsData.get("PERCENT_CASES_FIRST_CONTACT_RESOLVED"),
-                metricsData.get("ABANDONMENT_RATE"),
-                metricsData.get("SERVICE_LEVEL"),
-                metricsData.get("AGENT_SCHEDULE_ADHERENCE"),
-                averageSpeedOfAnswer
+                averageHoldTimeRounded,
+                percentageFirstContactResolution,
+                abandonmentRateRounded,
+                serviceLevelRounded,
+                scheduleAdherenceRounded,
+                averageSpeedOfAnswerRounded
         );
+    }
+
+    // Get the current number of agents on each channel
+    public Mono<MetricResultsDTO> getMetricResults(@NotNull DashboardDTO dashboardDTO) {
+        String instanceId = dashboardDTO.getInstanceId();
+        String routingProfile = dashboardDTO.getRoutingProfiles()[0];
+        List<Channel> channels = Arrays.asList(Channel.VOICE, Channel.CHAT);
+        List<String> queueIds = getAllQueueIds(instanceId);
+        Filters filters = Filters.builder()
+                //.routingProfiles(Collections.singletonList(routingProfile))
+                .queues(queueIds)
+                .channels(channels)
+                //.routingStepExpressions(Collections.emptyList())
+                .build();
+
+        GetCurrentMetricDataRequest request = GetCurrentMetricDataRequest.builder()
+                .instanceId(instanceId)
+                .filters(filters)
+                .currentMetrics(CurrentMetric.builder()
+                        .name(CurrentMetricName.AGENTS_ON_CONTACT)
+                        .unit(Unit.COUNT)
+                        .build())
+                .groupings(Grouping.CHANNEL)
+                .build();
+        System.out.println("Request: " + request);
+
+        try {
+            GetCurrentMetricDataResponse response = connectClient.getCurrentMetricData(request);
+            MetricResultsDTO result = convertToDTO(response);
+            System.out.println("Response: " + response);
+            System.out.println("Result: " + result);
+            return Mono.just(result);
+        } catch (ConnectException e) {
+            return Mono.empty();
+        }
+    }
+
+    //Converts the raw channel response into the DTO
+    private MetricResultsDTO convertToDTO(GetCurrentMetricDataResponse response) {
+        MetricResultsDTO dto = new MetricResultsDTO();
+
+
+        List<MetricResultDTO> metricResultDTOs = response.metricResults().stream().map(metricResult -> {
+            MetricResultDTO metricResultDTO = new MetricResultDTO();
+
+
+            DimensionDTO dimensionDTO = new DimensionDTO();
+            dimensionDTO.setChannel(metricResult.dimensions().channel().toString());
+            metricResultDTO.setDimensions(dimensionDTO);
+
+
+            List<CollectionDTO> collectionDTOs = metricResult.collections().stream().map(collection -> {
+                CollectionDTO collectionDTO = new CollectionDTO();
+
+
+                MetricDTO metricDTO = new MetricDTO();
+                metricDTO.setName(collection.metric().name().toString());
+                metricDTO.setUnit(collection.metric().unit().toString());
+                collectionDTO.setMetric(metricDTO);
+
+
+                collectionDTO.setValue(collection.value().intValue());
+
+                return collectionDTO;
+            }).collect(Collectors.toList());
+
+            metricResultDTO.setCollections(collectionDTOs);
+            return metricResultDTO;
+        }).collect(Collectors.toList());
+
+        dto.setMetricResults(metricResultDTOs);
+        dto.setNextToken(response.nextToken());
+        return dto;
+    }
+
+    //Extracts the number of agents on each channel and returns it as a map with the desired format
+    public Map<String, Integer> extractValues(MetricResultsDTO metricResults) {
+        Map<String, Integer> values = new HashMap<>();
+        if (metricResults == null || metricResults.getMetricResults() == null) {
+            return values;
+        }
+
+        for (MetricResultDTO metricResult : metricResults.getMetricResults()) {
+            if (metricResult.getCollections() != null) {
+                for (CollectionDTO collection : metricResult.getCollections()) {
+                    String channel = metricResult.getDimensions().getChannel().toLowerCase();
+                    values.put(channel, collection.getValue());
+                }
+            }
+        }
+        return values;
+    }
+
+    private List<String> getAllQueueIds(String instanceId) {
+        ListQueuesRequest listQueuesRequest = ListQueuesRequest.builder()
+                .instanceId(instanceId)
+                .build();
+
+        ListQueuesResponse listQueuesResponse = connectClient.listQueues(listQueuesRequest);
+
+        return listQueuesResponse.queueSummaryList().stream()
+                .map(QueueSummary::id)
+                .collect(Collectors.toList());
     }
 
     public List<Notification> getNotifications() {
@@ -186,10 +300,9 @@ public class DashboardService {
                 .orElseThrow(() -> new IllegalStateException(
                         "Notification with id " + id + " does not exist"
                 ));
-        notificationToUpdate.setDateTime(notification.getDateTime());
+        notificationToUpdate.setCreatedAt(notification.getCreatedAt());
         notificationToUpdate.setDescription(notification.getDescription());
         notificationToUpdate.setUser(notification.getUser());
-        notificationToUpdate.setContact(notification.getContact());
         notificationRepository.save(notificationToUpdate);
         return notificationToUpdate;
     }
@@ -268,4 +381,6 @@ public class DashboardService {
 
         return activityResponseDTO;
     }
+
+
 }

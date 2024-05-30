@@ -1,7 +1,6 @@
 package com.itesm.panoptimize.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
 
 import java.util.Set;
 
@@ -16,7 +15,7 @@ public class User {
     @Column(name = "connect_id", nullable = false, unique = true)
     private String connectId;
 
-    @Column(name = "firebase_id", nullable = false, unique = true)
+    @Column(name = "firebase_id")
     private String firebaseId;
 
     @Column(nullable = false)
@@ -28,30 +27,31 @@ public class User {
     @Column(name = "image_path")
     private String imagePath;
 
-    @Column(name = "routing_profile_id", nullable = false)
-    private String routingProfileId;
-
     @Column(name = "can_switch", nullable = false)
     private Boolean canSwitch = true;
 
     @ManyToOne
-    @JoinColumn(name = "company_id", nullable = false)
+    @JoinColumn(name = "company_id", nullable = false, foreignKey = @ForeignKey(name = "company_has_users"))
     private Company company;
 
     @ManyToOne
-    @JoinColumn(name = "user_type_id", nullable = false)
+    @JoinColumn(name = "user_type_id", nullable = false, foreignKey = @ForeignKey(name = "user_has_user_type"))
     private UserType userType;
 
     @ManyToMany
     @JoinTable(
             name = "agents_have_supervisors",
-            joinColumns = @JoinColumn(name = "agent_id"),
-            inverseJoinColumns = @JoinColumn(name = "supervisor_id")
+            joinColumns = @JoinColumn(name = "agent_id", foreignKey = @ForeignKey(name = "agents_have_supervisors")),
+            inverseJoinColumns = @JoinColumn(name = "supervisor_id", foreignKey = @ForeignKey(name = "supervisors_have_agents"))
     )
     private Set<User> supervisors;
 
     @ManyToMany(mappedBy = "supervisors")
     private Set<User> agents;
+
+    @ManyToOne
+    @JoinColumn(name = "routing_profile_id", nullable = false, foreignKey = @ForeignKey(name = "user_has_routing_profile"))
+    private RoutingProfile routingProfile;
 
     // Getters and Setters
     public Integer getId() {
@@ -102,12 +102,12 @@ public class User {
         this.imagePath = imagePath;
     }
 
-    public String getRoutingProfileId() {
-        return routingProfileId;
+    public RoutingProfile getRoutingProfile() {
+        return routingProfile;
     }
 
-    public void setRoutingProfileId(String routingProfileId) {
-        this.routingProfileId = routingProfileId;
+    public void setRoutingProfile(RoutingProfile routingProfileId) {
+        this.routingProfile = routingProfileId;
     }
 
     public boolean isCanSwitch() {
