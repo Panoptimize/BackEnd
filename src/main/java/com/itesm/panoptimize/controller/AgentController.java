@@ -5,7 +5,6 @@ import com.itesm.panoptimize.dto.dashboard.DashboardFiltersDTO;
 import com.itesm.panoptimize.dto.agent.AgentResponseDTO;
 import com.itesm.panoptimize.model.*;
 import com.itesm.panoptimize.service.AgentListService;
-import com.itesm.panoptimize.service.DashboardService;
 import com.itesm.panoptimize.service.FeedbackService;
 import com.itesm.panoptimize.service.UserService;
 import com.itesm.panoptimize.service.AgentListService;
@@ -34,7 +33,6 @@ import java.util.List;
 public class AgentController {
 
     private final UserService userService;
-    private final ModelMapper modelMapper;
     private final FeedbackService feedbackService;
 
     private final AgentListService agentListService;
@@ -42,14 +40,9 @@ public class AgentController {
     @Autowired
     public AgentController(UserService userService, ModelMapper modelMapper, FeedbackService feedbackService, AgentListService agentListService, AgentListService agentsService) {
         this.userService = userService;
-        this.modelMapper = modelMapper;
         this.feedbackService = feedbackService;
         this.agentListService = agentListService;
         this.agentsService = agentsService;
-    }
-
-    private AgentDTO convertToDTO(User user) {
-        return modelMapper.map(user, AgentDTO.class);
     }
 
     @Operation(summary = "Obtener todos los agentes", description = "Obtener todos los agentes registrados en el sistema" )
@@ -133,14 +126,14 @@ public class AgentController {
         return ResponseEntity.ok(userService.updateAgentPerformance(id, agentPerformance));
     }
     @GetMapping("/agent/feedback/{id}")
-    public ResponseEntity<Feedback> getFeedback(@PathVariable("id") Integer id){
-        Feedback feedback = feedbackService.getFeedbackById(id);
-        return new ResponseEntity<>(feedback, HttpStatus.OK);
+    public ResponseEntity<Note> getFeedback(@PathVariable("id") Integer id){
+        Note note = feedbackService.getFeedbackById(id);
+        return new ResponseEntity<>(note, HttpStatus.OK);
     }
     @PostMapping("/agent/feedback/new")
     public ResponseEntity<String> addFeedback(){
-        Feedback feedback = new Feedback();
-        feedbackService.addFeedback(feedback);
+        Note note = new Note();
+        feedbackService.addFeedback(note);
         return new ResponseEntity<>("Feedback added", HttpStatus.OK);
     }
     @DeleteMapping("/agent/feedback/delete/{id}")
@@ -149,8 +142,8 @@ public class AgentController {
         return new ResponseEntity<>("Feedback deleted", HttpStatus.OK);
     }
     @PutMapping("/agent/feedback/update/{id}")
-    public ResponseEntity<Feedback> updateFeedback(@PathVariable Integer id, @RequestBody Feedback feedback) {
-        return ResponseEntity.ok(feedbackService.updateFeedback(id, feedback));
+    public ResponseEntity<Note> updateFeedback(@PathVariable Integer id, @RequestBody Note note) {
+        return ResponseEntity.ok(feedbackService.updateFeedback(id, note));
     }
 
     @GetMapping("/list/{instanceId}")

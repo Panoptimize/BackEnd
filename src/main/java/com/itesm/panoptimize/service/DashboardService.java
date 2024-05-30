@@ -13,8 +13,6 @@ import com.itesm.panoptimize.util.Constants;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -302,10 +300,9 @@ public class DashboardService {
                 .orElseThrow(() -> new IllegalStateException(
                         "Notification with id " + id + " does not exist"
                 ));
-        notificationToUpdate.setDateTime(notification.getDateTime());
+        notificationToUpdate.setCreatedAt(notification.getCreatedAt());
         notificationToUpdate.setDescription(notification.getDescription());
         notificationToUpdate.setUser(notification.getUser());
-        notificationToUpdate.setContact(notification.getContact());
         notificationRepository.save(notificationToUpdate);
         return notificationToUpdate;
     }

@@ -15,6 +15,9 @@ public class UserType {
     @Column(name = "user_type_name", nullable = false, unique = true, length = 10)
     private String typeName;
 
+    @Column(name = "security_profile_id", nullable = false, length = 36)
+    private String securityProfileId;
+
     @OneToMany(mappedBy = "userType")
     private Set<User> users;
 
@@ -40,5 +43,13 @@ public class UserType {
 
     public void setUsers(Set<User> users) {
         this.users = users;
+    }
+
+    public String getSecurityProfileId() {
+        return securityProfileId;
+    }
+
+    public void setSecurityProfileId(String securityProfileId) {
+        this.securityProfileId = securityProfileId;
     }
 }
