@@ -184,7 +184,7 @@ public class DashboardController {
     })
     @PostMapping("/performance")
     public ResponseEntity<List<AgentPerformanceDTO>> getPerformance(@RequestBody PerformanceDTO performanceDTO) {
-        List<AgentPerformanceDTO> performanceData = calculatePerformanceService.getMetricsData(performanceDTO);
+        List<AgentPerformanceDTO> performanceData = calculatePerformanceService.getPerformances(performanceDTO.getStartDate(), performanceDTO.getEndDate(), performanceDTO.getInstanceId());
         return ResponseEntity.ok(performanceData);
     }
 

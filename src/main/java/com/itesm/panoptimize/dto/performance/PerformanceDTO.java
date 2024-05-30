@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class PerformanceDTO {
@@ -11,26 +12,26 @@ public class PerformanceDTO {
     @Size(min = 36, max = 36, message = "Instance ID must be 36 characters long")
     private String instanceId;
     @NotNull(message = "Start date is required")
-    private Date startDate;
+    private LocalDate startDate;
     @NotNull(message = "End date is required")
-    private Date endDate;
+    private LocalDate endDate;
     private String[] routingProfiles;
     // UUID format
     private String[] queues;
 
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
 
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
 

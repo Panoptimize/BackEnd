@@ -1,78 +1,94 @@
 package com.itesm.panoptimize.model;
 
+
 import jakarta.persistence.*;
 
 import java.util.Date;
+import java.time.LocalDate;
+
 
 @Entity
 @Table(name = "agent_performance")
 public class AgentPerformance {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "agent_performance_id")
-    private Integer id;
+    private int id;
 
-    @Column(nullable = false)
-    private Date date;
+    @Column(name = "date")
+    private LocalDate performanceDate;
 
-    @Column(name = "total_contacts_handled", nullable = false)
-    private int totalContactsHandled;
+    @Column(name = "avg_after_contact_work_time")
+    private Double avgAfterContactWorkTime;
 
-    @Column(name = "total_after_call_work", nullable = false)
-    private int totalAfterCallWork;
+    @Column(name = "avg_handle_time")
+    private Double avgHandleTime;
 
-    @Column(name = "adherence_percentage", nullable = false)
-    private float adherencePercentage;
+    @Column(name = "avg_abandon_time")
+    private Double avgAbandonTime;
 
-    @ManyToOne
-    @JoinColumn(name = "agent_id", nullable = false)
-    private User agent;
+    @Column(name = "avg_hold_time")
+    private Double avgHoldTime;
 
-    public Integer getId() {
+    @Column(name = "agent_id", length = 20)
+    private String agentId;
+
+    // Getters and Setters
+
+    public int getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(int id) {
         this.id = id;
     }
 
-    public Date getDate() {
-        return date;
+    public LocalDate getPerformanceDate() {
+        return performanceDate;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    public void setPerformanceDate(LocalDate date) {
+        this.performanceDate = date;
     }
 
-    public int getTotalContactsHandled() {
-        return totalContactsHandled;
+    public Double getAvgAfterContactWorkTime() {
+        return avgAfterContactWorkTime;
     }
 
-    public void setTotalContactsHandled(int totalContactsHandled) {
-        this.totalContactsHandled = totalContactsHandled;
+    public void setAvgAfterContactWorkTime(Double avgAfterContactWorkTime) {
+        this.avgAfterContactWorkTime = avgAfterContactWorkTime;
     }
 
-    public int getTotalAfterCallWork() {
-        return totalAfterCallWork;
+    public Double getAvgHandleTime() {
+        return avgHandleTime;
     }
 
-    public void setTotalAfterCallWork(int totalAfterCallwork) {
-        this.totalAfterCallWork = totalAfterCallwork;
+    public void setAvgHandleTime(Double avgHandleTime) {
+        this.avgHandleTime = avgHandleTime;
     }
 
-    public float getAdherencePercentage() {
-        return adherencePercentage;
+    public Double getAvgAbandonTime() {
+        return avgAbandonTime;
     }
 
-    public void setAdherencePercentage(float adherencePercentage) {
-        this.adherencePercentage = adherencePercentage;
+    public void setAvgAbandonTime(Double avgAbandonTime) {
+        this.avgAbandonTime = avgAbandonTime;
     }
 
-    public User getAgent() {
-        return agent;
+    public Double getAvgHoldTime() {
+        return avgHoldTime;
     }
 
-    public void setAgent(User agent) {
-        this.agent = agent;
+    public void setAvgHoldTime(Double avgHoldTime) {
+        this.avgHoldTime = avgHoldTime;
+    }
+
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
     }
 }

@@ -141,11 +141,12 @@ public class UserService {
         AgentPerformance agentPerformanceToUpdate = agentPerformanceRepository.findById(id)
                 .orElse(null);
         if (agentPerformanceToUpdate != null) {
-            agentPerformanceToUpdate.setAgent(agentPerformance.getAgent());
-            agentPerformanceToUpdate.setDate(agentPerformance.getDate());
-            agentPerformanceToUpdate.setTotalContactsHandled(agentPerformance.getTotalContactsHandled());
-            agentPerformanceToUpdate.setTotalAfterCallWork(agentPerformance.getTotalAfterCallWork());
-            agentPerformanceToUpdate.setAdherencePercentage(agentPerformance.getAdherencePercentage());
+            agentPerformanceToUpdate.setAgentId(agentPerformance.getAgentId());
+            agentPerformanceToUpdate.setPerformanceDate(agentPerformance.getPerformanceDate());
+            agentPerformanceToUpdate.setAvgAfterContactWorkTime(agentPerformance.getAvgAfterContactWorkTime());
+            agentPerformanceToUpdate.setAvgHandleTime(agentPerformance.getAvgHandleTime());
+            agentPerformanceToUpdate.setAvgAbandonTime(agentPerformance.getAvgAbandonTime());
+            agentPerformanceToUpdate.setAvgHoldTime(agentPerformance.getAvgHoldTime());
             agentPerformanceRepository.save(agentPerformanceToUpdate);
         }
         return agentPerformanceToUpdate;
