@@ -1,6 +1,8 @@
 package com.itesm.panoptimize.controller;
 
+import com.itesm.panoptimize.dto.contact.ContactDTO;
 import com.itesm.panoptimize.dto.contact_event.ContactEventDTO;
+import com.itesm.panoptimize.service.ConnectEventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -16,18 +18,23 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/connect")
 public class ConnectEventController {
-    private static final Logger logger = LoggerFactory.getLogger(ConnectEventController.class);
+
+    private final ConnectEventService connectEventService;
+
+    public ConnectEventController(ConnectEventService connectEventService) {
+        this.connectEventService = connectEventService;
+    }
 
     @Operation(summary = "Handle Amazon Connect event")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Event received")
     })
     @PostMapping("/event")
-    public ResponseEntity<String> handleConnectEvent(@RequestBody ContactEventDTO event) {
-        logger.info("Received Amazon Connect event: {}", event);
-
-        // Process the event here
-
-        return new ResponseEntity<>("Event received", HttpStatus.OK);
+    public ResponseEntity<ContactDTO> handleConnectEvent(@RequestBody ContactEventDTO event) {
+        ContactDTO contactDTO = connectEventService.handleConnectEvent(event);
+        if (contactDTO != null) {
+            return new ResponseEntity<>(contactDTO, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }

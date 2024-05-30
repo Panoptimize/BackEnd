@@ -12,9 +12,8 @@ import jakarta.persistence.*;
 })
 public class Contact {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "contact_id")
-    private Integer id;
+    @Column(name = "contact_id", length = 36, nullable = false, unique = true, columnDefinition = "CHAR(36)")
+    private String id;
 
     @Column(name = "satisfaction")
     private Integer satisfaction;
@@ -23,11 +22,11 @@ public class Contact {
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "contact_has_user"))
     private User user;
 
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(String id) {
         this.id = id;
     }
 
