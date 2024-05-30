@@ -15,7 +15,7 @@ public class User {
     @Column(name = "connect_id", nullable = false, unique = true)
     private String connectId;
 
-    @Column(name = "firebase_id", nullable = false, unique = true)
+    @Column(name = "firebase_id")
     private String firebaseId;
 
     @Column(nullable = false)
