@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull;
 
 public class CreateContactDTO {
     @NotNull(message = "Id is required")
-    String id;
+    private String id;
     @NotNull(message = "Satisfaction is required")
     private Integer satisfaction;
     @NotNull(message = "AgentId is required")
