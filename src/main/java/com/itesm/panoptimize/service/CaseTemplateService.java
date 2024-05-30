@@ -46,7 +46,7 @@ public class CaseTemplateService {
         return caseTemplateRepository.findAll(pageable).map(this::convertToDTO);
     }
 
-    public CaseTemplateDTO caseTemplateDTO(Integer id, UpdateCaseTemplateDTO caseTemplateDTO) {
+    public CaseTemplateDTO updateCaseTemplateDTO(Integer id, UpdateCaseTemplateDTO caseTemplateDTO) {
         CaseTemplate caseTemplate = caseTemplateRepository.findById(id).orElse(null);
         if (caseTemplate == null) {
             return null;

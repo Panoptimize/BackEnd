@@ -26,8 +26,8 @@ public class RoutingProfileService {
         return modelMapper.map(routingProfile, RoutingProfileDTO.class);
     }
 
-    private RoutingProfile convertToEntity(CreateRoutingProfileDTO routingProfileDTO) {
-        return modelMapper.map(routingProfileDTO, RoutingProfile.class);
+    private RoutingProfile convertToEntity(CreateRoutingProfileDTO createRoutingProfileDTO) {
+        return modelMapper.map(createRoutingProfileDTO, RoutingProfile.class);
     }
 
     public RoutingProfileDTO getRoutingProfile(String id){

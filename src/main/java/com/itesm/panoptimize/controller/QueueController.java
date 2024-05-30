@@ -58,7 +58,7 @@ public class QueueController {
             @ApiResponse(responseCode = "404", description = "Queue not deleted")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<QueueDTO> deteleteQueue(@PathVariable String id){
+    public ResponseEntity<?> deleteQueue(@PathVariable String id){
         queueService.deleteQueue(id);
         return ResponseEntity.noContent().build();
     }

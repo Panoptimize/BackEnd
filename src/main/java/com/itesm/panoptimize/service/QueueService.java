@@ -25,8 +25,8 @@ public class QueueService {
 
     private QueueDTO convertToDTO(Queue queue) { return modelMapper.map(queue, QueueDTO.class); }
 
-    private Queue convertToEntity(QueueCreateDTO queueDTO){
-        return modelMapper.map(queueDTO, Queue.class);
+    private Queue convertToEntity(QueueCreateDTO queueCreateDTO){
+        return modelMapper.map(queueCreateDTO, Queue.class);
     }
 
     public QueueDTO getQueue(String id){

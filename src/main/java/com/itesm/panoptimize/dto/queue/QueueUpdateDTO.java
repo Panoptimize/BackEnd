@@ -1,6 +1,9 @@
 package com.itesm.panoptimize.dto.queue;
 
+import jakarta.validation.constraints.NotNull;
+
 public class QueueUpdateDTO {
+    @NotNull(message = "The name cannot be null")
     private String name;
 
     public QueueUpdateDTO(String name) {
