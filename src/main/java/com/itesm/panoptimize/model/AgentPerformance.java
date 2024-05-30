@@ -19,8 +19,8 @@ public class AgentPerformance {
     @CreationTimestamp
     private Instant createdAt;
 
-    @Column(name = "avg_after_call_work_time", nullable = false)
-    private Double avgAfterCallWorkTime;
+    @Column(name = "avg_after_contact_work_time", nullable = false)
+    private Double avgAfterContactWorkTime;
 
     @Column(name = "avg_handle_time", nullable = false)
     private Double avgHandleTime;
@@ -55,11 +55,11 @@ public class AgentPerformance {
     }
 
     public Double getAvgAfterCallWorkTime() {
-        return avgAfterCallWorkTime;
+        return avgAfterContactWorkTime;
     }
 
-    public void setAvgAfterCallWorkTime(Double avgAfterCallWork) {
-        this.avgAfterCallWorkTime = avgAfterCallWork;
+    public void setAvgAfterCallWorkTime(Double avgAfterContactWorkTime) {
+        this.avgAfterContactWorkTime = avgAfterContactWorkTime;
     }
 
     public Double getAvgHandleTime() {

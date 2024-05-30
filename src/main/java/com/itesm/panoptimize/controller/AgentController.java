@@ -25,21 +25,15 @@ import org.springframework.web.bind.annotation.*;
 public class AgentController {
 
     private final UserService userService;
-    private final ModelMapper modelMapper;
     private final FeedbackService feedbackService;
 
     private final AgentListService agentListService;
 
     @Autowired
-    public AgentController(UserService userService, ModelMapper modelMapper, FeedbackService feedbackService, AgentListService agentListService) {
+    public AgentController(UserService userService, FeedbackService feedbackService, AgentListService agentListService) {
         this.userService = userService;
-        this.modelMapper = modelMapper;
         this.feedbackService = feedbackService;
         this.agentListService = agentListService;
-    }
-
-    private AgentDTO convertToDTO(User user) {
-        return modelMapper.map(user, AgentDTO.class);
     }
 
     @Operation(summary = "Obtener todos los agentes", description = "Obtener todos los agentes registrados en el sistema" )
