@@ -31,18 +31,18 @@ public class User {
     private Boolean canSwitch = true;
 
     @ManyToOne
-    @JoinColumn(name = "company_id", nullable = false)
+    @JoinColumn(name = "company_id", nullable = false, foreignKey = @ForeignKey(name = "company_has_users"))
     private Company company;
 
     @ManyToOne
-    @JoinColumn(name = "user_type_id", nullable = false)
+    @JoinColumn(name = "user_type_id", nullable = false, foreignKey = @ForeignKey(name = "user_has_user_type"))
     private UserType userType;
 
     @ManyToMany
     @JoinTable(
             name = "agents_have_supervisors",
-            joinColumns = @JoinColumn(name = "agent_id"),
-            inverseJoinColumns = @JoinColumn(name = "supervisor_id")
+            joinColumns = @JoinColumn(name = "agent_id", foreignKey = @ForeignKey(name = "agents_have_supervisors")),
+            inverseJoinColumns = @JoinColumn(name = "supervisor_id", foreignKey = @ForeignKey(name = "supervisors_have_agents"))
     )
     private Set<User> supervisors;
 
@@ -50,7 +50,7 @@ public class User {
     private Set<User> agents;
 
     @ManyToOne
-    @JoinColumn(name = "routing_profile_id", nullable = false)
+    @JoinColumn(name = "routing_profile_id", nullable = false, foreignKey = @ForeignKey(name = "user_has_routing_profile"))
     private RoutingProfile routingProfile;
 
     // Getters and Setters

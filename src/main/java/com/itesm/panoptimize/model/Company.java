@@ -15,20 +15,26 @@ public class Company {
     @Column(name = "company_id")
     private Integer id;
 
-    @Column(name = "name", nullable = false, length = 20, unique = true)
+    @Column(name = "name", nullable = false, length = 50, unique = true)
     private String name;
 
-    @Column(name = "slogan", length = 50)
+    @Column(name = "slogan", length = 100)
     private String slogan;
 
     @Column(name = "logo_path", length = 100, unique = true)
     private String logoPath;
+
+    @OneToOne(mappedBy = "company", fetch = FetchType.LAZY)
+    private Instance instance;
 
     @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
     private Set<User> users;
 
     @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
     private Set<RoutingProfile> routingProfiles;
+
+    @OneToMany(mappedBy = "company")
+    private Set<CaseTemplate> caseTemplates;
 
     public Integer getId() {
         return id;
@@ -40,6 +46,14 @@ public class Company {
 
     public String getName() {
         return name;
+    }
+
+    public Set<CaseTemplate> getCaseTemplates() {
+        return caseTemplates;
+    }
+
+    public void setCaseTemplates(Set<CaseTemplate> caseTemplates) {
+        this.caseTemplates = caseTemplates;
     }
 
     public void setName(String name) {
@@ -76,5 +90,13 @@ public class Company {
 
     public void setRoutingProfiles(Set<RoutingProfile> routingProfiles) {
         this.routingProfiles = routingProfiles;
+    }
+
+    public Instance getInstance() {
+        return instance;
+    }
+
+    public void setInstance(Instance instance) {
+        this.instance = instance;
     }
 }

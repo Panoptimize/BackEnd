@@ -8,7 +8,7 @@ import java.util.Set;
 @Table(name = "queue")
 public class Queue {
     @Id
-    @Column(name = "quque_id")
+    @Column(name = "queue_id")
     private String id;
 
     @Column(name = "name", nullable = false)
@@ -17,8 +17,8 @@ public class Queue {
     @ManyToMany
     @JoinTable(
             name = "routing_profiles_have_queues",
-            joinColumns = @JoinColumn(name = "queue_id"),
-            inverseJoinColumns = @JoinColumn(name = "routing_profile_id")
+            joinColumns = @JoinColumn(name = "queue_id", referencedColumnName = "queue_id", foreignKey = @ForeignKey(name = "queues_have_routing_profiles")),
+            inverseJoinColumns = @JoinColumn(name = "routing_profile_id", foreignKey = @ForeignKey(name = "routing_profiles_have_queues"))
     )
     private Set<RoutingProfile> routingProfiles;
 

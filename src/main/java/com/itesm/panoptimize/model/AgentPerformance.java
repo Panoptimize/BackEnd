@@ -1,23 +1,26 @@
 package com.itesm.panoptimize.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
-import java.util.Date;
 
 @Entity
-@Table(name = "agent_performance")
+@Table(name = "agent_performance", indexes = {
+        @Index(name = "agent_created_at_index", columnList = "created_at")
+})
 public class AgentPerformance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "agent_performance_id")
     private Integer id;
 
-    @Column(nullable = false)
-    private Instant date;
+    @Column(name = "created_at", nullable = false)
+    @CreationTimestamp
+    private Instant createdAt;
 
     @Column(name = "avg_after_call_work_time", nullable = false)
-    private Double avgAfterCallWork;
+    private Double avgAfterCallWorkTime;
 
     @Column(name = "avg_handle_time", nullable = false)
     private Double avgHandleTime;
@@ -29,8 +32,11 @@ public class AgentPerformance {
     private Double avgHoldTime;
 
     @ManyToOne
-    @JoinColumn(name = "agent_id", nullable = false)
+    @JoinColumn(name = "agent_id", nullable = false, foreignKey = @ForeignKey(name = "agent_has_performance"))
     private User agent;
+
+    @OneToOne(mappedBy = "agentPerformance")
+    private Note note;
 
     public Integer getId() {
         return id;
@@ -40,43 +46,43 @@ public class AgentPerformance {
         this.id = id;
     }
 
-    public Instant getDate() {
-        return date;
+    public Instant getCreatedAt() {
+        return createdAt;
     }
 
-    public void setDate(Instant date) {
-        this.date = date;
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
     }
 
-    public double getAvgAfterCallWork() {
-        return avgAfterCallWork;
+    public Double getAvgAfterCallWorkTime() {
+        return avgAfterCallWorkTime;
     }
 
-    public void setAvgAfterCallWork(double avgAfterCallWork) {
-        this.avgAfterCallWork = avgAfterCallWork;
+    public void setAvgAfterCallWorkTime(Double avgAfterCallWork) {
+        this.avgAfterCallWorkTime = avgAfterCallWork;
     }
 
-    public double getAvgHandleTime() {
+    public Double getAvgHandleTime() {
         return avgHandleTime;
     }
 
-    public void setAvgHandleTime(double avgHandleTime) {
+    public void setAvgHandleTime(Double avgHandleTime) {
         this.avgHandleTime = avgHandleTime;
     }
 
-    public double getAvgAbandonTime() {
+    public Double getAvgAbandonTime() {
         return avgAbandonTime;
     }
 
-    public void setAvgAbandonTime(double avgAbandonTime) {
+    public void setAvgAbandonTime(Double avgAbandonTime) {
         this.avgAbandonTime = avgAbandonTime;
     }
 
-    public double getAvgHoldTime() {
+    public Double getAvgHoldTime() {
         return avgHoldTime;
     }
 
-    public void setAvgHoldTime(double avgHoldTime) {
+    public void setAvgHoldTime(Double avgHoldTime) {
         this.avgHoldTime = avgHoldTime;
     }
 
@@ -86,5 +92,13 @@ public class AgentPerformance {
 
     public void setAgent(User agent) {
         this.agent = agent;
+    }
+
+    public Note getNotes() {
+        return note;
+    }
+
+    public void setNotes(Note note) {
+        this.note = note;
     }
 }

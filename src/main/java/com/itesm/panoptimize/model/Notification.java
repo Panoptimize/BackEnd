@@ -1,33 +1,45 @@
 package com.itesm.panoptimize.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
 
 @Entity
-@Table(name = "notification")
+@Table(name = "notification", indexes = {
+        @Index(name = "notification_created_at_index", columnList = "created_at")
+})
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "notification_id")
     private Integer id;
 
-    @Column(name = "date_time")
-    private Date dateTime;
+    @CreationTimestamp
+    @Column(name = "created_at")
+    private Date createdAt;
 
     @Column(name = "description")
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "notification_has_user"))
     private User user;
 
-    public Date getDateTime() {
-        return dateTime;
+    public Integer getId() {
+        return id;
     }
 
-    public void setDateTime(Date dateTime) {
-        this.dateTime = dateTime;
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
     public String getDescription() {
@@ -45,5 +57,4 @@ public class Notification {
     public void setUser(User user) {
         this.user = user;
     }
-
 }

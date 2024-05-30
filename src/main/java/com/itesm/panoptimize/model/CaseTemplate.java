@@ -1,24 +1,19 @@
 package com.itesm.panoptimize.model;
 
-
 import jakarta.persistence.*;
 
-import java.util.UUID;
-
 @Entity
-@Table(name = "instance", indexes = {
-        @Index(name = "instance_name_index", columnList = "name", unique = true)
-})
-public class Instance {
+@Table(name = "case_template")
+public class CaseTemplate {
     @Id
-    @Column(name = "instance_id", nullable = false, length = 36)
+    @Column(name = "case_template_id", length = 36)
     private String id;
 
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(name = "name", nullable = false, length = 50)
     private String name;
 
-    @OneToOne
-    @JoinColumn(name = "company_id", nullable = false, foreignKey = @ForeignKey(name = "company_has_instance"))
+    @ManyToOne
+    @JoinColumn(name = "company_id", foreignKey = @ForeignKey(name = "case_template_has_company"))
     private Company company;
 
     public String getId() {
@@ -45,4 +40,3 @@ public class Instance {
         this.company = company;
     }
 }
-

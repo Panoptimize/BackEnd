@@ -1,30 +1,23 @@
 package com.itesm.panoptimize.service;
 
 import com.itesm.panoptimize.dto.agent.AgentCreateDTO;
-import com.itesm.panoptimize.dto.agent.AgentDTO;
 import com.itesm.panoptimize.dto.agent.AgentUpdateDTO;
 import com.itesm.panoptimize.dto.agent.AgentUserDTO;
 import com.itesm.panoptimize.dto.supervisor.SupervisorCreateDTO;
-import com.itesm.panoptimize.dto.supervisor.SupervisorDTO;
 import com.itesm.panoptimize.dto.supervisor.SupervisorUpdateDTO;
 import com.itesm.panoptimize.dto.supervisor.SupervisorUserDTO;
 import com.itesm.panoptimize.model.AgentPerformance;
+import com.itesm.panoptimize.model.RoutingProfile;
 import com.itesm.panoptimize.model.User;
 import com.itesm.panoptimize.repository.AgentPerformanceRepository;
 import com.itesm.panoptimize.repository.UserRepository;
 import com.itesm.panoptimize.repository.UserTypeRepository;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @Service
 public class UserService {
@@ -117,7 +110,11 @@ public class UserService {
         }
 
         if(agentUserDTO.getRoutingProfileId() != null) {
-            agentToUpdate.setRoutingProfile(agentUserDTO.getRoutingProfileId());
+            RoutingProfile routingProfile = new RoutingProfile();
+            routingProfile.setRoutingProfileId(agentUserDTO.getRoutingProfileId());
+
+            agentToUpdate.setRoutingProfile(routingProfile);
+
         }
 
         if(agentUserDTO.isCanSwitch() != null) {
@@ -142,8 +139,8 @@ public class UserService {
                 .orElse(null);
         if (agentPerformanceToUpdate != null) {
             agentPerformanceToUpdate.setAgent(agentPerformance.getAgent());
-            agentPerformanceToUpdate.setDate(agentPerformance.getDate());
-            agentPerformanceToUpdate.setAvgAfterCallWork(agentPerformance.getAvgAfterCallWork());
+            agentPerformanceToUpdate.setCreatedAt(agentPerformance.getCreatedAt());
+            agentPerformanceToUpdate.setAvgAfterCallWorkTime(agentPerformance.getAvgAfterCallWorkTime());
             agentPerformanceToUpdate.setAvgAbandonTime(agentPerformance.getAvgAbandonTime());
             agentPerformanceToUpdate.setAvgHandleTime(agentPerformance.getAvgHandleTime());
             agentPerformanceToUpdate.setAvgHoldTime(agentPerformance.getAvgHoldTime());
@@ -193,7 +190,10 @@ public class UserService {
         }
 
         if(supervisorUserDTO.getRoutingProfileId() != null) {
-            supervisorToUpdate.setRoutingProfile(supervisorUserDTO.getRoutingProfileId());
+            RoutingProfile routingProfile = new RoutingProfile();
+            routingProfile.setRoutingProfileId(supervisorUserDTO.getRoutingProfileId());
+
+            supervisorToUpdate.setRoutingProfile(routingProfile);
         }
 
         if(supervisorUserDTO.isCanSwitch() != null) {

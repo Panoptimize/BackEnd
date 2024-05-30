@@ -25,7 +25,7 @@ Our security team will respond to your report within 48 hours to acknowledge rec
 1. Investigation: Upon receiving a vulnerability report, we will investigate the issue to confirm its validity and impact.
 2. Fix Development: Once confirmed, our team will develop a fix for the vulnerability. We aim to do this within 7 days of confirmation.
 3. Patch Release: We will release a patch and notify the community through our official channels, including the GitHub repository and mailing list.
-4. Acknowledgment: We will acknowledge the reporter of the vulnerability, giving them credit in our release notes unless they prefer to remain anonymous.
+4. Acknowledgment: We will acknowledge the reporter of the vulnerability, giving them credit in our release note unless they prefer to remain anonymous.
 
 ## Security best practices
 - Keep your dependencies up to date.

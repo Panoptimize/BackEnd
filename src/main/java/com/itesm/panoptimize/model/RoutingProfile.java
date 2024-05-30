@@ -15,17 +15,17 @@ public class RoutingProfile {
     private String name;
 
     @ManyToOne
-    @JoinColumn(name = "company_id", nullable = false)
+    @JoinColumn(name = "company_id", nullable = false, foreignKey = @ForeignKey(name = "company_has_routing_profiles"))
     private Company company;
 
-    @OneToMany(mappedBy = "routingProfileId")
+    @OneToMany(mappedBy = "routingProfile")
     private Set<User> users;
 
     @ManyToMany
     @JoinTable(
             name = "routing_profiles_have_queues",
-            joinColumns = @JoinColumn(name = "routing_profile_id"),
-            inverseJoinColumns = @JoinColumn(name = "queue_id")
+            joinColumns = @JoinColumn(name = "routing_profile_id", foreignKey = @ForeignKey(name = "routing_profiles_have_queues")),
+            inverseJoinColumns = @JoinColumn(name = "queue_id", foreignKey = @ForeignKey(name = "queues_have_routing_profiles"))
     )
     private Set<Queue> queues;
 

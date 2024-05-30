@@ -2,25 +2,23 @@ package com.itesm.panoptimize.model;
 
 import com.itesm.panoptimize.enumerator.Priority;
 import jakarta.persistence.*;
-import org.hibernate.annotations.Collate;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.CurrentTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 
 @Entity
-@Table(name = "notes")
-public class Notes {
+@Table(name = "note")
+public class Note {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "feedback_id")
+    @Column(name = "note_id")
     private Integer id;
 
     @Column(name = "name", nullable = false, length = 20)
     private String name;
 
-    @Column(name = "description", nullable = false, length = 255)
+    @Column(name = "description", nullable = false)
     private String description;
 
     @Enumerated(EnumType.STRING)
@@ -38,9 +36,9 @@ public class Notes {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    @ManyToOne
-    @JoinColumn(name = "agent_id")
-    private User user;
+    @OneToOne
+    @JoinColumn(name = "agent_performance_id", foreignKey = @ForeignKey(name = "agent_performance_has_note"))
+    private AgentPerformance agentPerformance;
 
     public Integer getId() {
         return id;
@@ -74,35 +72,35 @@ public class Notes {
         this.priority = priority;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public boolean isSolved() {
+    public Boolean getSolved() {
         return solved;
     }
 
-    public void setSolved(boolean solved) {
+    public void setSolved(Boolean solved) {
         this.solved = solved;
     }
 
-    public Instant getCreated_at() {
+    public Instant getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreated_at(Instant created_at) {
-        this.createdAt = created_at;
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
     }
 
-    public Instant getUpdated_at() {
+    public Instant getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdated_at(Instant updated_at) {
-        this.updatedAt = updated_at;
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public AgentPerformance getAgentPerformance() {
+        return agentPerformance;
+    }
+
+    public void setAgentPerformance(AgentPerformance agentPerformance) {
+        this.agentPerformance = agentPerformance;
     }
 }

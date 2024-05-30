@@ -123,14 +123,14 @@ public class AgentController {
         return ResponseEntity.ok(userService.updateAgentPerformance(id, agentPerformance));
     }
     @GetMapping("/agent/feedback/{id}")
-    public ResponseEntity<Notes> getFeedback(@PathVariable("id") Integer id){
-        Notes notes = feedbackService.getFeedbackById(id);
-        return new ResponseEntity<>(notes, HttpStatus.OK);
+    public ResponseEntity<Note> getFeedback(@PathVariable("id") Integer id){
+        Note note = feedbackService.getFeedbackById(id);
+        return new ResponseEntity<>(note, HttpStatus.OK);
     }
     @PostMapping("/agent/feedback/new")
     public ResponseEntity<String> addFeedback(){
-        Notes notes = new Notes();
-        feedbackService.addFeedback(notes);
+        Note note = new Note();
+        feedbackService.addFeedback(note);
         return new ResponseEntity<>("Feedback added", HttpStatus.OK);
     }
     @DeleteMapping("/agent/feedback/delete/{id}")
@@ -139,8 +139,8 @@ public class AgentController {
         return new ResponseEntity<>("Feedback deleted", HttpStatus.OK);
     }
     @PutMapping("/agent/feedback/update/{id}")
-    public ResponseEntity<Notes> updateFeedback(@PathVariable Integer id, @RequestBody Notes notes) {
-        return ResponseEntity.ok(feedbackService.updateFeedback(id, notes));
+    public ResponseEntity<Note> updateFeedback(@PathVariable Integer id, @RequestBody Note note) {
+        return ResponseEntity.ok(feedbackService.updateFeedback(id, note));
     }
 
     @GetMapping("/list/{instanceId}")
