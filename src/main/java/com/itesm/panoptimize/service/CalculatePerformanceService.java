@@ -117,6 +117,54 @@ public class CalculatePerformanceService {
         return agentPerformancesList;
     }
 
+    public int calculateSingleAgentPerformance(String routingProfile, PerformanceDTO performanceDTO) {
+        List<MetricV2> metricList = new ArrayList<>(Arrays.asList(
+                MetricV2.builder().name("AVG_HANDLE_TIME").build(),
+                MetricV2.builder().name("AVG_AFTER_CONTACT_WORK_TIME").build(),
+                MetricV2.builder().name("AVG_HOLD_TIME").build(),
+                MetricV2.builder().name("AVG_ABANDON_TIME").build()
+        ));
+
+        performanceDTO.setRoutingProfiles(new String[]{routingProfile});
+        Map<String, String> agentMap = getAgentIdsAndNames(performanceDTO.getInstanceId());
+
+        if (agentMap.isEmpty()) {
+            return 0;
+        }
+
+        String agentId = agentMap.keySet().iterator().next(); // Obtener el primer agente
+        GetMetricDataV2Response response = getKPIs(performanceDTO, metricList, agentId);
+
+        double avgHandleTime = 0.0;
+        double avgAfterContactWorkTime = 0.0;
+        double avgHoldTime = 0.0;
+        double avgAbandonTime = 0.0;
+
+        for (MetricResultV2 result : response.metricResults()) {
+            for (MetricDataV2 data : result.collections()) {
+                double value = getValue(data, data.metric().name());
+
+                switch (data.metric().name()) {
+                    case "AVG_HANDLE_TIME":
+                        avgHandleTime += value;
+                        break;
+                    case "AVG_AFTER_CONTACT_WORK_TIME":
+                        avgAfterContactWorkTime += value;
+                        break;
+                    case "AVG_HOLD_TIME":
+                        avgHoldTime += value;
+                        break;
+                    case "AVG_ABANDON_TIME":
+                        avgAbandonTime += value;
+                        break;
+                }
+            }
+        }
+
+        double performanceScore = calculateAgentPerformanceScore(avgHandleTime, avgAfterContactWorkTime, avgHoldTime, avgAbandonTime);
+        return (int) performanceScore;
+    }
+
     private Map<String, String> getAgentIdsAndNames(String instanceId) {
         Map<String, String> agentMap = new HashMap<>();
         String nextToken = null;

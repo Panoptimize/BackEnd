@@ -8,8 +8,6 @@ public class AgentUpdateDTO {
 
     private String connectId;
 
-    private String firebaseId;
-
     private String email;
 
     private String fullName;
@@ -38,14 +36,6 @@ public class AgentUpdateDTO {
 
     public void setConnectId(String connectId) {
         this.connectId = connectId;
-    }
-
-    public String getFirebaseId() {
-        return firebaseId;
-    }
-
-    public void setFirebaseId(String firebaseId) {
-        this.firebaseId = firebaseId;
     }
 
     public String getEmail() {
