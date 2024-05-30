@@ -3,6 +3,8 @@ package com.itesm.panoptimize.service;
 import com.itesm.panoptimize.dto.routing_profile.CreateRoutingProfileDTO;
 import com.itesm.panoptimize.dto.routing_profile.RoutingProfileDTO;
 import com.itesm.panoptimize.dto.routing_profile.UpdateRoutingProfileDTO;
+import com.itesm.panoptimize.model.Company;
+import com.itesm.panoptimize.model.Queue;
 import com.itesm.panoptimize.model.RoutingProfile;
 import com.itesm.panoptimize.repository.RoutingProfileRepository;
 import org.modelmapper.ModelMapper;
@@ -10,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 public class RoutingProfileService {
@@ -39,7 +44,24 @@ public class RoutingProfileService {
     }
 
     public RoutingProfileDTO createRoutingProfile(CreateRoutingProfileDTO routingProfileDTO){
-        return convertToDTO(routingProfileRepository.save(convertToEntity(routingProfileDTO)));
+        RoutingProfile routingProfileToCreate = new RoutingProfile();
+        routingProfileToCreate.setName(routingProfileDTO.getName());
+        routingProfileToCreate.setRoutingProfileId(routingProfileDTO.getId());
+
+        Company company = new Company();
+        company.setId(routingProfileDTO.getCompanyId());
+        routingProfileToCreate.setCompany(company);
+
+        Set<Queue> queues = new HashSet<>();
+        routingProfileDTO.getQueues().forEach(queue -> {
+            Queue queueToAdd = new Queue();
+            queueToAdd.setId(queue);
+            queues.add(queueToAdd);
+        });
+
+        routingProfileToCreate.setQueues(queues);
+
+        return convertToDTO(routingProfileRepository.save(routingProfileToCreate));
     }
 
     public void deleteRoutingProfile(String id){

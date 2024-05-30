@@ -29,6 +29,14 @@ public class RoutingProfile {
     )
     private Set<Queue> queues;
 
+    public Set<Queue> getQueues() {
+        return queues;
+    }
+
+    public void setQueues(Set<Queue> queues) {
+        this.queues = queues;
+    }
+
     public String getRoutingProfileId() {
         return routingProfileId;
     }

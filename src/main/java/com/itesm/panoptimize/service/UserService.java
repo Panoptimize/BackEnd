@@ -93,10 +93,6 @@ public class UserService {
             agentToUpdate.setConnectId(agentUserDTO.getConnectId());
         }
 
-        if(agentUserDTO.getFirebaseId() != null) {
-            agentToUpdate.setFirebaseId(agentUserDTO.getFirebaseId());
-        }
-
         if(agentUserDTO.getEmail() != null) {
             agentToUpdate.setEmail(agentUserDTO.getEmail());
         }

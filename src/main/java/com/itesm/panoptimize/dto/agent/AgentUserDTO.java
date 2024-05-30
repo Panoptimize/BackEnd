@@ -7,8 +7,6 @@ public class AgentUserDTO {
     private Integer id;
     @NotNull(message = "ConnectId is required")
     private String connectId;
-    @NotNull(message = "FirebaseId is required")
-    private String firebaseId;
     @NotNull(message = "Email is required")
     private String email;
     @NotNull(message = "FullName is required")
@@ -35,14 +33,6 @@ public class AgentUserDTO {
 
     public void setConnectId(String connectId) {
         this.connectId = connectId;
-    }
-
-    public String getFirebaseId() {
-        return firebaseId;
-    }
-
-    public void setFirebaseId(String firebaseId) {
-        this.firebaseId = firebaseId;
     }
 
     public String getEmail() {

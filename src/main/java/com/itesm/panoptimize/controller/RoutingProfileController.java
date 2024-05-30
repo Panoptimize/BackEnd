@@ -48,7 +48,7 @@ public class RoutingProfileController {
             @ApiResponse(responseCode = "200", description = "Routing profile created"),
             @ApiResponse(responseCode = "404", description = "Routing profile not created")
     })
-    @PostMapping("/{id}")
+    @PostMapping("/")
     public ResponseEntity<RoutingProfileDTO> createRoutingProfile(@RequestBody CreateRoutingProfileDTO createRoutingProfileDTO){
         return ResponseEntity.ok(routingProfileService.createRoutingProfile(createRoutingProfileDTO));
     }

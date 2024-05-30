@@ -10,12 +10,6 @@ public class RoutingProfileDTO {
     @NotNull(message = "Company Id is required")
     private Integer companyId;
 
-    public RoutingProfileDTO(String routingProfileId, String name, Integer companyId){
-        this.routingProfileId = routingProfileId;
-        this.name = name;
-        this.companyId = companyId;
-    }
-
     public String getRoutingProfileId() {
         return routingProfileId;
     }

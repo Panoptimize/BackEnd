@@ -2,6 +2,8 @@ package com.itesm.panoptimize.dto.routing_profile;
 
 import jakarta.validation.constraints.NotNull;
 
+import java.util.List;
+
 public class CreateRoutingProfileDTO {
 
     @NotNull(message = "Id is required")
@@ -9,7 +11,9 @@ public class CreateRoutingProfileDTO {
     @NotNull(message = "Name is required")
     private String name;
     @NotNull(message = "Company id is required")
-    private String companyId;
+    private Integer companyId;
+    @NotNull(message = "Queues are required")
+    private List<String> queues;
 
     public @NotNull(message = "Id is required") String getId() {
         return id;
@@ -19,11 +23,11 @@ public class CreateRoutingProfileDTO {
         this.id = id;
     }
 
-    public @NotNull(message = "Company id is required") String getCompanyId() {
+    public @NotNull(message = "Company id is required") Integer getCompanyId() {
         return companyId;
     }
 
-    public void setCompanyId(@NotNull(message = "Company id is required") String companyId) {
+    public void setCompanyId(@NotNull(message = "Company id is required") Integer companyId) {
         this.companyId = companyId;
     }
 
@@ -33,5 +37,13 @@ public class CreateRoutingProfileDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public List<String> getQueues() {
+        return queues;
+    }
+
+    public void setQueues(List<String> queues) {
+        this.queues = queues;
     }
 }

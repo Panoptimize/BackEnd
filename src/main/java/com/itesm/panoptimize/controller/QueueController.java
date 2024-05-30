@@ -47,7 +47,7 @@ public class QueueController {
             @ApiResponse(responseCode = "200", description = "Queue created"),
             @ApiResponse(responseCode = "404", description = "Queue not created")
     })
-    @PostMapping("/{id}")
+    @PostMapping("/")
     public ResponseEntity<QueueDTO> createQueue(@RequestBody QueueCreateDTO queueCreateDTO){
         return ResponseEntity.ok(queueService.createQueue(queueCreateDTO));
     }
