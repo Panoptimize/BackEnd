@@ -30,7 +30,7 @@ public class DownloadController {
 
         String homedir = System.getProperty("user.home");
         Date date = new Date();
-        String file = "DataReport" + date.getTime() + ".xlsx";
+        String file = "DataReport_" + date.getTime() + ".xlsx";
         String filePath = Paths.get(homedir, "Downloads", file).toString();
 
         downloadService.getFinalReport(filePath);

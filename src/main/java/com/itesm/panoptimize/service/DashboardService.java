@@ -183,25 +183,30 @@ public class DashboardService {
         String instanceId = dashboardDTO.getInstanceId();
         String routingProfile = dashboardDTO.getRoutingProfiles()[0];
         List<Channel> channels = Arrays.asList(Channel.VOICE, Channel.CHAT);
+        List<String> queueIds = getAllQueueIds(instanceId);
         Filters filters = Filters.builder()
-                .routingProfiles(Collections.singletonList(routingProfile))
+                //.routingProfiles(Collections.singletonList(routingProfile))
+                .queues(queueIds)
                 .channels(channels)
-                .routingStepExpressions(Collections.emptyList())
+                //.routingStepExpressions(Collections.emptyList())
                 .build();
 
         GetCurrentMetricDataRequest request = GetCurrentMetricDataRequest.builder()
                 .instanceId(instanceId)
                 .filters(filters)
                 .currentMetrics(CurrentMetric.builder()
-                        .name(CurrentMetricName.AGENTS_ONLINE)
+                        .name(CurrentMetricName.AGENTS_ON_CONTACT)
                         .unit(Unit.COUNT)
                         .build())
                 .groupings(Grouping.CHANNEL)
                 .build();
+        System.out.println("Request: " + request);
 
         try {
             GetCurrentMetricDataResponse response = connectClient.getCurrentMetricData(request);
             MetricResultsDTO result = convertToDTO(response);
+            System.out.println("Response: " + response);
+            System.out.println("Result: " + result);
             return Mono.just(result);
         } catch (ConnectException e) {
             return Mono.empty();
@@ -262,6 +267,18 @@ public class DashboardService {
             }
         }
         return values;
+    }
+
+    private List<String> getAllQueueIds(String instanceId) {
+        ListQueuesRequest listQueuesRequest = ListQueuesRequest.builder()
+                .instanceId(instanceId)
+                .build();
+
+        ListQueuesResponse listQueuesResponse = connectClient.listQueues(listQueuesRequest);
+
+        return listQueuesResponse.queueSummaryList().stream()
+                .map(QueueSummary::id)
+                .collect(Collectors.toList());
     }
 
     public List<Notification> getNotifications() {
