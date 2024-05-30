@@ -1,6 +1,7 @@
 package com.itesm.panoptimize.controller;
 
 import com.itesm.panoptimize.dto.contact.ContactDTO;
+import com.itesm.panoptimize.dto.contact.CreateContactDTO;
 import com.itesm.panoptimize.service.ContactService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,7 +22,7 @@ public class ContactController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<ContactDTO> createContact(ContactDTO contactDTO) {
+    public ResponseEntity<ContactDTO> createContact(CreateContactDTO contactDTO) {
         return ResponseEntity.ok(contactService.createContact(contactDTO));
     }
 
