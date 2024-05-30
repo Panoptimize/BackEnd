@@ -1,8 +1,7 @@
 package com.itesm.panoptimize.dto.contact;
 
 import jakarta.validation.constraints.NotNull;
-
-import java.util.List;
+import software.amazon.awssdk.services.connect.model.SearchCriteria;
 
 public class SearchContactsDTO {
 
@@ -66,175 +65,6 @@ public class SearchContactsDTO {
         this.timeRange = timeRange;
     }
 
-    public static class SearchCriteria {
-        private List<String> agentHierarchyGroups;
-        private List<String> agentIds;
-        private List<String> channels;
-        private ContactAnalysis contactAnalysis;
-        private List<String> initiationMethods;
-        private List<String> queueIds;
-        private SearchableContactAttributes searchableContactAttributes;
-
-        // Getters and Setters
-
-        public List<String> getAgentHierarchyGroups() {
-            return agentHierarchyGroups;
-        }
-
-        public void setAgentHierarchyGroups(List<String> agentHierarchyGroups) {
-            this.agentHierarchyGroups = agentHierarchyGroups;
-        }
-
-        public List<String> getAgentIds() {
-            return agentIds;
-        }
-
-        public void setAgentIds(List<String> agentIds) {
-            this.agentIds = agentIds;
-        }
-
-        public List<String> getChannels() {
-            return channels;
-        }
-
-        public void setChannels(List<String> channels) {
-            this.channels = channels;
-        }
-
-        public ContactAnalysis getContactAnalysis() {
-            return contactAnalysis;
-        }
-
-        public void setContactAnalysis(ContactAnalysis contactAnalysis) {
-            this.contactAnalysis = contactAnalysis;
-        }
-
-        public List<String> getInitiationMethods() {
-            return initiationMethods;
-        }
-
-        public void setInitiationMethods(List<String> initiationMethods) {
-            this.initiationMethods = initiationMethods;
-        }
-
-        public List<String> getQueueIds() {
-            return queueIds;
-        }
-
-        public void setQueueIds(List<String> queueIds) {
-            this.queueIds = queueIds;
-        }
-
-        public SearchableContactAttributes getSearchableContactAttributes() {
-            return searchableContactAttributes;
-        }
-
-        public void setSearchableContactAttributes(SearchableContactAttributes searchableContactAttributes) {
-            this.searchableContactAttributes = searchableContactAttributes;
-        }
-    }
-
-    public static class ContactAnalysis {
-        private Transcript transcript;
-        private String matchType;
-
-        // Getters and Setters
-
-        public Transcript getTranscript() {
-            return transcript;
-        }
-
-        public void setTranscript(Transcript transcript) {
-            this.transcript = transcript;
-        }
-
-        public String getMatchType() {
-            return matchType;
-        }
-
-        public void setMatchType(String matchType) {
-            this.matchType = matchType;
-        }
-    }
-
-    public static class Transcript {
-        private List<Criteria> criteria;
-        private String matchType;
-
-        // Getters and Setters
-
-        public List<Criteria> getCriteria() {
-            return criteria;
-        }
-
-        public void setCriteria(List<Criteria> criteria) {
-            this.criteria = criteria;
-        }
-
-        public String getMatchType() {
-            return matchType;
-        }
-
-        public void setMatchType(String matchType) {
-            this.matchType = matchType;
-        }
-    }
-
-    public static class Criteria {
-        private String matchType;
-        private String participantRole;
-        private List<String> searchText;
-
-        // Getters and Setters
-
-        public String getMatchType() {
-            return matchType;
-        }
-
-        public void setMatchType(String matchType) {
-            this.matchType = matchType;
-        }
-
-        public String getParticipantRole() {
-            return participantRole;
-        }
-
-        public void setParticipantRole(String participantRole) {
-            this.participantRole = participantRole;
-        }
-
-        public List<String> getSearchText() {
-            return searchText;
-        }
-
-        public void setSearchText(List<String> searchText) {
-            this.searchText = searchText;
-        }
-    }
-
-    public static class SearchableContactAttributes {
-        private List<Criteria> criteria;
-        private String matchType;
-
-        // Getters and Setters
-
-        public List<Criteria> getCriteria() {
-            return criteria;
-        }
-
-        public void setCriteria(List<Criteria> criteria) {
-            this.criteria = criteria;
-        }
-
-        public String getMatchType() {
-            return matchType;
-        }
-
-        public void setMatchType(String matchType) {
-            this.matchType = matchType;
-        }
-    }
-
     public static class Sort {
         private String fieldName;
         private String order;
@@ -259,25 +89,25 @@ public class SearchContactsDTO {
     }
 
     public static class TimeRange {
-        private Long endTime;
-        private Long startTime;
+        private String endTime;
+        private String startTime;
         private String type;
 
         // Getters and Setters
 
-        public Long getEndTime() {
+        public String getEndTime() {
             return endTime;
         }
 
-        public void setEndTime(Long endTime) {
+        public void setEndTime(String endTime) {
             this.endTime = endTime;
         }
 
-        public Long getStartTime() {
+        public String getStartTime() {
             return startTime;
         }
 
-        public void setStartTime(Long startTime) {
+        public void setStartTime(String startTime) {
             this.startTime = startTime;
         }
 

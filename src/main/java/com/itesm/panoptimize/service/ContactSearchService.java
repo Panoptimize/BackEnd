@@ -8,6 +8,10 @@ import software.amazon.awssdk.services.connect.model.SearchContactsRequest;
 import software.amazon.awssdk.services.connect.model.SearchContactsResponse;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,17 +19,21 @@ import java.util.stream.Collectors;
 public class ContactSearchService {
 
     private final ConnectClient connectClient;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public ContactSearchService(ConnectClient connectClient) {
         this.connectClient = connectClient;
     }
 
     public SearchContactsResponseDTO searchContacts(SearchContactsDTO searchContactsDTO) {
+        Long startTimeEpoch = convertToEpoch(searchContactsDTO.getTimeRange().getStartTime());
+        Long endTimeEpoch = convertToEpoch(searchContactsDTO.getTimeRange().getEndTime());
+
         SearchContactsRequest.Builder requestBuilder = SearchContactsRequest.builder()
                 .instanceId(searchContactsDTO.getInstanceId())
                 .timeRange(t -> t
-                        .startTime(Instant.ofEpochMilli(searchContactsDTO.getTimeRange().getStartTime()))
-                        .endTime(Instant.ofEpochMilli(searchContactsDTO.getTimeRange().getEndTime()))
+                        .startTime(Instant.ofEpochMilli(startTimeEpoch))
+                        .endTime(Instant.ofEpochMilli(endTimeEpoch))
                         .type(searchContactsDTO.getTimeRange().getType()));
 
         if (searchContactsDTO.getMaxResults() != null) {
@@ -54,5 +62,14 @@ public class ContactSearchService {
         responseDTO.setTotalCount(response.totalCount());
 
         return responseDTO;
+    }
+
+    private Long convertToEpoch(String date) {
+        try {
+            LocalDate localDate = LocalDate.parse(date, formatter);
+            return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Invalid date format, expected YYYY-MM-DD", e);
+        }
     }
 }
