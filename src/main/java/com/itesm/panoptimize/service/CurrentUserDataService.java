@@ -32,7 +32,12 @@ public class CurrentUserDataService {
     }
 
     private void sentimentAnalysis() {
-        
+        connectContactLensClient.listRealtimeContactAnalysisSegments(
+                r -> r.instanceId("instanceId")
+                        .contactId("contactId")
+                        .maxResults(10)
+                        .nextToken("nextToken")
+        );
     }
 
     public Object getCurrentUserData(String instanceId, Map<String, Object> requestPayload) {
