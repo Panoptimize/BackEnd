@@ -1,6 +1,6 @@
 package com.itesm.panoptimize.dto.contact_event;
 
-public class ContactEvent {
+public class ContactEventDTO {
     private String id;
     private String detailType;
     private Detail detail;

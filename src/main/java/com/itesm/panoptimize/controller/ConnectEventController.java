@@ -1,6 +1,6 @@
 package com.itesm.panoptimize.controller;
 
-import com.itesm.panoptimize.dto.contact_event.ContactEvent;
+import com.itesm.panoptimize.dto.contact_event.ContactEventDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/connect")
 public class ConnectEventController {
@@ -25,7 +23,7 @@ public class ConnectEventController {
             @ApiResponse(responseCode = "200", description = "Event received")
     })
     @PostMapping("/event")
-    public ResponseEntity<String> handleConnectEvent(@RequestBody ContactEvent event) {
+    public ResponseEntity<String> handleConnectEvent(@RequestBody ContactEventDTO event) {
         logger.info("Received Amazon Connect event: {}", event);
 
         // Process the event here
