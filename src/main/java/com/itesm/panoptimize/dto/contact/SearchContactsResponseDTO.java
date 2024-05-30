@@ -38,8 +38,10 @@ public class SearchContactsResponseDTO {
         private String contactId;
         private String channel;
         private Long initiationTimestamp;
+        private String sentiment; // Nuevo campo
+        private String agentId; // Nuevo campo
 
-        // Getters and Setters
+        // Getters y Setters
 
         public String getContactId() {
             return contactId;
@@ -63,6 +65,22 @@ public class SearchContactsResponseDTO {
 
         public void setInitiationTimestamp(Long initiationTimestamp) {
             this.initiationTimestamp = initiationTimestamp;
+        }
+
+        public String getSentiment() {
+            return sentiment;
+        }
+
+        public void setSentiment(String sentiment) {
+            this.sentiment = sentiment;
+        }
+
+        public String getAgentId() {
+            return agentId;
+        }
+
+        public void setAgentId(String agentId) {
+            this.agentId = agentId;
         }
     }
 }

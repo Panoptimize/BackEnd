@@ -52,6 +52,8 @@ public class ContactSearchService {
                     dto.setContactId(contact.id());
                     dto.setChannel(String.valueOf(contact.channel()));
                     dto.setInitiationTimestamp(contact.initiationTimestamp().toEpochMilli());
+                    dto.setSentiment("Neutral"); // Establecer el valor del Sentiment
+                    dto.setAgentId(contact.agentInfo() != null ? contact.agentInfo().id() : null); // Establecer el ID del agente
                     return dto;
                 })
                 .collect(Collectors.toList());
