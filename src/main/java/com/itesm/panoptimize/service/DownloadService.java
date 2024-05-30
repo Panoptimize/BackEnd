@@ -68,8 +68,8 @@ public class DownloadService {
         Date eDate = new Date();
 
         try {
-            sDate = dateFormat.parse("2024-05-11");
-            eDate = dateFormat.parse("2024-05-14");
+            sDate = dateFormat.parse("2024-05-02");
+            eDate = dateFormat.parse("2024-05-20");
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -136,8 +136,8 @@ public class DownloadService {
         Date eDate = new Date();
 
         try {
-            sDate = dateFormat.parse("2024-05-11");
-            eDate = dateFormat.parse("2024-05-14");
+            sDate = dateFormat.parse("2024-05-02");
+            eDate = dateFormat.parse("2024-05-20");
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -226,8 +226,8 @@ public class DownloadService {
         Date eDate = new Date();
 
         try {
-            sDate = dateFormat.parse("2024-05-10");
-            eDate = dateFormat.parse("2024-05-14");
+            sDate = dateFormat.parse("2024-05-02");
+            eDate = dateFormat.parse("2024-05-20");
         } catch (ParseException e) {
             e.printStackTrace();
         }
