@@ -6,10 +6,6 @@ keep the code in our tutorials consistent.
 
 Our overarching goals are __conciseness__, __readability__ and __simplicity__.
 
-You should also check out out [Swift](https://github.com/raywenderlich/swift-style-guide)
-and [Objective-C](https://github.com/raywenderlich/objective-c-style-guide)
-style guides too.
-
 ## Inspiration
 
 This style-guide is somewhat of a mash-up between the existing Java language
