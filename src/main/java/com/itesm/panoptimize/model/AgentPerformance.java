@@ -16,7 +16,7 @@ public class AgentPerformance {
     @Column(name = "agent_performance_id")
     private int id;
 
-    @Column(name = "date")
+    @Column(name = "created_at")
     private LocalDate performanceDate;
 
     @Column(name = "avg_after_contact_work_time")
