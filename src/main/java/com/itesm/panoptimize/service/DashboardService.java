@@ -382,5 +382,31 @@ public class DashboardService {
         return activityResponseDTO;
     }
 
+    public Map<String,Object> getDashboarData(DashboardDTO dashboardDTO) {
+        MetricResultsDTO metricResults = getMetricResults(dashboardDTO).block();
+        Map<String, Integer> values = extractValues(metricResults);
+
+        Map<String, Object> combinedMetrics = new HashMap<>();
+        combinedMetrics.put("voice", values.get("voice"));
+        combinedMetrics.put("chat", values.get("chat"));
+
+        // Call the second service method
+        MetricResponseDTO metricData = getMetricsData(dashboardDTO);
+        combinedMetrics.put("avgHoldTime", metricData.getAvgHoldTime());
+        combinedMetrics.put("firstContactResolution", metricData.getFirstContactResolution());
+        combinedMetrics.put("abandonmentRate", metricData.getAbandonmentRate());
+        combinedMetrics.put("serviceLevel", metricData.getServiceLevel());
+        combinedMetrics.put("agentScheduleAdherence", metricData.getAgentScheduleAdherence());
+        combinedMetrics.put("avgSpeedOfAnswer", metricData.getAvgSpeedOfAnswer());
+
+        // Call the activity service
+        ActivityResponseDTO activity = getActivity(dashboardDTO);
+        combinedMetrics.put("activities", activity.getActivities());
+
+        return combinedMetrics;
+    }
+
+
+
 
 }
