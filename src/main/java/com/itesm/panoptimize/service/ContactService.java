@@ -1,7 +1,9 @@
 package com.itesm.panoptimize.service;
 
 import com.itesm.panoptimize.dto.contact.ContactDTO;
+import com.itesm.panoptimize.dto.contact.CreateContactDTO;
 import com.itesm.panoptimize.model.Contact;
+import com.itesm.panoptimize.model.User;
 import com.itesm.panoptimize.repository.ContactRepository;
 import com.itesm.panoptimize.repository.UserRepository;
 import org.modelmapper.ModelMapper;
@@ -41,13 +43,15 @@ public class ContactService {
         return contactRepository.findAll(pageable).map(this::convertToDTO);
     }
 
-    public ContactDTO createContact(ContactDTO contactDTO) {
+    public ContactDTO createContact(CreateContactDTO contactDTO) {
         Contact contact = new Contact();
         contact.setId(contactDTO.getId());
         contact.setSatisfaction(contactDTO.getSatisfaction());
 
-        userRepository.connectId(contactDTO.getAgentId()).ifPresent(contact::setUser);
-
+        User agent = userRepository.connectId(contactDTO.getAgentId()).orElseThrow(
+                () -> new IllegalArgumentException("Agent not found")
+        );
+        contact.setUser(agent);
         return convertToDTO(contactRepository.save(contact));
     }
 

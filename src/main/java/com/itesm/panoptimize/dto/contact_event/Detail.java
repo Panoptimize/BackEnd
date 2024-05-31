@@ -4,8 +4,8 @@ import java.util.UUID;
 
 public class Detail {
     private String eventType;
-    private String instanceARN;
-    private UUID contactID;
+    private String instanceArn;
+    private UUID contactId;
     private String channel;
     private QueueInfo queueInfo;
     private AgentInfo agentInfo;
@@ -13,16 +13,16 @@ public class Detail {
     public String getEventType() { return eventType; }
     public void setEventType(String value) { this.eventType = value; }
 
-    public String getInstanceARN() {
-        return instanceARN;
+    public String getInstanceArn() {
+        return instanceArn;
     }
 
-    public void setInstanceARN(String instanceARN) {
-        this.instanceARN = instanceARN;
+    public void setInstanceArn(String instanceArn) {
+        this.instanceArn = instanceArn;
     }
 
-    public UUID getContactID() { return contactID; }
-    public void setContactID(UUID value) { this.contactID = value; }
+    public UUID getContactId() { return contactId; }
+    public void setContactId(UUID value) { this.contactId = value; }
 
     public String getChannel() { return channel; }
     public void setChannel(String value) { this.channel = value; }

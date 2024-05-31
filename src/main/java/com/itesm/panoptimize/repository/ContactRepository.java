@@ -13,4 +13,6 @@ import java.util.List;
  */
 @Repository
 public interface ContactRepository extends JpaRepository<Contact, String> {
+    @Query("SELECT c.satisfaction, COUNT(c) FROM Contact c GROUP BY c.satisfaction ORDER BY c.satisfaction")
+    List<Object[]> countBySatisfaction();
 }

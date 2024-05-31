@@ -3,14 +3,7 @@ package com.itesm.panoptimize.dto.user_type;
 public class UserTypeUpdateDTO {
     private Integer id;
     private String type;
-
-    public UserTypeUpdateDTO() {
-    }
-
-    public UserTypeUpdateDTO(Integer id, String type) {
-        this.id = id;
-        this.type = type;
-    }
+    private String securityProfileId;
 
     public Integer getId() {
         return id;
@@ -26,5 +19,13 @@ public class UserTypeUpdateDTO {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getSecurityProfileId() {
+        return securityProfileId;
+    }
+
+    public void setSecurityProfileId(String securityProfileId) {
+        this.securityProfileId = securityProfileId;
     }
 }

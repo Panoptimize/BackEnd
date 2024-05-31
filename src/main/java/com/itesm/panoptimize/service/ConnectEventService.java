@@ -1,14 +1,13 @@
 package com.itesm.panoptimize.service;
 
 import com.itesm.panoptimize.dto.contact.ContactDTO;
+import com.itesm.panoptimize.dto.contact.CreateContactDTO;
 import com.itesm.panoptimize.dto.contact_event.ContactEventDTO;
-import com.itesm.panoptimize.dto.contact_event.Detail;
 import com.itesm.panoptimize.util.Constants;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.connect.ConnectClient;
 import software.amazon.awssdk.services.connect.model.GetContactAttributesRequest;
 import software.amazon.awssdk.services.connect.model.GetContactAttributesResponse;
-import software.amazon.awssdk.services.connect.model.User;
 
 @Service
 public class ConnectEventService {
@@ -29,18 +28,22 @@ public class ConnectEventService {
             GetContactAttributesResponse responseAttributes = connectClient.getContactAttributes(
                     GetContactAttributesRequest
                             .builder()
-                            .instanceId(Constants.extractId(event.getDetail().getInstanceARN()))
-                            .initialContactId(event.getDetail().getContactID().toString())
+                            .instanceId(Constants.extractId(event.getDetail().getInstanceArn()))
+                            .initialContactId(event.getDetail().getContactId().toString())
                             .build()
             );
 
+            int satisfaction;
+
             if (!responseAttributes.attributes().containsKey("Satisfaction")) {
-                return null;
+                satisfaction = 3;
+            } else {
+                satisfaction = Integer.parseInt(responseAttributes.attributes().get("Satisfaction"));
             }
 
-            ContactDTO contactDTO = new ContactDTO();
-            contactDTO.setId(event.getDetail().getContactID().toString());
-            contactDTO.setSatisfaction(Integer.parseInt(responseAttributes.attributes().get("Satisfaction")));
+            CreateContactDTO contactDTO = new CreateContactDTO();
+            contactDTO.setId(event.getDetail().getContactId().toString());
+            contactDTO.setSatisfaction(satisfaction);
             contactDTO.setAgentId(Constants.extractId(event.getDetail().getAgentInfo().getAgentArn()));
 
             return contactService.createContact(contactDTO);

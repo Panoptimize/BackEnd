@@ -2,13 +2,13 @@ package com.itesm.panoptimize.dto.contact;
 
 import jakarta.validation.constraints.NotNull;
 
-public class ContactDTO {
+public class CreateContactDTO {
     @NotNull(message = "Id is required")
-    String id;
+    private String id;
     @NotNull(message = "Satisfaction is required")
     private Integer satisfaction;
     @NotNull(message = "AgentId is required")
-    private Integer agentId;
+    private String agentId;
 
     public @NotNull(message = "Id is required") String getId() {
         return id;
@@ -26,11 +26,11 @@ public class ContactDTO {
         this.satisfaction = satisfaction;
     }
 
-    public Integer getAgentId() {
+    public @NotNull(message = "AgentId is required") String getAgentId() {
         return agentId;
     }
 
-    public void setAgentId(Integer agentId) {
+    public void setAgentId(@NotNull(message = "AgentId is required") String agentId) {
         this.agentId = agentId;
     }
 }
