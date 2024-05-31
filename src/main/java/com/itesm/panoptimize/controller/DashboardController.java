@@ -106,23 +106,7 @@ public class DashboardController {
     @PostMapping("/combined-metrics")
     public ResponseEntity<Map<String, Object>> getCombinedMetrics(@Valid @RequestBody DashboardDTO dashboardDTO) {
         Map<String, Object> combinedMetrics = new HashMap<>();
-
-        // Call the first service method
-        Mono<Map<String, Integer>> valuesMono = apiClient.getMetricResults(dashboardDTO).map(metricService::extractValues);
-        valuesMono.subscribe(values -> combinedMetrics.putAll(values));
-        // Call the second service method
-        MetricResponseDTO metricsData = dashboardService.getMetricsData(dashboardDTO);
-        combinedMetrics.put("avgHoldTime", metricsData.getAvgHoldTime());
-        combinedMetrics.put("firstContactResolution", metricsData.getFirstContactResolution());
-        combinedMetrics.put("abandonmentRate", metricsData.getAbandonmentRate());
-        combinedMetrics.put("serviceLevel", metricsData.getServiceLevel());
-        combinedMetrics.put("agentScheduleAdherence", metricsData.getAgentScheduleAdherence());
-        combinedMetrics.put("avgSpeedOfAnswer", metricsData.getAvgSpeedOfAnswer());
-
-        // Call the activity service
-        ActivityResponseDTO activityData = dashboardService.getActivity(dashboardDTO);
-        combinedMetrics.put("activities", activityData.getActivities());
-
+        combinedMetrics = dashboardService.getDashboarData(dashboardDTO);
         return ResponseEntity.ok(combinedMetrics);
     }
 
