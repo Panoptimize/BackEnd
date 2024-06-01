@@ -73,4 +73,8 @@ public class NoteService {
 
         return convertToNoteDTO(noteRepository.save(note));
     }
+
+    public Page<NoteDTO> getAgentNotes(Pageable pageable, Integer agentId) {
+        return noteRepository.getNotesByAgent(agentId, pageable);
+    }
 }

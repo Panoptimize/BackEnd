@@ -52,4 +52,9 @@ public class NoteController {
         noteService.deleteNote(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/agent/{id}")
+    public ResponseEntity<Page<NoteDTO>> getAgentNotes(@PathVariable Integer id, Pageable pageable){
+        return ResponseEntity.ok(noteService.getAgentNotes(pageable, id));
+    }
 }
