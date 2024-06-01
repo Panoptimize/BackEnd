@@ -17,4 +17,8 @@ public class Constants {
         return roundMetric(metric,2);
     }
 
+    public static String extractId(String arn){
+        return arn.substring(arn.lastIndexOf('/')+1);
+    }
+
 }

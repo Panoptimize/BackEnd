@@ -1,11 +1,15 @@
 package com.itesm.panoptimize.controller;
 
+
+
 import com.itesm.panoptimize.dto.dashboard.*;
 import com.itesm.panoptimize.model.Notification;
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
 import com.itesm.panoptimize.dto.performance.AgentPerformanceDTO;
 
 import com.itesm.panoptimize.service.DashboardService;
+
+import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
 import com.itesm.panoptimize.service.CalculateSatisfactionService;
 
 import com.itesm.panoptimize.dto.performance.PerformanceDTO;
@@ -21,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,7 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
-
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -82,9 +87,9 @@ public class DashboardController {
     }
 
     @GetMapping("/customer-satisfaction")
-    public ResponseEntity<List<Integer>> calculateSatisfaction() {
-        List<CallMetricsDTO> metrics = satisfactionService.getCallMetrics();
-        return ResponseEntity.ok(satisfactionService.calculateSatisfaction(metrics));
+    public ResponseEntity<CustomerSatisfactionDTO> calculateSatisfaction() {
+        CustomerSatisfactionDTO result = satisfactionService.getSatisfactionLevels();
+        return ResponseEntity.ok(result);
     }
     @Autowired
     private DashboardService apiClient;

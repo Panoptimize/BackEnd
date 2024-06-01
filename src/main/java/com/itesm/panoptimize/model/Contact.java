@@ -1,6 +1,9 @@
 package com.itesm.panoptimize.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.Instant;
 
 /**
  * Entity representing a contact.
@@ -12,22 +15,25 @@ import jakarta.persistence.*;
 })
 public class Contact {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "contact_id")
-    private Integer id;
+    @Column(name = "contact_id", length = 36, nullable = false, unique = true, columnDefinition = "CHAR(36)")
+    private String id;
 
     @Column(name = "satisfaction")
     private Integer satisfaction;
+
+    @CreationTimestamp
+    @Column(name = "created_at")
+    private Instant createdAt;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "contact_has_user"))
     private User user;
 
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -45,5 +51,13 @@ public class Contact {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
     }
 }

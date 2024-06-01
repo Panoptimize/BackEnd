@@ -1,4 +1,4 @@
-package com.itesm.panoptimize.dto.case_template;
+package com.itesm.panoptimize.dto.casetemplate;
 
 public class UpdateCaseTemplateDTO {
     private String name;
