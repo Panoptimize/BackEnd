@@ -5,11 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itesm.panoptimize.dto.dashboard.ActivityResponseDTO;
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
 import com.itesm.panoptimize.dto.dashboard.MetricResponseDTO;
+import com.itesm.panoptimize.dto.download.DownloadDTO;
 import com.itesm.panoptimize.dto.performance.AgentPerformanceDTO;
 import com.itesm.panoptimize.dto.performance.PerformanceDTO;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xddf.usermodel.chart.*;
+import org.apache.poi.xssf.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -17,8 +19,6 @@ import reactor.core.publisher.Mono;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -42,12 +42,12 @@ public class DownloadService {
         this.dashboardService = dashboardService;
     }
 
-    public XSSFWorkbook getFinalReport(String url){
+    public XSSFWorkbook getFinalReport(String url, DownloadDTO downloadDTO) {
         XSSFWorkbook workbook = new XSSFWorkbook();
 
-        getCalculatePerformance(workbook);
-        getRestOfData(workbook);
-        getActivities(workbook);
+        getCalculatePerformance(workbook, downloadDTO);
+        getRestOfData(workbook, downloadDTO);
+        getActivities(workbook, downloadDTO);
 
 
         try (FileOutputStream outputStream = new FileOutputStream(url)) {
@@ -61,30 +61,18 @@ public class DownloadService {
 
     }
 
-    public XSSFWorkbook getCalculatePerformance(XSSFWorkbook workbook) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-        Date sDate = new Date();
-        Date eDate = new Date();
-
-        try {
-            sDate = dateFormat.parse("2024-05-02");
-            eDate = dateFormat.parse("2024-05-20");
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+    public XSSFWorkbook getCalculatePerformance(XSSFWorkbook workbook, DownloadDTO downloadDTO) {
 
         PerformanceDTO performanceDTO = new PerformanceDTO();
-        performanceDTO.setInstanceId("7c78bd60-4a9f-40e5-b461-b7a0dfaad848");
-        performanceDTO.setStartDate(sDate);
-        performanceDTO.setEndDate(eDate);
-        performanceDTO.setRoutingProfiles(new String[]{"4896ae34-a93e-41bc-8231-bf189e7628b1"});
-        performanceDTO.setQueues(new String[]{});
+        performanceDTO.setInstanceId(downloadDTO.getInstanceId());
+        performanceDTO.setStartDate(downloadDTO.getStartDate());
+        performanceDTO.setEndDate(downloadDTO.getEndDate());
+        performanceDTO.setRoutingProfiles(downloadDTO.getRoutingProfiles());
+        performanceDTO.setQueues(downloadDTO.getQueues());
 
         List<AgentPerformanceDTO> performanceData = getPerformance( performanceDTO);
-
         try{
-            JsonNode jsonArray = objectMapper.readTree(performanceData.toString());
+            JsonNode jsonArray = objectMapper.valueToTree(performanceData);
 
             if (!jsonArray.isArray()) {
                 throw new IOException("Expected an array of JSON objects");
@@ -97,7 +85,7 @@ public class DownloadService {
             int colNum = 0;
             int rowNum = 1;
 
-            headerRow.createCell(colNum++).setCellValue("Agent ID");
+            headerRow.createCell(colNum++).setCellValue("Agent name");
             headerRow.createCell(colNum++).setCellValue("Performances");
 
 
@@ -121,7 +109,38 @@ public class DownloadService {
                 sheet.autoSizeColumn(i);
             }
 
+
+            XSSFDrawing drawing = sheet.createDrawingPatriarch();
+            XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 0, rowNum + 2, 10, rowNum + 20);
+
+            XSSFChart chart = drawing.createChart(anchor);
+            chart.setTitleText("Performance per Agent");
+            chart.setTitleOverlay(false);
+
+            XDDFChartLegend legend = chart.getOrAddLegend();
+            legend.setPosition(LegendPosition.TOP_RIGHT);
+
+            XDDFCategoryAxis bottomAxis = chart.createCategoryAxis(AxisPosition.BOTTOM);
+            bottomAxis.setTitle("Agent");
+
+            XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.LEFT);
+            leftAxis.setTitle("Performance");
+            leftAxis.setCrossBetween(AxisCrossBetween.BETWEEN);
+
+            XDDFDataSource<String> agentIDs = XDDFDataSourcesFactory.fromStringCellRange(sheet, new CellRangeAddress(1, rowNum - 1, 0, 0));
+            XDDFNumericalDataSource<Double> performances = XDDFDataSourcesFactory.fromNumericCellRange(sheet, new CellRangeAddress(1, rowNum - 1, 1, 1));
+
+            XDDFBarChartData data = (XDDFBarChartData) chart.createData(ChartTypes.BAR, bottomAxis, leftAxis);
+            XDDFBarChartData.Series series = (XDDFBarChartData.Series) data.addSeries(agentIDs, performances);
+            series.setTitle("Performance", null);
+            data.setBarDirection(BarDirection.COL);
+
+            chart.plot(data);
+
+
+
             return workbook;
+
 
         }catch (IOException e){
             return null;
@@ -129,25 +148,14 @@ public class DownloadService {
 
     }
 
-    public XSSFWorkbook getRestOfData(XSSFWorkbook workbook){
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-        Date sDate = new Date();
-        Date eDate = new Date();
-
-        try {
-            sDate = dateFormat.parse("2024-05-02");
-            eDate = dateFormat.parse("2024-05-20");
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+    public XSSFWorkbook getRestOfData(XSSFWorkbook workbook, DownloadDTO downloadDTO){
 
         DashboardDTO dashboardDTO = new DashboardDTO();
-        dashboardDTO.setInstanceId("7c78bd60-4a9f-40e5-b461-b7a0dfaad848");
-        dashboardDTO.setStartDate(sDate);
-        dashboardDTO.setEndDate(eDate);
-        dashboardDTO.setRoutingProfiles(new String[]{"4896ae34-a93e-41bc-8231-bf189e7628b1"});
-        dashboardDTO.setAgents(new String[]{});
+        dashboardDTO.setInstanceId(downloadDTO.getInstanceId());
+        dashboardDTO.setStartDate(downloadDTO.getStartDate());
+        dashboardDTO.setEndDate(downloadDTO.getEndDate());
+        dashboardDTO.setRoutingProfiles(downloadDTO.getRoutingProfiles());
+        dashboardDTO.setAgents(downloadDTO.getAgents());
 
         Map<String, Object> combinedMetrics = new HashMap<>();
 
@@ -219,25 +227,14 @@ public class DownloadService {
 
     }
 
-    public XSSFWorkbook getActivities(XSSFWorkbook workbook){
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-        Date sDate = new Date();
-        Date eDate = new Date();
-
-        try {
-            sDate = dateFormat.parse("2024-05-02");
-            eDate = dateFormat.parse("2024-05-20");
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+    public XSSFWorkbook getActivities(XSSFWorkbook workbook, DownloadDTO downloadDTO){
 
         DashboardDTO dashboardDTO = new DashboardDTO();
-        dashboardDTO.setInstanceId("7c78bd60-4a9f-40e5-b461-b7a0dfaad848");
-        dashboardDTO.setStartDate(sDate);
-        dashboardDTO.setEndDate(eDate);
-        dashboardDTO.setAgents(new String[]{});
-        dashboardDTO.setRoutingProfiles(new String[]{"4896ae34-a93e-41bc-8231-bf189e7628b1"});
+        dashboardDTO.setInstanceId(downloadDTO.getInstanceId());
+        dashboardDTO.setStartDate(downloadDTO.getStartDate());
+        dashboardDTO.setEndDate(downloadDTO.getEndDate());
+        dashboardDTO.setAgents(downloadDTO.getAgents());
+        dashboardDTO.setRoutingProfiles(downloadDTO.getRoutingProfiles());
 
         ActivityResponseDTO actData = getActivitiesData(dashboardDTO);
 
