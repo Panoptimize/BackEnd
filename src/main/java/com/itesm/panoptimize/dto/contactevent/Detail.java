@@ -1,4 +1,4 @@
-package com.itesm.panoptimize.dto.contact_event;
+package com.itesm.panoptimize.dto.contactevent;
 
 import java.util.UUID;
 

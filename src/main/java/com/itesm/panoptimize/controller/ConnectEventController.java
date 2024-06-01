@@ -1,13 +1,11 @@
 package com.itesm.panoptimize.controller;
 
 import com.itesm.panoptimize.dto.contact.ContactDTO;
-import com.itesm.panoptimize.dto.contact_event.ContactEventDTO;
+import com.itesm.panoptimize.dto.contactevent.ContactEventDTO;
 import com.itesm.panoptimize.service.ConnectEventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

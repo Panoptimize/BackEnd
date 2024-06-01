@@ -1,8 +1,8 @@
 package com.itesm.panoptimize.service;
 
-import com.itesm.panoptimize.dto.user_type.UserTypeCreateDTO;
-import com.itesm.panoptimize.dto.user_type.UserTypeDTO;
-import com.itesm.panoptimize.dto.user_type.UserTypeUpdateDTO;
+import com.itesm.panoptimize.dto.usertype.UserTypeCreateDTO;
+import com.itesm.panoptimize.dto.usertype.UserTypeDTO;
+import com.itesm.panoptimize.dto.usertype.UserTypeUpdateDTO;
 import com.itesm.panoptimize.model.UserType;
 import com.itesm.panoptimize.repository.UserTypeRepository;
 import org.modelmapper.ModelMapper;

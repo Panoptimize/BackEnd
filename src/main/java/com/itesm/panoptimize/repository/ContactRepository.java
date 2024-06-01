@@ -1,5 +1,6 @@
 package com.itesm.panoptimize.repository;
 
+import com.itesm.panoptimize.dto.contact.SatisfactionCountDTO;
 import com.itesm.panoptimize.model.Contact;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,6 +14,6 @@ import java.util.List;
  */
 @Repository
 public interface ContactRepository extends JpaRepository<Contact, String> {
-    @Query("SELECT c.satisfaction, COUNT(c) FROM Contact c GROUP BY c.satisfaction ORDER BY c.satisfaction")
-    List<Object[]> countBySatisfaction();
+    @Query("SELECT c.satisfaction, COUNT(c) count FROM Contact c GROUP BY c.satisfaction ORDER BY c.satisfaction")
+    List<SatisfactionCountDTO> countBySatisfaction();
 }

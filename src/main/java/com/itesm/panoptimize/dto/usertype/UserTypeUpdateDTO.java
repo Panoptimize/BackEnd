@@ -1,4 +1,4 @@
-package com.itesm.panoptimize.dto.user_type;
+package com.itesm.panoptimize.dto.usertype;
 
 public class UserTypeUpdateDTO {
     private Integer id;

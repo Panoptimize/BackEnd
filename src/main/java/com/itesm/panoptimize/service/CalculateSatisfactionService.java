@@ -24,7 +24,7 @@ public class CalculateSatisfactionService {
     public CustomerSatisfactionDTO getSatisfactionLevels(){
         List<Long> satisfactionLevels = new ArrayList<>();
         contactRepository.countBySatisfaction().forEach(satisfactionCountDTO -> {
-            satisfactionLevels.add((Long) satisfactionCountDTO[1]);
+            satisfactionLevels.add(satisfactionCountDTO.getCount());
         });
         CustomerSatisfactionDTO customerSatisfactionDTO = new CustomerSatisfactionDTO();
         customerSatisfactionDTO.setSatisfaction_levels(satisfactionLevels);

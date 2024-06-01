@@ -2,7 +2,7 @@ package com.itesm.panoptimize.service;
 
 import com.itesm.panoptimize.dto.contact.ContactDTO;
 import com.itesm.panoptimize.dto.contact.CreateContactDTO;
-import com.itesm.panoptimize.dto.contact_event.ContactEventDTO;
+import com.itesm.panoptimize.dto.contactevent.ContactEventDTO;
 import com.itesm.panoptimize.util.Constants;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.connect.ConnectClient;
