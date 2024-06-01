@@ -68,8 +68,8 @@ public class DownloadService {
         Date eDate = new Date();
 
         try {
-            sDate = dateFormat.parse("2024-05-02");
-            eDate = dateFormat.parse("2024-05-20");
+            sDate = dateFormat.parse("2024-05-01");
+            eDate = dateFormat.parse("2024-05-31");
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -82,9 +82,8 @@ public class DownloadService {
         performanceDTO.setQueues(new String[]{});
 
         List<AgentPerformanceDTO> performanceData = getPerformance( performanceDTO);
-
         try{
-            JsonNode jsonArray = objectMapper.readTree(performanceData.toString());
+            JsonNode jsonArray = objectMapper.valueToTree(performanceData);
 
             if (!jsonArray.isArray()) {
                 throw new IOException("Expected an array of JSON objects");
@@ -136,8 +135,8 @@ public class DownloadService {
         Date eDate = new Date();
 
         try {
-            sDate = dateFormat.parse("2024-05-02");
-            eDate = dateFormat.parse("2024-05-20");
+            sDate = dateFormat.parse("2024-05-01");
+            eDate = dateFormat.parse("2024-05-31");
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -226,8 +225,8 @@ public class DownloadService {
         Date eDate = new Date();
 
         try {
-            sDate = dateFormat.parse("2024-05-02");
-            eDate = dateFormat.parse("2024-05-20");
+            sDate = dateFormat.parse("2024-05-01");
+            eDate = dateFormat.parse("2024-05-31");
         } catch (ParseException e) {
             e.printStackTrace();
         }
