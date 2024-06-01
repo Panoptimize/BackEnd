@@ -1,4 +1,4 @@
-package com.itesm.panoptimize.dto.routing_profile;
+package com.itesm.panoptimize.dto.routingprofile;
 
 import jakarta.validation.constraints.NotNull;
 
