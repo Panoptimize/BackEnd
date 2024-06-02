@@ -114,7 +114,7 @@ public class DownloadService {
 
 
             XSSFDrawing drawing = sheet.createDrawingPatriarch();
-            XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 0, rowNum + 2, 10, rowNum + 20);
+            XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 4, 2, 16, 20);
 
             XSSFChart chart = drawing.createChart(anchor);
             chart.setTitleText("Performance per Agent");
@@ -315,6 +315,32 @@ public class DownloadService {
             sheet.autoSizeColumn(i);
         }
 
+        XSSFDrawing drawing = sheet.createDrawingPatriarch();
+        XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 4, 1, 16, 20);
+
+        XSSFChart chart = drawing.createChart(anchor);
+        chart.setTitleText("Total Agent Activities");
+        chart.setTitleOverlay(false);
+
+        XDDFChartLegend legend = chart.getOrAddLegend();
+        legend.setPosition(LegendPosition.TOP_RIGHT);
+
+        XDDFCategoryAxis bottomAxis = chart.createCategoryAxis(AxisPosition.BOTTOM);
+        bottomAxis.setTitle("Date");
+
+        XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.LEFT);
+        leftAxis.setTitle("Activity");
+        leftAxis.setCrossBetween(AxisCrossBetween.BETWEEN);
+
+        XDDFDataSource<String> Dates = XDDFDataSourcesFactory.fromStringCellRange(sheet, new CellRangeAddress(1, rowNum - 1, 1, 1));
+        XDDFNumericalDataSource<Double> Activities = XDDFDataSourcesFactory.fromNumericCellRange(sheet, new CellRangeAddress(1, rowNum - 1, 0, 0));
+
+        XDDFLineChartData data = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
+        XDDFLineChartData.Series series = (XDDFLineChartData.Series) data.addSeries(Dates, Activities);
+
+        series.setTitle("Activities", null);
+
+        chart.plot(data);
 
         return workbook;
 

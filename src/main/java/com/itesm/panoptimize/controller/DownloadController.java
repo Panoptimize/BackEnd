@@ -39,9 +39,9 @@ public class DownloadController {
         String file = "DataReport_" + date.getTime() + ".xlsx";
         String filePath = Paths.get(homedir, "Downloads", file).toString();
 
-        downloadService.getFinalReport(filePath, downloadDTO);
+        downloadService.getFinalReport(file, downloadDTO);
 
-        File fileToDownload = new File(filePath);
+        File fileToDownload = new File(file);
         InputStreamResource resource = new InputStreamResource(new FileInputStream(fileToDownload));
 
         HttpHeaders headers = new HttpHeaders();
