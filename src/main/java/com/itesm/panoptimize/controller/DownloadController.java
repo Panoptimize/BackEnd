@@ -21,12 +21,9 @@ public class DownloadController {
 
     private final DownloadService downloadService;
 
-    private final ObjectMapper objectMapper;
-
     @Autowired
-    public DownloadController(DownloadService downloadService, ObjectMapper objectMapper) {
+    public DownloadController(DownloadService downloadService) {
         this.downloadService = downloadService;
-        this.objectMapper = objectMapper;
     }
 
     //Download data from the Dashboard
