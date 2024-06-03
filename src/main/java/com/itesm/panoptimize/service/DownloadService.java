@@ -158,7 +158,6 @@ public class DownloadService {
         dashboardDTO.setStartDate(downloadDTO.getStartDate());
         dashboardDTO.setEndDate(downloadDTO.getEndDate());
         dashboardDTO.setRoutingProfiles(downloadDTO.getRoutingProfiles());
-        dashboardDTO.setAgents(downloadDTO.getAgents());
 
         Map<String, Object> combinedMetrics = new HashMap<>();
 
@@ -263,7 +262,6 @@ public class DownloadService {
         dashboardDTO.setInstanceId(downloadDTO.getInstanceId());
         dashboardDTO.setStartDate(downloadDTO.getStartDate());
         dashboardDTO.setEndDate(downloadDTO.getEndDate());
-        dashboardDTO.setAgents(downloadDTO.getAgents());
         dashboardDTO.setRoutingProfiles(downloadDTO.getRoutingProfiles());
 
         ActivityResponseDTO actData = getActivitiesData(dashboardDTO);
