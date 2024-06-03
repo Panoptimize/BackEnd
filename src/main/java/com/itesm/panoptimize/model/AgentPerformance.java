@@ -35,7 +35,7 @@ public class AgentPerformance {
     @JoinColumn(name = "agent_id", nullable = false, foreignKey = @ForeignKey(name = "agent_has_performance"))
     private User agent;
 
-    @OneToOne(mappedBy = "agentPerformance")
+    @OneToOne(mappedBy = "agentPerformance", cascade = CascadeType.ALL)
     private Note note;
 
     public Integer getId() {

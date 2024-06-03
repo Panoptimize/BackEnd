@@ -1,5 +1,6 @@
 package com.itesm.panoptimize.controller;
 
+import com.itesm.panoptimize.dto.agent_performance.CreateAgentPerformanceWithNote;
 import com.itesm.panoptimize.dto.note.CreateNoteDTO;
 import com.itesm.panoptimize.dto.note.NoteDTO;
 import com.itesm.panoptimize.dto.note.UpdateNoteDTO;
@@ -34,8 +35,8 @@ public class NoteController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<NoteDTO> createNote(@RequestBody CreateNoteDTO noteDTO){
-        return ResponseEntity.ok(noteService.createNote(noteDTO));
+    public ResponseEntity<NoteDTO> createNote(@RequestBody CreateAgentPerformanceWithNote createAgentPerformanceWithNote){
+        return ResponseEntity.ok(noteService.createNoteWithAgentPerformance(createAgentPerformanceWithNote));
     }
 
     @PutMapping("/{id}")
