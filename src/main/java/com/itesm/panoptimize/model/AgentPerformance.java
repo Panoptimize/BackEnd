@@ -6,17 +6,15 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.Instant;
 
 @Entity
-@Table(name = "agent_performance", indexes = {
-        @Index(name = "agent_created_at_index", columnList = "created_at")
-})
+@Table(name = "agent_performance")
 public class AgentPerformance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "agent_performance_id")
     private Integer id;
 
-    @Column(name = "created_at", nullable = false)
     @CreationTimestamp
+    @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
     @Column(name = "avg_after_contact_work_time", nullable = false)
@@ -32,7 +30,7 @@ public class AgentPerformance {
     private Double avgHoldTime;
 
     @ManyToOne
-    @JoinColumn(name = "agent_id", nullable = false, foreignKey = @ForeignKey(name = "agent_has_performance"))
+    @JoinColumn(name = "agent_id", nullable = false, foreignKey = @ForeignKey(name = "agent_has_performances"))
     private User agent;
 
     @OneToOne(mappedBy = "agentPerformance", cascade = CascadeType.ALL)
@@ -54,11 +52,11 @@ public class AgentPerformance {
         this.createdAt = createdAt;
     }
 
-    public Double getAvgAfterCallWorkTime() {
+    public Double getAvgAfterContactWorkTime() {
         return avgAfterContactWorkTime;
     }
 
-    public void setAvgAfterCallWorkTime(Double avgAfterContactWorkTime) {
+    public void setAvgAfterContactWorkTime(Double avgAfterContactWorkTime) {
         this.avgAfterContactWorkTime = avgAfterContactWorkTime;
     }
 

@@ -1,12 +1,17 @@
 package com.itesm.panoptimize.dto.agent_performance;
 
-import com.itesm.panoptimize.model.Note;
+import software.amazon.awssdk.annotations.NotNull;
 
-public class UpdateAgent_PerformanceDTO {
+public class CreateAgentPerformanceDTO {
+    @NotNull
     private Double avgAfterContactWorkTime;
+    @NotNull
     private Double avgHandleTime;
+    @NotNull
     private Double avgAbandonTime;
+    @NotNull
     private Double avgHoldTime;
+    @NotNull
     private Integer agentId;
 
     public Double getAvgAfterContactWorkTime() {
@@ -48,5 +53,4 @@ public class UpdateAgent_PerformanceDTO {
     public void setAgentId(Integer agentId) {
         this.agentId = agentId;
     }
-
 }

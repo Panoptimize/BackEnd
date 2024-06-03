@@ -7,7 +7,7 @@ public class CreateAgentPerformanceWithNote {
     @NotNull
     private CreateNoteDTO createNoteDTO;
     @NotNull
-    private CreateAgent_PerformanceDTO createAgent_PerformanceDTO;
+    private CreateAgentPerformanceDTO createAgentPerformanceDTO;
 
     public CreateNoteDTO getCreateNoteDTO() {
         return createNoteDTO;
@@ -17,11 +17,11 @@ public class CreateAgentPerformanceWithNote {
         this.createNoteDTO = createNoteDTO;
     }
 
-    public CreateAgent_PerformanceDTO getCreateAgent_PerformanceDTO() {
-        return createAgent_PerformanceDTO;
+    public CreateAgentPerformanceDTO getCreateAgentPerformanceDTO() {
+        return createAgentPerformanceDTO;
     }
 
-    public void setCreateAgent_PerformanceDTO(CreateAgent_PerformanceDTO createAgent_PerformanceDTO) {
-        this.createAgent_PerformanceDTO = createAgent_PerformanceDTO;
+    public void setCreateAgentPerformanceDTO(CreateAgentPerformanceDTO createAgentPerformanceDTO) {
+        this.createAgentPerformanceDTO = createAgentPerformanceDTO;
     }
 }

@@ -1,6 +1,6 @@
 package com.itesm.panoptimize.dto.agent_performance;
 
-public class CreateAgent_PerformanceDTO {
+public class UpdateAgentPerformanceDTO {
     private Double avgAfterContactWorkTime;
     private Double avgHandleTime;
     private Double avgAbandonTime;
@@ -46,4 +46,5 @@ public class CreateAgent_PerformanceDTO {
     public void setAgentId(Integer agentId) {
         this.agentId = agentId;
     }
+
 }

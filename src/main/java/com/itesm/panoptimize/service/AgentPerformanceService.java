@@ -1,24 +1,16 @@
 package com.itesm.panoptimize.service;
 
-import com.itesm.panoptimize.dto.agent_performance.Agent_PerformanceDTO;
-import com.itesm.panoptimize.dto.agent_performance.CreateAgent_PerformanceDTO;
-import com.itesm.panoptimize.dto.agent_performance.UpdateAgent_PerformanceDTO;
-import com.itesm.panoptimize.dto.note.CreateNoteDTO;
-import com.itesm.panoptimize.dto.note.NoteDTO;
-import com.itesm.panoptimize.dto.note.UpdateNoteDTO;
-import com.itesm.panoptimize.dto.performance.AgentPerformanceDTO;
+import com.itesm.panoptimize.dto.agent_performance.AgentPerformanceDTO;
+import com.itesm.panoptimize.dto.agent_performance.CreateAgentPerformanceDTO;
+import com.itesm.panoptimize.dto.agent_performance.UpdateAgentPerformanceDTO;
 import com.itesm.panoptimize.model.AgentPerformance;
-import com.itesm.panoptimize.model.Note;
 import com.itesm.panoptimize.model.User;
 import com.itesm.panoptimize.repository.AgentPerformanceRepository;
-import com.itesm.panoptimize.repository.NoteRepository;
 import com.itesm.panoptimize.repository.UserRepository;
-import org.aspectj.weaver.loadtime.Agent;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AgentPerformanceService {
@@ -32,19 +24,19 @@ public class AgentPerformanceService {
         this.userRepository = userRepository;
     }
 
-    private Agent_PerformanceDTO convertToDTO(AgentPerformance agentPerformance) {
-        return modelMapper.map(agentPerformance, Agent_PerformanceDTO.class);
+    private AgentPerformanceDTO convertToDTO(AgentPerformance agentPerformance) {
+        return modelMapper.map(agentPerformance, AgentPerformanceDTO.class);
     }
 
-    private AgentPerformance convertDTOToEntity(CreateAgent_PerformanceDTO createAgentPerformanceDTO) {
+    private AgentPerformance convertDTOToEntity(CreateAgentPerformanceDTO createAgentPerformanceDTO) {
         return modelMapper.map(createAgentPerformanceDTO, AgentPerformance.class);
     }
 
-    public Agent_PerformanceDTO getAgentPerformance(Integer id) {
+    public AgentPerformanceDTO getAgentPerformance(Integer id) {
         return convertToDTO(agentPerformanceRepository.findById(id).orElse(null));
     }
 
-    public Page<Agent_PerformanceDTO> getAgentPerformances(Pageable pageable) {
+    public Page<AgentPerformanceDTO> getAgentPerformances(Pageable pageable) {
         return agentPerformanceRepository.findAll(pageable).map(this::convertToDTO);
     }
 
@@ -52,9 +44,10 @@ public class AgentPerformanceService {
         agentPerformanceRepository.deleteById(id);
     }
 
-    public Agent_PerformanceDTO createAgentPerformance(CreateAgent_PerformanceDTO createAgentPerformanceDTO) {
+    public AgentPerformanceDTO createAgentPerformance(CreateAgentPerformanceDTO createAgentPerformanceDTO) {
         AgentPerformance agentPerformanceToCreate = new AgentPerformance();
-        agentPerformanceToCreate.setAvgAfterCallWorkTime(createAgentPerformanceDTO.getAvgAfterContactWorkTime());
+        agentPerformanceToCreate.setId(null);
+        agentPerformanceToCreate.setAvgAfterContactWorkTime(createAgentPerformanceDTO.getAvgAfterContactWorkTime());
         agentPerformanceToCreate.setAvgAbandonTime(createAgentPerformanceDTO.getAvgAbandonTime());
         agentPerformanceToCreate.setAvgHandleTime(createAgentPerformanceDTO.getAvgAfterContactWorkTime());
         agentPerformanceToCreate.setAvgHoldTime(createAgentPerformanceDTO.getAvgAfterContactWorkTime());
@@ -66,7 +59,7 @@ public class AgentPerformanceService {
         return convertToDTO(agentPerformanceRepository.save(agentPerformanceToCreate));
     }
 
-    public Agent_PerformanceDTO updateAgentPerformance(Integer id, UpdateAgent_PerformanceDTO updateAgentPerformanceDTO) {
+    public AgentPerformanceDTO updateAgentPerformance(Integer id, UpdateAgentPerformanceDTO updateAgentPerformanceDTO) {
         AgentPerformance agentPerformance = agentPerformanceRepository.findById(id).orElse(null);
         if (agentPerformance == null) {
             return null;
@@ -78,7 +71,7 @@ public class AgentPerformanceService {
             agentPerformance.setAvgAbandonTime(updateAgentPerformanceDTO.getAvgAbandonTime());
         }
         if (updateAgentPerformanceDTO.getAvgAfterContactWorkTime() != null) {
-            agentPerformance.setAvgAfterCallWorkTime(updateAgentPerformanceDTO.getAvgAfterContactWorkTime());
+            agentPerformance.setAvgAfterContactWorkTime(updateAgentPerformanceDTO.getAvgAfterContactWorkTime());
         }
         if(updateAgentPerformanceDTO.getAvgHandleTime() != null) {
             agentPerformance.setAvgHandleTime(updateAgentPerformanceDTO.getAvgHandleTime());

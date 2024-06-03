@@ -2,31 +2,20 @@ package com.itesm.panoptimize.dto.agent_performance;
 
 import jakarta.validation.constraints.NotNull;
 
-import java.time.Instant;
-
-public class Agent_PerformanceDTO {
+public class AgentPerformanceDTO {
     @NotNull(message = "Id is required")
-    private Integer agentPerformanceId;
-    private Instant createdAt;
+    private Integer id;
     private Double avgAfterContactWorkTime;
     private Double avgHandleTime;
     private Double avgAbandonTime;
     private Double avgHoldTime;
 
-    public @NotNull(message = "Id is required") Integer getAgentPerformanceId() {
-        return agentPerformanceId;
+    public @NotNull(message = "Id is required") Integer getId() {
+        return id;
     }
 
-    public void setAgentPerformanceId(@NotNull(message = "Id is required") Integer agentPerformanceId) {
-        this.agentPerformanceId = agentPerformanceId;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
+    public void setId(@NotNull(message = "Id is required") Integer id) {
+        this.id = id;
     }
 
     public Double getAvgAfterContactWorkTime() {

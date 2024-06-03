@@ -1,21 +1,26 @@
 package com.itesm.panoptimize.service;
 
-import com.itesm.panoptimize.dto.agent_performance.Agent_PerformanceDTO;
+import com.itesm.panoptimize.dto.agent_performance.AgentPerformanceDTO;
 import com.itesm.panoptimize.dto.agent_performance.CreateAgentPerformanceWithNote;
+import com.itesm.panoptimize.dto.agent_performance.CreateAgentPerformanceDTO;
 import com.itesm.panoptimize.dto.note.CreateNoteDTO;
 import com.itesm.panoptimize.dto.note.NoteDTO;
 import com.itesm.panoptimize.dto.note.UpdateNoteDTO;
 import com.itesm.panoptimize.model.AgentPerformance;
 import com.itesm.panoptimize.model.Note;
-import com.itesm.panoptimize.model.User;
 import com.itesm.panoptimize.repository.AgentPerformanceRepository;
 import com.itesm.panoptimize.repository.NoteRepository;
 import com.itesm.panoptimize.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class NoteService {
@@ -24,6 +29,7 @@ public class NoteService {
     private final AgentPerformanceRepository agentPerformanceRepository;
     private final ModelMapper modelMapper;
     private final UserRepository userRepository;
+    private final AgentPerformanceService agentPerformanceService;
 
     private NoteDTO convertToNoteDTO(Note note) {
         return modelMapper.map(note, NoteDTO.class);
@@ -33,11 +39,12 @@ public class NoteService {
         return modelMapper.map(noteDTO, Note.class);
     }
 
-    public NoteService(NoteRepository noteRepository, ModelMapper modelMapper, AgentPerformanceRepository agentPerformanceRepository, UserRepository userRepository) {
+    public NoteService(NoteRepository noteRepository, ModelMapper modelMapper, AgentPerformanceRepository agentPerformanceRepository, UserRepository userRepository, AgentPerformanceService agentPerformanceService) {
         this.noteRepository = noteRepository;
         this.modelMapper = modelMapper;
         this.agentPerformanceRepository = agentPerformanceRepository;
         this.userRepository = userRepository;
+        this.agentPerformanceService = agentPerformanceService;
     }
 
     public NoteDTO getNote(Integer id) {
@@ -82,19 +89,25 @@ public class NoteService {
     }
 
     public Page<NoteDTO> getAgentNotes(Pageable pageable, Integer agentId) {
-        return noteRepository.getNotesByAgent(agentId, pageable);
+        return noteRepository.getNotesByAgent(agentId, pageable).map(this::convertToNoteDTO);
     }
 
     @Transactional
-    public NoteDTO createNoteWithAgentPerformance(CreateAgentPerformanceWithNote createAgentPerformanceWithNote) {
-        AgentPerformance agentPerformance = modelMapper.map(createAgentPerformanceWithNote, AgentPerformance.class);
-        User agent = userRepository.findById(createAgentPerformanceWithNote.getCreateAgent_PerformanceDTO().getAgentId())
-                .orElse(null);
-        agentPerformance.setAgent(agent);
-        agentPerformance = agentPerformanceRepository.save(agentPerformance);
+    public NoteDTO createNoteWithAgentPerformance(CreateAgentPerformanceWithNote createNoteWithAgentPerformanceDTO) {
+        CreateAgentPerformanceDTO createAgentPerformanceDTO = createNoteWithAgentPerformanceDTO.getCreateAgentPerformanceDTO();
+        if (createAgentPerformanceDTO == null) {
+            throw new IllegalArgumentException("AgentPerformance data is missing");
+        }
 
-        Note note = convertToNoteEntity(createAgentPerformanceWithNote.getCreateNoteDTO());
-        note.setAgentPerformance(agentPerformance);
+        CreateNoteDTO createNoteDTO = createNoteWithAgentPerformanceDTO.getCreateNoteDTO();
+        if (createNoteDTO == null) {
+            throw new IllegalArgumentException("Note data is missing");
+        }
+
+        AgentPerformanceDTO agentPerformanceDTO = agentPerformanceService.createAgentPerformance(createAgentPerformanceDTO);
+
+        Note note = convertToNoteEntity(createNoteDTO);
+        note.setAgentPerformance(agentPerformanceRepository.findById(agentPerformanceDTO.getId()).orElse(null));
         note = noteRepository.save(note);
 
         return convertToNoteDTO(note);
