@@ -146,14 +146,7 @@ public class AgentController {
         return ResponseEntity.ok(feedbackService.updateFeedback(id, note));
     }
 
-    @GetMapping("/list/{instanceId}")
-    public ResponseEntity<DashboardFiltersDTO> getFilters(@PathVariable String instanceId) {
-        DashboardFiltersDTO filters = agentListService.getAgentList(instanceId);
 
-        System.out.println(instanceId);
-
-        return ResponseEntity.ok(filters);
-    }
 
     @GetMapping("/detail/{instanceId}/{agentId}")
     public ResponseEntity<AgentDetailsDTO> getAgentDetails(@PathVariable String agentId,@PathVariable String instanceId) {
@@ -169,7 +162,7 @@ public class AgentController {
     private final AgentListService agentsService;
 
 
-    @PostMapping("/agentslist")
+    @PostMapping("/agents-list")
     public Mono<AgentResponseDTO> getAllAgents(@RequestParam String instanceId) {
         return agentsService.getAllAgents(instanceId)
                 .map(AgentResponseDTO::new);

@@ -7,7 +7,6 @@ import java.nio.file.Paths;
 import java.util.Date;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
 import com.itesm.panoptimize.dto.download.DownloadDTO;
 import com.itesm.panoptimize.service.DownloadService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +38,7 @@ public class DownloadController {
 
         downloadService.getFinalReport(filePath, downloadDTO);
 
-        File fileToDownload = new File(filePath);
+        File fileToDownload = new File(file);
         InputStreamResource resource = new InputStreamResource(new FileInputStream(fileToDownload));
 
         HttpHeaders headers = new HttpHeaders();

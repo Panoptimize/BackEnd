@@ -3,6 +3,7 @@ package com.itesm.panoptimize.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itesm.panoptimize.dto.dashboard.ActivityResponseDTO;
+import com.itesm.panoptimize.dto.dashboard.CustomerSatisfactionDTO;
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
 import com.itesm.panoptimize.dto.dashboard.MetricResponseDTO;
 import com.itesm.panoptimize.dto.download.DownloadDTO;
@@ -27,6 +28,7 @@ public class DownloadService {
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
     private final DashboardService dashboardService;
+    private final CalculateSatisfactionService satisfactionService;
 
     @Autowired
     private CalculatePerformanceService calculatePerformanceService;
@@ -36,10 +38,11 @@ public class DownloadService {
     private DashboardService metricService;
 
     @Autowired
-    public DownloadService(WebClient.Builder webClientBuilder, ObjectMapper objectMapper, DashboardService dashboardService) {
+    public DownloadService(WebClient.Builder webClientBuilder, ObjectMapper objectMapper, DashboardService dashboardService, CalculateSatisfactionService satisfactionService) {
         this.webClient = webClientBuilder.baseUrl("http://localhost:8000").build();
         this.objectMapper = objectMapper;
         this.dashboardService = dashboardService;
+        this.satisfactionService = satisfactionService;
     }
 
     public XSSFWorkbook getFinalReport(String url, DownloadDTO downloadDTO) {
@@ -111,7 +114,7 @@ public class DownloadService {
 
 
             XSSFDrawing drawing = sheet.createDrawingPatriarch();
-            XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 0, rowNum + 2, 10, rowNum + 20);
+            XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 4, 2, 16, 20);
 
             XSSFChart chart = drawing.createChart(anchor);
             chart.setTitleText("Performance per Agent");
@@ -148,14 +151,13 @@ public class DownloadService {
 
     }
 
-    public XSSFWorkbook getRestOfData(XSSFWorkbook workbook, DownloadDTO downloadDTO){
+    public XSSFWorkbook getRestOfData(XSSFWorkbook workbook, DownloadDTO downloadDTO) {
 
         DashboardDTO dashboardDTO = new DashboardDTO();
         dashboardDTO.setInstanceId(downloadDTO.getInstanceId());
         dashboardDTO.setStartDate(downloadDTO.getStartDate());
         dashboardDTO.setEndDate(downloadDTO.getEndDate());
         dashboardDTO.setRoutingProfiles(downloadDTO.getRoutingProfiles());
-        dashboardDTO.setAgents(downloadDTO.getAgents());
 
         Map<String, Object> combinedMetrics = new HashMap<>();
 
@@ -171,6 +173,9 @@ public class DownloadService {
         Mono<Map<String, Integer>> valuesMono = apiClient.getMetricResults(dashboardDTO).map(metricService::extractValues);
         valuesMono.subscribe(values -> combinedMetrics.putAll(values));
 
+        CustomerSatisfactionDTO customerSatisfactionData = getCustomerSatisfactionData(dashboardDTO);
+        combinedMetrics.put("customerSatisfaction", customerSatisfactionData.getSatisfaction_levels());
+
 
         JsonNode json = objectMapper.valueToTree(combinedMetrics);
 
@@ -181,18 +186,25 @@ public class DownloadService {
         List<Object> values = new ArrayList<>();
         List<Object> keys2 = new ArrayList<>();
         List<Object> values2 = new ArrayList<>();
+        List<String> keys3Satisfaction = new ArrayList<>();
+        List<Integer> valuesSatisfaction = new ArrayList<>();
 
         Iterator<Map.Entry<String, JsonNode>> fieldValues = json.fields();
         while (fieldValues.hasNext()) {
             Map.Entry<String, JsonNode> entry = fieldValues.next();
-            if(!entry.getKey().equals("activities") && !entry.getKey().equals("voice") && !entry.getKey().equals("chat")){
+            if (!entry.getKey().equals("activities") && !entry.getKey().equals("voice") && !entry.getKey().equals("chat") && !entry.getKey().equals("customerSatisfaction")) {
                 keys.add(entry.getKey());
                 values.add(entry.getValue());
-            }
-            else if(entry.getKey().equals("voice") || entry.getKey().equals("chat")){
+            } else if (entry.getKey().equals("voice") || entry.getKey().equals("chat")) {
                 keys2.add(entry.getKey());
                 values2.add(entry.getValue());
+
+            } else if (entry.getKey().equals("customerSatisfaction")) {
+                for (JsonNode val: entry.getValue()){
+                    valuesSatisfaction.add(val.asInt());
+                }
             }
+
 
         }
 
@@ -201,6 +213,9 @@ public class DownloadService {
         headerRow.createCell(1).setCellValue("Value");
         headerRow.createCell(2).setCellValue("Type of Interaction");
         headerRow.createCell(3).setCellValue("Total Interactions");
+        headerRow.createCell(4).setCellValue("Satisfaction Level");
+        headerRow.createCell(5).setCellValue("Value");
+
 
         int rowNum = 1;
         Row row = sheet.createRow(rowNum);
@@ -217,11 +232,25 @@ public class DownloadService {
             row2.createCell(3).setCellValue(values2.get(i).toString());
         }
 
+        keys3Satisfaction.add("Very Satisfied");
+        keys3Satisfaction.add("Satisfied");
+        keys3Satisfaction.add("Neutral");
+        keys3Satisfaction.add("Unsatisfied");
+        keys3Satisfaction.add("Very Unsatisfied");
+        rowNum = 1;
+        for (int i = 0; i < keys3Satisfaction.size(); i++) {
+            Row row3 = sheet.getRow(rowNum++);
+            row3.createCell(4).setCellValue(keys3Satisfaction.get(i));
+            row3.createCell(5).setCellValue(valuesSatisfaction.get(i));
+        }
+
 
         sheet.autoSizeColumn(0);
         sheet.autoSizeColumn(1);
         sheet.autoSizeColumn(2);
         sheet.autoSizeColumn(3);
+        sheet.autoSizeColumn(4);
+        sheet.autoSizeColumn(5);
 
         return workbook;
 
@@ -233,7 +262,6 @@ public class DownloadService {
         dashboardDTO.setInstanceId(downloadDTO.getInstanceId());
         dashboardDTO.setStartDate(downloadDTO.getStartDate());
         dashboardDTO.setEndDate(downloadDTO.getEndDate());
-        dashboardDTO.setAgents(downloadDTO.getAgents());
         dashboardDTO.setRoutingProfiles(downloadDTO.getRoutingProfiles());
 
         ActivityResponseDTO actData = getActivitiesData(dashboardDTO);
@@ -285,6 +313,32 @@ public class DownloadService {
             sheet.autoSizeColumn(i);
         }
 
+        XSSFDrawing drawing = sheet.createDrawingPatriarch();
+        XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 4, 1, 16, 20);
+
+        XSSFChart chart = drawing.createChart(anchor);
+        chart.setTitleText("Total Agent Activities");
+        chart.setTitleOverlay(false);
+
+        XDDFChartLegend legend = chart.getOrAddLegend();
+        legend.setPosition(LegendPosition.TOP_RIGHT);
+
+        XDDFCategoryAxis bottomAxis = chart.createCategoryAxis(AxisPosition.BOTTOM);
+        bottomAxis.setTitle("Date");
+
+        XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.LEFT);
+        leftAxis.setTitle("Activity");
+        leftAxis.setCrossBetween(AxisCrossBetween.BETWEEN);
+
+        XDDFDataSource<String> Dates = XDDFDataSourcesFactory.fromStringCellRange(sheet, new CellRangeAddress(1, rowNum - 1, 1, 1));
+        XDDFNumericalDataSource<Double> Activities = XDDFDataSourcesFactory.fromNumericCellRange(sheet, new CellRangeAddress(1, rowNum - 1, 0, 0));
+
+        XDDFLineChartData data = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
+        XDDFLineChartData.Series series = (XDDFLineChartData.Series) data.addSeries(Dates, Activities);
+
+        series.setTitle("Activities", null);
+
+        chart.plot(data);
 
         return workbook;
 
@@ -304,6 +358,11 @@ public class DownloadService {
     private ActivityResponseDTO getActivitiesData(DashboardDTO dashboardDTO){
         ActivityResponseDTO actData = dashboardService.getActivity(dashboardDTO);
         return actData;
+    }
+
+    private CustomerSatisfactionDTO getCustomerSatisfactionData(DashboardDTO dashboardDTO){
+        CustomerSatisfactionDTO customerSatisfactionData = satisfactionService.getSatisfactionLevels();
+        return customerSatisfactionData;
     }
 
 

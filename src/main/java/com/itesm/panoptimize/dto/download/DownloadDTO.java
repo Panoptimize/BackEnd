@@ -4,15 +4,14 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.time.Instant;
 import java.util.Date;
 
 public class DownloadDTO {
     @NotNull(message = "Instance ID is required")
     @Size(min = 36, max = 36, message = "Instance ID must be 36 characters long")
     private String instanceId;
-    @NotNull(message = "Start date is required")
     private Date startDate;
-    @NotNull(message = "End date is required")
     private Date endDate;
     private String[] routingProfiles;
     private String[] queues;
