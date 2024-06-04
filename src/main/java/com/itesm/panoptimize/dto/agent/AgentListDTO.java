@@ -9,6 +9,8 @@ public class AgentListDTO {
         private String workspace;
         private String instanceID;
 
+        private String email;
+
     public String getInstanceID() {
         return instanceID;
     }
@@ -23,17 +25,23 @@ public class AgentListDTO {
 
 
 
-    public AgentListDTO(String id, String name, String status, String workspace, String instanceID){
+    public AgentListDTO(String id, String name, String status, String workspace, String instanceID , String email){
         this.id = id;
         this.name = name;
         this.status = status;
         this.workspace = workspace;
         this.instanceID = instanceID;
+        this.email = email;
     }
 
 
+    public String getEmail() {
+        return email;
+    }
 
-
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
     public String getId() {
             return id;
