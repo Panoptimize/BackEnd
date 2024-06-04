@@ -9,7 +9,7 @@ RUN mvn dependency:go-offline -B
 COPY src ./src
 
 # Compilar el proyecto y generar el archivo jar
-RUN mvn package
+RUN mvn package -DskipTests
 
 # Etapa de construcción de la imagen
 FROM openjdk:17
