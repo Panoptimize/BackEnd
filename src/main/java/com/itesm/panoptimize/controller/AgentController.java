@@ -122,7 +122,7 @@ public class AgentController {
         return new ResponseEntity<>("Agent performance deleted", HttpStatus.OK);
     }
     @PutMapping("/agent/performance/update/{id}")
-    public ResponseEntity<AgentPerformance> updateNotification(@PathVariable Integer id, @RequestBody AgentPerformance agentPerformance) {
+    public ResponseEntity<AgentPerformance> updateNotification(@PathVariable int id, @RequestBody AgentPerformance agentPerformance) {
         return ResponseEntity.ok(userService.updateAgentPerformance(id, agentPerformance));
     }
     @GetMapping("/agent/feedback/{id}")

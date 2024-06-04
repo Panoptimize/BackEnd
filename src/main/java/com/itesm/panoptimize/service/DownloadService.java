@@ -345,7 +345,7 @@ public class DownloadService {
     }
 
     private List<AgentPerformanceDTO> getPerformance(PerformanceDTO performanceDTO){
-        List<AgentPerformanceDTO> performanceData = calculatePerformanceService.getMetricsData(performanceDTO);
+        List<AgentPerformanceDTO> performanceData = calculatePerformanceService.getPerformances(performanceDTO.getStartDate(), performanceDTO.getEndDate(), performanceDTO.getInstanceId());
         return performanceData;
     }
 

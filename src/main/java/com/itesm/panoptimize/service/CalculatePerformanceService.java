@@ -1,196 +1,88 @@
 package com.itesm.panoptimize.service;
 
 import com.itesm.panoptimize.dto.performance.AgentPerformanceDTO;
-import com.itesm.panoptimize.dto.performance.PerformanceDTO;
-import com.itesm.panoptimize.util.Constants;
+import com.itesm.panoptimize.model.AgentPerformance;
+import com.itesm.panoptimize.repository.AgentPerformanceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.connect.ConnectClient;
-import software.amazon.awssdk.services.connect.model.*;
-
+import software.amazon.awssdk.services.connect.model.DescribeUserRequest;
+import software.amazon.awssdk.services.connect.model.DescribeUserResponse;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
+/**
+ * Service class for calculating agent performance.
+ */
 @Service
 public class CalculatePerformanceService {
+
     private final ConnectClient connectClient;
+    private final AgentPerformanceRepository agentPerformanceRepository;
 
+    /**
+     * Constructor with dependency injection.
+     *
+     * @param connectClient              AWS Connect client for interacting with Amazon Connect
+     * @param agentPerformanceRepository Repository for accessing agent performance data
+     */
     @Autowired
-    public CalculatePerformanceService(ConnectClient connectClient) {
+    public CalculatePerformanceService(ConnectClient connectClient, AgentPerformanceRepository agentPerformanceRepository) {
         this.connectClient = connectClient;
+        this.agentPerformanceRepository = agentPerformanceRepository;
     }
 
-    private GetMetricDataV2Response getKPIs(PerformanceDTO performanceDTO, List<MetricV2> metrics, String agentId) {
-        String instanceId = performanceDTO.getInstanceId();
-        Instant startTime = performanceDTO.getStartDate().toInstant();
-        Instant endTime = performanceDTO.getEndDate().toInstant();
+    /**
+     * Retrieves the performance data for agents between two dates.
+     *
+     * @param startDate Start date for the performance data
+     * @param endDate   End date for the performance data
+     * @param instanceId AWS Connect instance ID
+     * @return List of AgentPerformanceDTO containing performance scores
+     */
+    public List<AgentPerformanceDTO> getPerformances(Date startDate, Date endDate, String instanceId) {
+        Instant startInstant = startDate.toInstant();
+        Instant endInstant = endDate.toInstant();
 
-        List<FilterV2> filters = new ArrayList<>();
-        if (performanceDTO.getRoutingProfiles().length > 0) {
-            filters.add(FilterV2.builder()
-                    .filterKey("ROUTING_PROFILE")
-                    .filterValues(Arrays.asList(performanceDTO.getRoutingProfiles()))
-                    .build());
-        }
-        if (performanceDTO.getQueues().length > 0) {
-            filters.add(FilterV2.builder()
-                    .filterKey("QUEUE")
-                    .filterValues(Arrays.asList(performanceDTO.getQueues()))
-                    .build());
-        }
-        if (agentId != null && !agentId.isEmpty()) {
-            filters.add(FilterV2.builder()
-                    .filterKey("AGENT")
-                    .filterValues(Collections.singletonList(agentId))
-                    .build());
-        }
+        List<AgentPerformance> performances = agentPerformanceRepository.findPerformancesBetweenDates(startInstant, endInstant);
 
-        IntervalDetails intervalDetails = IntervalDetails.builder()
-                .timeZone("UTC")
-                .intervalPeriod("DAY")
-                .build();
 
-        return connectClient.getMetricDataV2(GetMetricDataV2Request.builder()
-                .startTime(startTime)
-                .endTime(endTime)
-                .interval(intervalDetails)
-                .resourceArn(Constants.BASE_ARN + ":instance/" + instanceId)
-                .filters(filters)
-                .metrics(metrics)
-                .build());
-    }
+        Map<String, List<AgentPerformance>> groupedByAgent = performances.stream()
+                .collect(Collectors.groupingBy(performance -> performance.getAgent().getConnectId()));
 
-    public List<AgentPerformanceDTO> getMetricsData(PerformanceDTO performanceDTO) {
-        List<MetricV2> metricList = new ArrayList<>(Arrays.asList(
-                MetricV2.builder().name("AVG_HANDLE_TIME").build(),
-                MetricV2.builder().name("AVG_AFTER_CONTACT_WORK_TIME").build(),
-                MetricV2.builder().name("AVG_HOLD_TIME").build(),
-                MetricV2.builder().name("AVG_ABANDON_TIME").build()
-        ));
+        List<AgentPerformanceDTO> result = new ArrayList<>();
 
-        Map<String, String> agentMap = getAgentIdsAndNames(performanceDTO.getInstanceId());
-        List<AgentPerformanceDTO> agentPerformancesList = new ArrayList<>();
-
-        for (Map.Entry<String, String> entry : agentMap.entrySet()) {
+        for (Map.Entry<String, List<AgentPerformance>> entry : groupedByAgent.entrySet()) {
             String agentId = entry.getKey();
-            String agentName = entry.getValue();
+            List<AgentPerformance> agentPerformances = entry.getValue();
 
-            GetMetricDataV2Response response = getKPIs(performanceDTO, metricList, agentId);
-            Map<String, Double> metricsMap = new HashMap<>();
+            List<Double> performanceScores = agentPerformances.stream()
+                    .map(performance -> calculateAgentPerformanceScore(
+                            performance.getAvgHandleTime(),
+                            performance.getAvgAfterContactWorkTime(),
+                            performance.getAvgHoldTime(),
+                            performance.getAvgAbandonTime()))
+                    .collect(Collectors.toList());
 
-            for (MetricResultV2 result : response.metricResults()) {
-                double avgHandleTime = 0.0;
-                double avgAfterContactWorkTime = 0.0;
-                double avgHoldTime = 0.0;
-                double avgAbandonTime = 0.0;
-
-                for (MetricDataV2 data : result.collections()) {
-                    double value = getValue(data, data.metric().name());
-
-                    switch (data.metric().name()) {
-                        case "AVG_HANDLE_TIME":
-                            avgHandleTime += value;
-                            break;
-                        case "AVG_AFTER_CONTACT_WORK_TIME":
-                            avgAfterContactWorkTime += value;
-                            break;
-                        case "AVG_HOLD_TIME":
-                            avgHoldTime += value;
-                            break;
-                        case "AVG_ABANDON_TIME":
-                            avgAbandonTime += value;
-                            break;
-                    }
-                }
-
-                double performanceScore = calculateAgentPerformanceScore(avgHandleTime, avgAfterContactWorkTime, avgHoldTime, avgAbandonTime);
-                metricsMap.put(agentName, performanceScore);
-            }
-
-            for (Map.Entry<String, Double> metricEntry : metricsMap.entrySet()) {
-                agentPerformancesList.add(new AgentPerformanceDTO(metricEntry.getKey(), Collections.singletonList(metricEntry.getValue())));
-            }
+            String agentName = getAgentNameById(agentId, instanceId);
+            result.add(new AgentPerformanceDTO(agentName, performanceScores));
         }
 
-        return agentPerformancesList;
+        return result;
     }
 
-    public int calculateSingleAgentPerformance(String routingProfile, PerformanceDTO performanceDTO) {
-        List<MetricV2> metricList = new ArrayList<>(Arrays.asList(
-                MetricV2.builder().name("AVG_HANDLE_TIME").build(),
-                MetricV2.builder().name("AVG_AFTER_CONTACT_WORK_TIME").build(),
-                MetricV2.builder().name("AVG_HOLD_TIME").build(),
-                MetricV2.builder().name("AVG_ABANDON_TIME").build()
-        ));
-
-        performanceDTO.setRoutingProfiles(new String[]{routingProfile});
-        Map<String, String> agentMap = getAgentIdsAndNames(performanceDTO.getInstanceId());
-
-        if (agentMap.isEmpty()) {
-            return 0;
-        }
-
-        String agentId = agentMap.keySet().iterator().next(); // Obtener el primer agente
-        GetMetricDataV2Response response = getKPIs(performanceDTO, metricList, agentId);
-
-        double avgHandleTime = 0.0;
-        double avgAfterContactWorkTime = 0.0;
-        double avgHoldTime = 0.0;
-        double avgAbandonTime = 0.0;
-
-        for (MetricResultV2 result : response.metricResults()) {
-            for (MetricDataV2 data : result.collections()) {
-                double value = getValue(data, data.metric().name());
-
-                switch (data.metric().name()) {
-                    case "AVG_HANDLE_TIME":
-                        avgHandleTime += value;
-                        break;
-                    case "AVG_AFTER_CONTACT_WORK_TIME":
-                        avgAfterContactWorkTime += value;
-                        break;
-                    case "AVG_HOLD_TIME":
-                        avgHoldTime += value;
-                        break;
-                    case "AVG_ABANDON_TIME":
-                        avgAbandonTime += value;
-                        break;
-                }
-            }
-        }
-
-        double performanceScore = calculateAgentPerformanceScore(avgHandleTime, avgAfterContactWorkTime, avgHoldTime, avgAbandonTime);
-        return (int) performanceScore;
-    }
-
-    private Map<String, String> getAgentIdsAndNames(String instanceId) {
-        Map<String, String> agentMap = new HashMap<>();
-        String nextToken = null;
-
-        do {
-            ListUsersRequest request = ListUsersRequest.builder()
-                    .instanceId(instanceId)
-                    .nextToken(nextToken)
-                    .maxResults(100)
-                    .build();
-
-            ListUsersResponse response = connectClient.listUsers(request);
-            for (UserSummary userSummary : response.userSummaryList()) {
-                agentMap.put(userSummary.id(), userSummary.username());
-            }
-
-            nextToken = response.nextToken();
-        } while (nextToken != null);
-
-        return agentMap;
-    }
-
-    private double getValue(MetricDataV2 data, String metricName) {
-        return data.metric().name().equals(metricName) && data.value() != null ? data.value() : 0.0;
-    }
-
+    /**
+     * Calculates the performance score for an agent based on various metrics.
+     *
+     * @param avgHandleTime              Average handle time
+     * @param avgAfterContactWorkTime    Average after contact work time
+     * @param avgHoldTime                Average hold time
+     * @param avgAbandonTime             Average abandon time
+     * @return Performance score as a double
+     */
     private double calculateAgentPerformanceScore(double avgHandleTime, double avgAfterContactWorkTime, double avgHoldTime, double avgAbandonTime) {
         double normalizedHandleTime = avgHandleTime < 100 ? 1 : 100 / avgHandleTime;
         double normalizedAfterContactWorkTime = avgAfterContactWorkTime < 10 ? 1 : 10 / avgAfterContactWorkTime;
@@ -206,5 +98,23 @@ public class CalculatePerformanceService {
         BigDecimal bd = new BigDecimal(score);
         bd = bd.setScale(1, RoundingMode.HALF_UP);
         return bd.doubleValue();
+    }
+
+    /**
+     * Retrieves the name of an agent by their ID from AWS Connect.
+     *
+     * @param agentId    ID of the agent
+     * @param instanceId AWS Connect instance ID
+     * @return Name of the agent as a String
+     */
+    private String getAgentNameById(String agentId, String instanceId) {
+        DescribeUserRequest describeUserRequest = DescribeUserRequest.builder()
+                .instanceId(instanceId)
+                .userId(agentId)
+                .build();
+
+        DescribeUserResponse describeUserResponse = connectClient.describeUser(describeUserRequest);
+
+        return describeUserResponse.user().username();
     }
 }
