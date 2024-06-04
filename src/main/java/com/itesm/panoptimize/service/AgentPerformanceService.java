@@ -82,4 +82,8 @@ public class AgentPerformanceService {
 
         return convertToDTO(agentPerformanceRepository.save(agentPerformance));
     }
+
+    public AgentPerformanceDTO getAgentPerformanceByNote(Integer id){
+        return convertToDTO(agentPerformanceRepository.findAgentPerformanceByNoteId(id));
+    }
 }

@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,7 +18,12 @@ public class AgentPerformance {
     public AgentPerformance(AgentPerformanceService agentPerformanceService) {this.agentPerformanceService = agentPerformanceService;}
 
     @GetMapping("/")
-    public ResponseEntity<Page<AgentPerformanceDTO>> getNotes(Pageable pageable){
+    public ResponseEntity<Page<AgentPerformanceDTO>> getAgentPerformances(Pageable pageable){
         return ResponseEntity.ok(agentPerformanceService.getAgentPerformances(pageable));
+    }
+
+    @GetMapping("/note/{id}")
+    public ResponseEntity<AgentPerformanceDTO> getAgentPerformanceByNote(@PathVariable Integer id){
+        return ResponseEntity.ok(agentPerformanceService.getAgentPerformanceByNote(id));
     }
 }
