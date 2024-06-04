@@ -37,6 +37,7 @@ public class AgentPerformance {
     @OneToOne(mappedBy = "agentPerformance")
     private Note note;
 
+
     public Integer getId() {
         return id;
     }
