@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -59,7 +60,7 @@ public class AgentController {
     })
     @GetMapping("/")
     public ResponseEntity<Page<AgentUserDTO>> getAllAgents(Pageable pageable) {
-        return ResponseEntity.ok(userService.getallAgents(pageable));
+        return ResponseEntity.ok(userService.getAllAgents(pageable));
     }
 
     @Operation(summary = "Obtener info  de agente", description = "Obtener la info de agente mediante el id" )
@@ -86,7 +87,7 @@ public class AgentController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<AgentUserDTO> createAgent(@RequestBody AgentCreateDTO agentUserDTO) {
+    public ResponseEntity<AgentUserDTO> createAgent(@Valid @RequestBody AgentCreateDTO agentUserDTO) {
         return ResponseEntity.ok(userService.createAgent(agentUserDTO));
     }
     

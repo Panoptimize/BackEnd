@@ -3,7 +3,6 @@ package com.itesm.panoptimize.dto.agent;
 import jakarta.validation.constraints.NotNull;
 
 public class AgentCreateDTO {
-    private final Integer id = null;
     @NotNull(message = "ConnectId is required")
     private String connectId;
     @NotNull(message = "Email is required")

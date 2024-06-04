@@ -44,6 +44,10 @@ public class RoutingProfileService {
     }
 
     public RoutingProfileDTO createRoutingProfile(CreateRoutingProfileDTO routingProfileDTO){
+        if(routingProfileRepository.existsById(routingProfileDTO.getId())) {
+            throw new IllegalArgumentException("Routing Profile already exists");
+        }
+
         RoutingProfile routingProfileToCreate = new RoutingProfile();
         routingProfileToCreate.setName(routingProfileDTO.getName());
         routingProfileToCreate.setRoutingProfileId(routingProfileDTO.getId());

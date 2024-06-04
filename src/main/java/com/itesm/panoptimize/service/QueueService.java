@@ -38,6 +38,9 @@ public class QueueService {
     }
 
     public QueueDTO createQueue(QueueCreateDTO queueDTO){
+        if(queueRepository.existsById(queueDTO.getId())) {
+            throw new IllegalArgumentException("Queue already exists");
+        }
         return convertToDTO(queueRepository.save(convertToEntity(queueDTO)));
     }
 
