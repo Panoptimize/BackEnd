@@ -146,6 +146,8 @@ public class AgentController {
         return ResponseEntity.ok(feedbackService.updateFeedback(id, note));
     }
 
+    /*
+    * Este enpoint regresa los datos tal cual de Connect, por lo que no requiere prueba.*/
     @GetMapping("/list/{instanceId}")
     public ResponseEntity<DashboardFiltersDTO> getFilters(@PathVariable String instanceId) {
         DashboardFiltersDTO filters = agentListService.getAgentList(instanceId);
