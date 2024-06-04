@@ -1,11 +1,14 @@
 package com.itesm.panoptimize.controller;
 
+
+
 import com.itesm.panoptimize.dto.dashboard.*;
 import com.itesm.panoptimize.model.Notification;
 import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
 import com.itesm.panoptimize.dto.performance.AgentPerformanceDTO;
 
 import com.itesm.panoptimize.service.DashboardService;
+
 import com.itesm.panoptimize.service.CalculateSatisfactionService;
 
 import com.itesm.panoptimize.dto.performance.PerformanceDTO;
@@ -18,23 +21,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Mono;
 
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 import java.util.List;
@@ -44,11 +38,15 @@ import java.util.List;
 public class DashboardController {
     private final CalculateSatisfactionService satisfactionService;
     private final DashboardService dashboardService;
+    private final CalculatePerformanceService calculatePerformanceService;
 
     @Autowired
-    public DashboardController(DashboardService dashboardService, CalculateSatisfactionService satisfactionService) {
+    public DashboardController(DashboardService dashboardService,
+                               CalculateSatisfactionService satisfactionService,
+                               CalculatePerformanceService calculatePerformanceService) {
         this.dashboardService = dashboardService;
         this.satisfactionService = satisfactionService;
+        this.calculatePerformanceService = calculatePerformanceService;
     }
     @Operation(summary = "Download the dashboard data", description = "Download the dashboard data by time frame, agent and workspace number")
     @ApiResponses(value = {
@@ -64,32 +62,11 @@ public class DashboardController {
     })
 
 
-    @PostMapping("/data/download")
-    public ResponseEntity<Resource> downloadData(@RequestBody DashboardDTO dashboardDTO) throws IOException {
-        Path pathFile = Paths.get("../utils/dummy.txt").toAbsolutePath().normalize();
-
-        System.out.println("Path file: " + pathFile);
-
-        Resource resource = new UrlResource(pathFile.toUri());
-
-        if (resource.exists()) {
-            return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .body(resource);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
     @GetMapping("/customer-satisfaction")
-    public ResponseEntity<List<Integer>> calculateSatisfaction() {
-        List<CallMetricsDTO> metrics = satisfactionService.getCallMetrics();
-        return ResponseEntity.ok(satisfactionService.calculateSatisfaction(metrics));
+    public ResponseEntity<CustomerSatisfactionDTO> calculateSatisfaction() {
+        CustomerSatisfactionDTO result = satisfactionService.getSatisfactionLevels();
+        return ResponseEntity.ok(result);
     }
-    @Autowired
-    private DashboardService apiClient;
-    @Autowired
-    private DashboardService metricService;
 
     @Operation(summary = "Get the metrics data", description = "Get the metrics data by time frame, agent and workspace number")
     @ApiResponses(value = {
@@ -105,24 +82,8 @@ public class DashboardController {
     })
     @PostMapping("/combined-metrics")
     public ResponseEntity<Map<String, Object>> getCombinedMetrics(@Valid @RequestBody DashboardDTO dashboardDTO) {
-        Map<String, Object> combinedMetrics = new HashMap<>();
-
-        // Call the first service method
-        Mono<Map<String, Integer>> valuesMono = apiClient.getMetricResults(dashboardDTO).map(metricService::extractValues);
-        valuesMono.subscribe(values -> combinedMetrics.putAll(values));
-        // Call the second service method
-        MetricResponseDTO metricsData = dashboardService.getMetricsData(dashboardDTO);
-        combinedMetrics.put("avgHoldTime", metricsData.getAvgHoldTime());
-        combinedMetrics.put("firstContactResolution", metricsData.getFirstContactResolution());
-        combinedMetrics.put("abandonmentRate", metricsData.getAbandonmentRate());
-        combinedMetrics.put("serviceLevel", metricsData.getServiceLevel());
-        combinedMetrics.put("agentScheduleAdherence", metricsData.getAgentScheduleAdherence());
-        combinedMetrics.put("avgSpeedOfAnswer", metricsData.getAvgSpeedOfAnswer());
-
-        // Call the activity service
-        ActivityResponseDTO activityData = dashboardService.getActivity(dashboardDTO);
-        combinedMetrics.put("activities", activityData.getActivities());
-
+        Map<String, Object> combinedMetrics;
+        combinedMetrics = dashboardService.getDashboarData(dashboardDTO);
         return ResponseEntity.ok(combinedMetrics);
     }
 
@@ -161,13 +122,8 @@ public class DashboardController {
     public ResponseEntity<DashboardFiltersDTO> getFilters(@PathVariable String instanceId) {
         DashboardFiltersDTO filters = dashboardService.getFilters(instanceId);
 
-        System.out.println(instanceId);
-
         return ResponseEntity.ok(filters);
     }
-
-    @Autowired
-    private CalculatePerformanceService calculatePerformanceService;
 
     //Performance
     @Operation(summary = "Download the dashboard data", description = "Download the dashboard data by time frame, agent and workspace number")

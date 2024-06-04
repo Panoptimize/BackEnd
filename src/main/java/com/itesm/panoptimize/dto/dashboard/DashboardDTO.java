@@ -14,17 +14,8 @@ public class DashboardDTO {
     @NotNull(message = "End date is required")
     private Date endDate;
     private String[] routingProfiles;
-    private String[] agents;
 
     public DashboardDTO() {
-    }
-
-    public DashboardDTO(String instanceId, Date startDate, Date endDate, String[] routingProfiles, String[] agents) {
-        this.instanceId = instanceId;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.routingProfiles = routingProfiles;
-        this.agents = agents;
     }
 
     public Date getStartDate() {
@@ -49,14 +40,6 @@ public class DashboardDTO {
 
     public void setRoutingProfiles(String[] routingProfiles) {
         this.routingProfiles = routingProfiles;
-    }
-
-    public String[] getAgents() {
-        return agents;
-    }
-
-    public void setAgents(String[] agents) {
-        this.agents = agents;
     }
 
     public String getInstanceId() {

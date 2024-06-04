@@ -1,55 +1,56 @@
 package com.itesm.panoptimize.model;
 
-
 import jakarta.persistence.*;
-
-import java.util.Date;
-import java.time.LocalDate;
-
+import org.hibernate.annotations.CreationTimestamp;
+import java.time.Instant;
 
 @Entity
-@Table(name = "agent_performance")
+@Table(name = "agent_performance", indexes = {
+        @Index(name = "agent_created_at_index", columnList = "created_at")
+})
 public class AgentPerformance {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "agent_performance_id")
-    private int id;
+    private Integer id;
 
-    @Column(name = "created_at")
-    private LocalDate performanceDate;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @CreationTimestamp
+    private Instant createdAt;
 
-    @Column(name = "avg_after_contact_work_time")
+    @Column(name = "avg_after_contact_work_time", nullable = false)
     private Double avgAfterContactWorkTime;
 
-    @Column(name = "avg_handle_time")
+    @Column(name = "avg_handle_time", nullable = false)
     private Double avgHandleTime;
 
-    @Column(name = "avg_abandon_time")
+    @Column(name = "avg_abandon_time", nullable = false)
     private Double avgAbandonTime;
 
-    @Column(name = "avg_hold_time")
+    @Column(name = "avg_hold_time", nullable = false)
     private Double avgHoldTime;
 
-    @Column(name = "agent_id", length = 20)
-    private String agentId;
+    @ManyToOne
+    @JoinColumn(name = "agent_id", nullable = false, foreignKey = @ForeignKey(name = "agent_has_performance"))
+    private User agent;
 
-    // Getters and Setters
+    @OneToOne(mappedBy = "agentPerformance")
+    private Note note;
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    public LocalDate getPerformanceDate() {
-        return performanceDate;
+    public Instant getCreatedAt() {
+        return createdAt;
     }
 
-    public void setPerformanceDate(LocalDate date) {
-        this.performanceDate = date;
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
     }
 
     public Double getAvgAfterContactWorkTime() {
@@ -84,11 +85,19 @@ public class AgentPerformance {
         this.avgHoldTime = avgHoldTime;
     }
 
-    public String getAgentId() {
-        return agentId;
+    public User getAgent() {
+        return agent;
     }
 
-    public void setAgentId(String agentId) {
-        this.agentId = agentId;
+    public void setAgent(User agent) {
+        this.agent = agent;
+    }
+
+    public Note getNote() {
+        return note;
+    }
+
+    public void setNote(Note note) {
+        this.note = note;
     }
 }

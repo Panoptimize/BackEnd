@@ -1,108 +1,63 @@
 package com.itesm.panoptimize.model;
 
-import com.itesm.panoptimize.enumerator.SatisfactionLevel;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
-import java.util.Date;
-import java.util.Set;
+import java.time.Instant;
 
 /**
  * Entity representing a contact.
  * This class maps to the 'contact' table in the database and defines the structure for contact data.
  */
 @Entity
-@Table(name = "contact")
+@Table(name = "contact", indexes = {
+        @Index(name = "contact_satisfaction_index", columnList = "satisfaction")
+})
 public class Contact {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "contact_id")
-    private Integer id;
+    @Column(name = "contact_id", length = 36, nullable = false, unique = true, columnDefinition = "CHAR(36)")
+    private String id;
 
-    @Column(name = "start_time")
-    private Date startTime;
+    @Column(name = "satisfaction")
+    private Integer satisfaction;
 
-    @Column(name = "end_time")
-    private Date endTime;
+    @CreationTimestamp
+    @Column(name = "created_at")
+    private Instant createdAt;
 
     @ManyToOne
-    @JoinColumn(name = "agent_id", nullable = false)
-    private User agent;
+    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "contact_has_user"))
+    private User user;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "satisfaction_level")
-    private SatisfactionLevel satisfactionLevel;
-
-    @OneToOne(mappedBy = "contact")
-    private ContactMetric contactMetrics;
-
-    @OneToMany(mappedBy = "contact")
-    private Set<Feedback> feedbacks;
-
-    @OneToMany(mappedBy = "contact")
-    private Set<Notification> notifications;
-
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public Date getStartTime() {
-        return startTime;
+    public Integer getSatisfaction() {
+        return satisfaction;
     }
 
-    public void setStartTime(Date startTime) {
-        this.startTime = startTime;
+    public void setSatisfaction(Integer satisfaction) {
+        this.satisfaction = satisfaction;
     }
 
-    public Date getEndTime() {
-        return endTime;
+    public User getUser() {
+        return user;
     }
 
-    public void setEndTime(Date endTime) {
-        this.endTime = endTime;
+    public void setUser(User user) {
+        this.user = user;
     }
 
-    public User getAgent() {
-        return agent;
+    public Instant getCreatedAt() {
+        return createdAt;
     }
 
-    public void setAgent(User agent) {
-        this.agent = agent;
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
     }
-
-    public SatisfactionLevel getSatisfactionLevel() {
-        return satisfactionLevel;
-    }
-
-    public void setSatisfactionLevel(SatisfactionLevel satisfactionLevel) {
-        this.satisfactionLevel = satisfactionLevel;
-    }
-
-    public ContactMetric getContactMetrics() {
-        return contactMetrics;
-    }
-
-    public void setContactMetrics(ContactMetric contactMetrics) {
-        this.contactMetrics = contactMetrics;
-    }
-
-    public Set<Feedback> getFeedbacks() {
-        return feedbacks;
-    }
-
-    public void setFeedbacks(Set<Feedback> feedbacks) {
-        this.feedbacks = feedbacks;
-    }
-
-    public Set<Notification> getNotifications() {
-        return notifications;
-    }
-
-    public void setNotifications(Set<Notification> notifications) {
-        this.notifications = notifications;
-    }
-
 }

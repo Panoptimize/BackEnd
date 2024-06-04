@@ -1,13 +1,11 @@
 package com.itesm.panoptimize.repository;
 
 import com.itesm.panoptimize.model.AgentPerformance;
-import jakarta.persistence.PrePersist;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.query.Procedure;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -15,5 +13,7 @@ import java.util.List;
  */
 @Repository
 public interface AgentPerformanceRepository extends JpaRepository<AgentPerformance, Integer> {
-    List<AgentPerformance> findByPerformanceDateBetween(LocalDate startDate, LocalDate endDate);
+
+    @Query("SELECT ap FROM AgentPerformance ap WHERE ap.createdAt BETWEEN :startDate AND :endDate")
+    List<AgentPerformance> findPerformancesBetweenDates(Instant startDate, Instant endDate);
 }
