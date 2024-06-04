@@ -101,10 +101,6 @@ public class UserService {
             agentToUpdate.setFullName(agentUserDTO.getFullName());
         }
 
-        if(agentUserDTO.getImagePath() != null) {
-            agentToUpdate.setImagePath(agentUserDTO.getImagePath());
-        }
-
         if(agentUserDTO.getRoutingProfileId() != null) {
             RoutingProfile routingProfile = new RoutingProfile();
             routingProfile.setRoutingProfileId(agentUserDTO.getRoutingProfileId());
@@ -179,10 +175,6 @@ public class UserService {
 
         if(supervisorUserDTO.getFullName() != null) {
             supervisorToUpdate.setFullName(supervisorUserDTO.getFullName());
-        }
-
-        if(supervisorUserDTO.getImagePath() != null) {
-            supervisorToUpdate.setImagePath(supervisorUserDTO.getImagePath());
         }
 
         if(supervisorUserDTO.getRoutingProfileId() != null) {

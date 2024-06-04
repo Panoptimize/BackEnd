@@ -13,7 +13,6 @@ import java.util.List;
  */
 @Repository
 public interface AgentPerformanceRepository extends JpaRepository<AgentPerformance, Integer> {
-
-    @Query("SELECT ap FROM AgentPerformance ap WHERE ap.createdAt BETWEEN :startDate AND :endDate")
-    List<AgentPerformance> findPerformancesBetweenDates(Instant startDate, Instant endDate);
+    @Query("SELECT ap FROM AgentPerformance ap JOIN ap.agent u WHERE ap.createdAt BETWEEN :startDate AND :endDate AND u.routingProfile.routingProfileId IN :routingProfileIds")
+    List<AgentPerformance> findPerformancesBetweenDates(Instant startDate, Instant endDate, List<String> routingProfileIds);
 }
