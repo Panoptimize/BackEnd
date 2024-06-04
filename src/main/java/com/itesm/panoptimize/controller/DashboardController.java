@@ -143,7 +143,6 @@ public class DashboardController {
 
     @PostMapping("/performance")
     public List<AgentPerformanceDTO> getPerformance(@RequestBody PerformanceDTO performanceDTO) {
-        System.out.println("PerformanceDTO received: " + performanceDTO);
         return calculatePerformanceService.getPerformances(performanceDTO.getStartDate(), performanceDTO.getEndDate(), performanceDTO.getInstanceId(), performanceDTO.getRoutingProfileIds());
     }
 
