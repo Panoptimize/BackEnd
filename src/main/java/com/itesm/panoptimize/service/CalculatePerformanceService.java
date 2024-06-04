@@ -8,9 +8,6 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.connect.ConnectClient;
 import software.amazon.awssdk.services.connect.model.DescribeUserRequest;
 import software.amazon.awssdk.services.connect.model.DescribeUserResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
@@ -22,8 +19,6 @@ import java.util.stream.Collectors;
  */
 @Service
 public class CalculatePerformanceService {
-
-    private static final Logger logger = LoggerFactory.getLogger(CalculatePerformanceService.class);
 
     private final ConnectClient connectClient;
     private final AgentPerformanceRepository agentPerformanceRepository;
@@ -52,15 +47,8 @@ public class CalculatePerformanceService {
         Instant startInstant = startDate.toInstant();
         Instant endInstant = endDate.toInstant();
 
-        logger.debug("Fetching performance data between {} and {}", startInstant, endInstant);
-
         List<AgentPerformance> performances = agentPerformanceRepository.findPerformancesBetweenDates(startInstant, endInstant);
 
-        logger.debug("Fetched {} performance records", performances.size());
-
-        if (performances.isEmpty()) {
-            logger.warn("No performance records found between {} and {}", startInstant, endInstant);
-        }
 
         Map<String, List<AgentPerformance>> groupedByAgent = performances.stream()
                 .collect(Collectors.groupingBy(performance -> performance.getAgent().getConnectId()));
