@@ -1,5 +1,4 @@
 package com.itesm.panoptimize.service;
-
 import com.itesm.panoptimize.dto.performance.AgentPerformanceDTO;
 import com.itesm.panoptimize.model.AgentPerformance;
 import com.itesm.panoptimize.repository.AgentPerformanceRepository;
@@ -8,7 +7,6 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.connect.ConnectClient;
 import software.amazon.awssdk.services.connect.model.DescribeUserRequest;
 import software.amazon.awssdk.services.connect.model.DescribeUserResponse;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
