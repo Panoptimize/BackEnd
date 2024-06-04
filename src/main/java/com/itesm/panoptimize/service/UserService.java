@@ -151,6 +151,12 @@ public class UserService {
         ));
     }
 
+    public SupervisorUserDTO getSupervisorByEmail(String email){
+        return convertToSupervisorDTO(userRepository.findByEmail(email).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entity not found")
+        ));
+    }
+
     public SupervisorUserDTO getSupervisorWithConnectId(String connectId) {
         return convertToSupervisorDTO(userRepository.connectId(connectId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entity not found")

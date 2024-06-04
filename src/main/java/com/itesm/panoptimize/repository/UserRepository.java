@@ -24,4 +24,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
      * @param amazonConnectId Amazon connect id
      */
     Optional<User> connectId(String amazonConnectId);
+
+    Optional<User> findByEmail(String email);
 }

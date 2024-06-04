@@ -73,6 +73,10 @@ public class SupervisorController {
     public ResponseEntity<SupervisorUserDTO> getSupervisorById(@PathVariable Integer id) {
         return ResponseEntity.ok(supervisorService.getSupervisor(id));
     }
+    @GetMapping("/userInfo")
+    public ResponseEntity<SupervisorUserDTO> getSupervisorByEmail(@RequestParam String email) {
+        return ResponseEntity.ok(supervisorService.getSupervisorByEmail(email));
+    }
 
     @Operation(summary = "Obtener info de supervisor", description = "Obtener la info de supervisor mediante el id de connect" )
     @ApiResponses(value = {
