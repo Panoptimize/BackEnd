@@ -101,10 +101,6 @@ public class UserService {
             agentToUpdate.setFullName(agentUserDTO.getFullName());
         }
 
-        if(agentUserDTO.getImagePath() != null) {
-            agentToUpdate.setImagePath(agentUserDTO.getImagePath());
-        }
-
         if(agentUserDTO.getRoutingProfileId() != null) {
             RoutingProfile routingProfile = new RoutingProfile();
             routingProfile.setRoutingProfileId(agentUserDTO.getRoutingProfileId());
@@ -134,11 +130,11 @@ public class UserService {
         AgentPerformance agentPerformanceToUpdate = agentPerformanceRepository.findById(id)
                 .orElse(null);
         if (agentPerformanceToUpdate != null) {
-            agentPerformanceToUpdate.setAvgAfterContactWorkTime(agentPerformance.getAvgAfterContactWorkTime());
-            agentPerformanceToUpdate.setAvgHandleTime(agentPerformance.getAvgHandleTime());
-            agentPerformanceToUpdate.setAvgAbandonTime(agentPerformance.getAvgAbandonTime());
             agentPerformanceToUpdate.setAgent(agentPerformance.getAgent());
             agentPerformanceToUpdate.setCreatedAt(agentPerformance.getCreatedAt());
+            agentPerformanceToUpdate.setAvgAfterContactWorkTime(agentPerformance.getAvgAfterContactWorkTime());
+            agentPerformanceToUpdate.setAvgAbandonTime(agentPerformance.getAvgAbandonTime());
+            agentPerformanceToUpdate.setAvgHandleTime(agentPerformance.getAvgHandleTime());
             agentPerformanceToUpdate.setAvgHoldTime(agentPerformance.getAvgHoldTime());
             agentPerformanceRepository.save(agentPerformanceToUpdate);
         }
@@ -179,10 +175,6 @@ public class UserService {
 
         if(supervisorUserDTO.getFullName() != null) {
             supervisorToUpdate.setFullName(supervisorUserDTO.getFullName());
-        }
-
-        if(supervisorUserDTO.getImagePath() != null) {
-            supervisorToUpdate.setImagePath(supervisorUserDTO.getImagePath());
         }
 
         if(supervisorUserDTO.getRoutingProfileId() != null) {

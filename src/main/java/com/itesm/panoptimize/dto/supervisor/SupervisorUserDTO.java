@@ -14,7 +14,6 @@ public class SupervisorUserDTO {
     private String email;
     @NotNull(message = "FullName is required")
     private String fullName;
-    private String imagePath;
     @NotNull(message = "RoutingProfileId is required")
     private String routingProfileId;
     private Boolean canSwitch;
@@ -60,14 +59,6 @@ public class SupervisorUserDTO {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
-    }
-
-    public String getImagePath() {
-        return imagePath;
-    }
-
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
     }
 
     public String getRoutingProfileId() {

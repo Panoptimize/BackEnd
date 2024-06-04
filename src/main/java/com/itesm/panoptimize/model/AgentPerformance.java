@@ -2,20 +2,19 @@ package com.itesm.panoptimize.model;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.Instant;
 
 @Entity
-@Table(name = "agent_performance", indexes = {
-        @Index(name = "agent_created_at_index", columnList = "created_at")
-})
+@Table(name = "agent_performance")
 public class AgentPerformance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "agent_performance_id")
     private Integer id;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
     @CreationTimestamp
+    @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
     @Column(name = "avg_after_contact_work_time", nullable = false)
@@ -31,10 +30,10 @@ public class AgentPerformance {
     private Double avgHoldTime;
 
     @ManyToOne
-    @JoinColumn(name = "agent_id", nullable = false, foreignKey = @ForeignKey(name = "agent_has_performance"))
+    @JoinColumn(name = "agent_id", nullable = false, foreignKey = @ForeignKey(name = "agent_has_performances"))
     private User agent;
 
-    @OneToOne(mappedBy = "agentPerformance")
+    @OneToOne(mappedBy = "agentPerformance", cascade = CascadeType.ALL)
     private Note note;
 
     public Integer getId() {
@@ -93,11 +92,11 @@ public class AgentPerformance {
         this.agent = agent;
     }
 
-    public Note getNote() {
+    public Note getNotes() {
         return note;
     }
 
-    public void setNote(Note note) {
+    public void setNotes(Note note) {
         this.note = note;
     }
 }
