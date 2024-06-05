@@ -135,7 +135,7 @@ public class UserService {
         if (agentPerformanceToUpdate != null) {
             agentPerformanceToUpdate.setAgent(agentPerformance.getAgent());
             agentPerformanceToUpdate.setCreatedAt(agentPerformance.getCreatedAt());
-            agentPerformanceToUpdate.setAvgAfterCallWorkTime(agentPerformance.getAvgAfterCallWorkTime());
+            agentPerformanceToUpdate.setAvgAfterContactWorkTime(agentPerformance.getAvgAfterContactWorkTime());
             agentPerformanceToUpdate.setAvgAbandonTime(agentPerformance.getAvgAbandonTime());
             agentPerformanceToUpdate.setAvgHandleTime(agentPerformance.getAvgHandleTime());
             agentPerformanceToUpdate.setAvgHoldTime(agentPerformance.getAvgHoldTime());
