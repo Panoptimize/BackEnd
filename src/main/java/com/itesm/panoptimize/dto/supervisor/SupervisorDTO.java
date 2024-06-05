@@ -11,7 +11,7 @@ public class SupervisorDTO {
     private String password;
     private String floor;
     private boolean verified;
-    private String picture;
+
     private List<AgentDTO> supervisedAgents;
     private int id;
 
@@ -79,12 +79,6 @@ public class SupervisorDTO {
         this.verified = verified;
     }
 
-    public String getPicture() {
-        return picture;
-    }
 
-    public void setPicture(String picture) {
-        this.picture = picture;
-    }
 }
 
