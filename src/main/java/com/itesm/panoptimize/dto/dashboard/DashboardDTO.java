@@ -6,8 +6,6 @@ import jakarta.validation.constraints.Size;
 import java.util.Date;
 
 public class DashboardDTO {
-    @NotNull(message = "Instance ID is required")
-    @Size(min = 36, max = 36, message = "Instance ID must be 36 characters long")
     private String instanceId;
     @NotNull(message = "Start date is required")
     private Date startDate;

@@ -82,7 +82,9 @@ public class DashboardController {
                     content = @Content),
     })
     @PostMapping("/combined-metrics")
-    public ResponseEntity<Map<String, Object>> getCombinedMetrics(@Valid @RequestBody DashboardDTO dashboardDTO) {
+    public ResponseEntity<Map<String, Object>> getCombinedMetrics(@Valid @RequestBody DashboardDTO dashboardDTO,
+                                                                  @RequestAttribute String instanceId) {
+        dashboardDTO.setInstanceId(instanceId);
         Map<String, Object> combinedMetrics;
         combinedMetrics = dashboardService.getDashboarData(dashboardDTO);
         return ResponseEntity.ok(combinedMetrics);
@@ -119,8 +121,8 @@ public class DashboardController {
     }
 
 
-    @GetMapping("/filters/{instanceId}")
-    public ResponseEntity<DashboardFiltersDTO> getFilters(@PathVariable String instanceId) {
+    @GetMapping("/filters")
+    public ResponseEntity<DashboardFiltersDTO> getFilters(@RequestAttribute String instanceId) {
         DashboardFiltersDTO filters = dashboardService.getFilters(instanceId);
 
         return ResponseEntity.ok(filters);
@@ -142,7 +144,8 @@ public class DashboardController {
 
 
     @PostMapping("/performance")
-    public List<AgentPerformanceDTO> getPerformance(@RequestBody PerformanceDTO performanceDTO) {
+    public List<AgentPerformanceDTO> getPerformance(@RequestBody PerformanceDTO performanceDTO, @RequestAttribute String instanceId) {
+        performanceDTO.setInstanceId(instanceId);
         return calculatePerformanceService.getPerformances(performanceDTO.getStartDate(), performanceDTO.getEndDate(), performanceDTO.getInstanceId(), performanceDTO.getRoutingProfileIds());
     }
 
