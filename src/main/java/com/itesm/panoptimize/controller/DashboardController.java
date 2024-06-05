@@ -82,8 +82,9 @@ public class DashboardController {
                     content = @Content),
     })
     @PostMapping("/combined-metrics")
-    public ResponseEntity<CombinedMetricsDTO> getCombinedMetrics(@Valid @RequestBody DashboardDTO dashboardDTO) {
-        CombinedMetricsDTO combinedMetrics = dashboardService.getDashboarData(dashboardDTO);
+    public ResponseEntity<Map<String, Object>> getCombinedMetrics(@Valid @RequestBody DashboardDTO dashboardDTO) {
+        Map<String, Object> combinedMetrics;
+        combinedMetrics = dashboardService.getDashboarData(dashboardDTO);
         return ResponseEntity.ok(combinedMetrics);
     }
 
@@ -125,6 +126,25 @@ public class DashboardController {
         return ResponseEntity.ok(filters);
     }
 
+    //Performance
+    @Operation(summary = "Download the dashboard data", description = "Download the dashboard data by time frame, agent and workspace number")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Calculated Performance data succesfully",
+                    content = {
+                            @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = PerformanceDTO.class))
+                    }),
+            @ApiResponse(responseCode = "404",
+                    description = "Data not found or calculated incorrectly.",
+                    content = @Content),
+    })
+
+
+    @PostMapping("/performance")
+    public List<AgentPerformanceDTO> getPerformance(@RequestBody PerformanceDTO performanceDTO) {
+        return calculatePerformanceService.getPerformances(performanceDTO.getStartDate(), performanceDTO.getEndDate(), performanceDTO.getInstanceId(), performanceDTO.getRoutingProfileIds());
+    }
 
 
 }

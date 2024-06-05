@@ -13,7 +13,6 @@ public class PerformanceDTO {
     @NotNull(message = "End date is required")
     private Date endDate;
 
-    @NotNull(message = "Instance ID is required")
     private String instanceId;
 
     @NotNull(message = "Routing profiles IDs are required")

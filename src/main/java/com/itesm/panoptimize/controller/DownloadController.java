@@ -1,12 +1,7 @@
 package com.itesm.panoptimize.controller;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.Date;
+import java.io.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itesm.panoptimize.dto.download.DownloadDTO;
 import com.itesm.panoptimize.service.DownloadService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,23 +25,20 @@ public class DownloadController {
     @PostMapping("/getDownload")
     public ResponseEntity<InputStreamResource> getReport(@RequestBody DownloadDTO downloadDTO) throws IOException {
 
-        String homedir = System.getProperty("user.home");
-        Date date = new Date();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-        String file = "DataReport_" + date.getTime() + ".xlsx";
-        String filePath = Paths.get(homedir, "Downloads", file).toString();
+        downloadService.getFinalReport(byteArrayOutputStream, downloadDTO);
 
-        downloadService.getFinalReport(filePath, downloadDTO);
-
-        File fileToDownload = new File(file);
-        InputStreamResource resource = new InputStreamResource(new FileInputStream(fileToDownload));
+        byte[] byteArray = byteArrayOutputStream.toByteArray();
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArray);
+        InputStreamResource resource = new InputStreamResource(byteArrayInputStream);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Disposition", String.format("attachment; filename=\"%s\"", fileToDownload.getName()));
+        headers.add("Content-Disposition", "attachment; filename=DataReport.xlsx");
 
         return ResponseEntity.ok()
                 .headers(headers)
-                .contentLength(fileToDownload.length())
+                .contentLength(byteArray.length)
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);
     }

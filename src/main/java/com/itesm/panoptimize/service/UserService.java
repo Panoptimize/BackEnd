@@ -7,6 +7,7 @@ import com.itesm.panoptimize.dto.supervisor.SupervisorCreateDTO;
 import com.itesm.panoptimize.dto.supervisor.SupervisorUpdateDTO;
 import com.itesm.panoptimize.dto.supervisor.SupervisorUserDTO;
 import com.itesm.panoptimize.model.AgentPerformance;
+import com.itesm.panoptimize.model.Company;
 import com.itesm.panoptimize.model.RoutingProfile;
 import com.itesm.panoptimize.model.User;
 import com.itesm.panoptimize.repository.AgentPerformanceRepository;
@@ -222,5 +223,11 @@ public class UserService {
         } else {
             throw new UsernameNotFoundException("User not found by firebase id: " + firebaseId);
         }
+    }
+
+    public String getInstanceIdFromFirebaseId(String firebaseId) {
+        return userRepository.firebaseId(firebaseId).map(
+                user -> user.getCompany().getInstance().getId()
+        ).orElseThrow(() -> new UsernameNotFoundException("User not found by firebase id: " + firebaseId));
     }
 }
