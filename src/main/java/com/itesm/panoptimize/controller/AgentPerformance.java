@@ -24,7 +24,7 @@ public class AgentPerformance {
         return ResponseEntity.ok(agentPerformanceService.getAgentPerformances(pageable));
     }
 
-    @GetMapping("/{date}/{id}")
+    @GetMapping("/details/{id}")
     public ResponseEntity<AgentPerformanceDTO> getAgentMetricsByDate(@PathVariable Instant searchDate, @PathVariable Integer agentId){
         return ResponseEntity.ok(agentPerformanceService.getAgentMetricsByDate(searchDate,agentId));
     }
