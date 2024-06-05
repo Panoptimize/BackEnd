@@ -91,14 +91,6 @@ public class User {
         this.fullName = fullName;
     }
 
-    public String getImagePath() {
-        return imagePath;
-    }
-
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
-    }
-
     public RoutingProfile getRoutingProfile() {
         return routingProfile;
     }
