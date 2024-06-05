@@ -2,7 +2,6 @@ package com.itesm.panoptimize.model;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
-
 import java.time.Instant;
 
 @Entity
@@ -15,7 +14,7 @@ public class AgentPerformance {
     @Column(name = "agent_performance_id")
     private Integer id;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     @CreationTimestamp
     private Instant createdAt;
 
@@ -38,6 +37,7 @@ public class AgentPerformance {
     @OneToOne(mappedBy = "agentPerformance")
     private Note note;
 
+
     public Integer getId() {
         return id;
     }
@@ -54,11 +54,11 @@ public class AgentPerformance {
         this.createdAt = createdAt;
     }
 
-    public Double getAvgAfterCallWorkTime() {
+    public Double getAvgAfterContactWorkTime() {
         return avgAfterContactWorkTime;
     }
 
-    public void setAvgAfterCallWorkTime(Double avgAfterContactWorkTime) {
+    public void setAvgAfterContactWorkTime(Double avgAfterContactWorkTime) {
         this.avgAfterContactWorkTime = avgAfterContactWorkTime;
     }
 
@@ -94,11 +94,11 @@ public class AgentPerformance {
         this.agent = agent;
     }
 
-    public Note getNotes() {
+    public Note getNote() {
         return note;
     }
 
-    public void setNotes(Note note) {
+    public void setNote(Note note) {
         this.note = note;
     }
 }

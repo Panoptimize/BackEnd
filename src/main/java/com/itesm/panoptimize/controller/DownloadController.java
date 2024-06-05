@@ -7,7 +7,7 @@ import java.nio.file.Paths;
 import java.util.Date;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
+import com.itesm.panoptimize.dto.download.DownloadDTO;
 import com.itesm.panoptimize.service.DownloadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -21,26 +21,24 @@ public class DownloadController {
 
     private final DownloadService downloadService;
 
-    private final ObjectMapper objectMapper;
-
     @Autowired
-    public DownloadController(DownloadService downloadService, ObjectMapper objectMapper) {
+    public DownloadController(DownloadService downloadService) {
         this.downloadService = downloadService;
-        this.objectMapper = objectMapper;
     }
 
     //Download data from the Dashboard
-    @GetMapping("/getDownload")
-    public ResponseEntity<InputStreamResource> getReport() throws IOException {
-        
+    @PostMapping("/getDownload")
+    public ResponseEntity<InputStreamResource> getReport(@RequestBody DownloadDTO downloadDTO) throws IOException {
+
         String homedir = System.getProperty("user.home");
         Date date = new Date();
+
         String file = "DataReport_" + date.getTime() + ".xlsx";
         String filePath = Paths.get(homedir, "Downloads", file).toString();
 
-        downloadService.getFinalReport(filePath);
+        downloadService.getFinalReport(filePath, downloadDTO);
 
-        File fileToDownload = new File(filePath);
+        File fileToDownload = new File(file);
         InputStreamResource resource = new InputStreamResource(new FileInputStream(fileToDownload));
 
         HttpHeaders headers = new HttpHeaders();

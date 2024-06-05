@@ -1,8 +1,8 @@
 package com.itesm.panoptimize.service;
 
-import com.itesm.panoptimize.dto.case_template.CaseTemplateDTO;
-import com.itesm.panoptimize.dto.case_template.CreateCaseTemplateDTO;
-import com.itesm.panoptimize.dto.case_template.UpdateCaseTemplateDTO;
+import com.itesm.panoptimize.dto.casetemplate.CaseTemplateDTO;
+import com.itesm.panoptimize.dto.casetemplate.CreateCaseTemplateDTO;
+import com.itesm.panoptimize.dto.casetemplate.UpdateCaseTemplateDTO;
 import com.itesm.panoptimize.model.CaseTemplate;
 import com.itesm.panoptimize.repository.CaseTemplateRepository;
 import org.modelmapper.ModelMapper;

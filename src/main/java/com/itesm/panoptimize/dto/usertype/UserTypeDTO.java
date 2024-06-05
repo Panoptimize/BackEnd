@@ -1,4 +1,4 @@
-package com.itesm.panoptimize.dto.user_type;
+package com.itesm.panoptimize.dto.usertype;
 
 import jakarta.validation.constraints.NotNull;
 
@@ -7,6 +7,8 @@ public class UserTypeDTO {
     private Integer id;
     @NotNull(message = "Type is required")
     private String type;
+    @NotNull(message = "SecurityProfileId is required")
+    private String securityProfileId;
 
     public UserTypeDTO() {
     }

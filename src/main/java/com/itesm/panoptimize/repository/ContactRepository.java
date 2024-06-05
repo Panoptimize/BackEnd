@@ -1,5 +1,6 @@
 package com.itesm.panoptimize.repository;
 
+import com.itesm.panoptimize.dto.contact.SatisfactionCountDTO;
 import com.itesm.panoptimize.model.Contact;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,11 +13,7 @@ import java.util.List;
  * Provides management operations for contacts including CRUD operations and custom queries.
  */
 @Repository
-public interface ContactRepository extends JpaRepository<Contact, Integer> {
-    /**
-     * Custom query to count contacts grouped by the month of their start time.
-     * @return a list of object arrays where each array contains the month number and the count of contacts for that month
-     */
-    @Query(value = "SELECT MONTH(c.start_time) month, COUNT(*) FROM contact c GROUP BY MONTH(c.start_time)", nativeQuery = true)
-    List<Object[]> countMonthlyContacts();
+public interface ContactRepository extends JpaRepository<Contact, String> {
+    @Query("SELECT c.satisfaction, COUNT(c) count FROM Contact c GROUP BY c.satisfaction ORDER BY c.satisfaction")
+    List<SatisfactionCountDTO> countBySatisfaction();
 }
