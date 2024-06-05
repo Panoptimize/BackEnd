@@ -89,7 +89,9 @@ public class AgentPerformanceService {
         return convertToDTO(agentPerformanceRepository.findAgentPerformanceByNoteId(id));
     }
 
-    public AgentPerformanceDTO getAgentMetricsByDate(Instant searchDate, Integer agentId){
-        return convertToDTO(agentPerformanceRepository.findAgentPerformanceByAgentIdDate(searchDate,agentId));
+    public AgentPerformanceDTO getAgentMetricsToday(Integer agentId){
+        Instant now=Instant.now();
+        String date=now.toString().substring(0,10);
+        return convertToDTO(agentPerformanceRepository.findAgentMetricsByAgentId(date,agentId));
     }
 }
