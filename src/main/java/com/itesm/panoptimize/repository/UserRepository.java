@@ -24,4 +24,11 @@ public interface UserRepository extends JpaRepository<User, Integer> {
      * @param amazonConnectId Amazon connect id
      */
     Optional<User> connectId(String amazonConnectId);
+
+    /**
+     * Get users with a specific firebase id
+     * @param firebaseId Firebase id
+     * @return Optional of user
+     */
+    Optional<User> firebaseId(String firebaseId);
 }

@@ -16,8 +16,11 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -207,5 +210,25 @@ public class UserService {
         );
         supervisor.getAgents().add(agent);
         userRepository.save(supervisor);
+    }
+
+    public SupervisorUserDTO getSupervisorWithFirebaseId(String firebaseId) {
+        Optional<User> userOptional = userRepository.firebaseId(firebaseId);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            SupervisorUserDTO supervisorUserDTO = new SupervisorUserDTO();
+
+            supervisorUserDTO.setFullName(user.getFullName());
+            supervisorUserDTO.setFirebaseId(user.getFirebaseId());
+            supervisorUserDTO.setEmail(user.getEmail());
+            supervisorUserDTO.setConnectId(user.getConnectId());
+            supervisorUserDTO.setId(user.getId());
+            supervisorUserDTO.setCanSwitch(user.isCanSwitch());
+            supervisorUserDTO.setRoutingProfileId(user.getRoutingProfile().getRoutingProfileId());
+
+            return supervisorUserDTO;
+        } else {
+            throw new UsernameNotFoundException("User not found by firebase id: " + firebaseId);
+        }
     }
 }

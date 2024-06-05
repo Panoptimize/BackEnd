@@ -18,9 +18,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RequestMapping ("/supervisor")
 public class SupervisorController {
     private final UserService supervisorService;
+    private final UserService userService;
 
-    public SupervisorController(UserService supervisorService) {
+    public SupervisorController(UserService supervisorService, UserService userService) {
         this.supervisorService = supervisorService;
+        this.userService = userService;
     }
 
     @Operation(summary = "Obtener todos los supervisores", description = "Obtener todos los supervisores registrados en el sistema" )
@@ -112,5 +114,22 @@ public class SupervisorController {
     @PutMapping("/{id}")
     public ResponseEntity<SupervisorUserDTO> updateSupervisor(@PathVariable Integer id, @RequestBody SupervisorUpdateDTO supervisorUserDTO) {
         return ResponseEntity.ok(supervisorService.updateSupervisor(id, supervisorUserDTO));
+    }
+
+    @Operation(summary = "Obtener info extra de supervisor", description = "Obtener la info de supervisor mediante el id de firebase" )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Supervisor encontrado.",
+                    content = {
+                            @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = SupervisorUserDTO.class))
+                    }),
+            @ApiResponse(responseCode = "404",
+                    description = "Supervisor no encontrado.",
+                    content = @Content),
+    })
+    @GetMapping("/firebase")
+    public ResponseEntity<SupervisorUserDTO> getSupervisorByFirebaseId(@RequestHeader("X-User-ID") String firebaseId) {
+        return ResponseEntity.ok(userService.getSupervisorWithFirebaseId(firebaseId));
     }
 }
