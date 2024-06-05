@@ -14,6 +14,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
+import java.security.Principal;
+
 @RestController
 @RequestMapping ("/supervisor")
 public class SupervisorController {
@@ -128,8 +130,9 @@ public class SupervisorController {
                     description = "Supervisor no encontrado.",
                     content = @Content),
     })
-    @GetMapping("/firebase")
-    public ResponseEntity<SupervisorUserDTO> getSupervisorByFirebaseId(@RequestHeader("X-User-ID") String firebaseId) {
+    @GetMapping("/info")
+    public ResponseEntity<SupervisorUserDTO> getSupervisorInfo(Principal principal) {
+        String firebaseId = principal.getName();
         return ResponseEntity.ok(userService.getSupervisorWithFirebaseId(firebaseId));
     }
 }
