@@ -12,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+
 @Service
 public class AgentPerformanceService {
     private final AgentPerformanceRepository agentPerformanceRepository;
@@ -85,5 +87,9 @@ public class AgentPerformanceService {
 
     public AgentPerformanceDTO getAgentPerformanceByNote(Integer id){
         return convertToDTO(agentPerformanceRepository.findAgentPerformanceByNoteId(id));
+    }
+
+    public AgentPerformanceDTO getAgentMetricsByDate(Instant searchDate, Integer agentId){
+        return convertToDTO(agentPerformanceRepository.findAgentPerformanceByAgentIdDate(searchDate,agentId));
     }
 }

@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
+
 @RestController
 @RequestMapping("/agent-performance")
 public class AgentPerformance {
@@ -20,6 +22,11 @@ public class AgentPerformance {
     @GetMapping("/")
     public ResponseEntity<Page<AgentPerformanceDTO>> getAgentPerformances(Pageable pageable){
         return ResponseEntity.ok(agentPerformanceService.getAgentPerformances(pageable));
+    }
+
+    @GetMapping("/{date}/{id}")
+    public ResponseEntity<AgentPerformanceDTO> getAgentMetricsByDate(@PathVariable Instant searchDate, @PathVariable Integer agentId){
+        return ResponseEntity.ok(agentPerformanceService.getAgentMetricsByDate(searchDate,agentId));
     }
 
     @GetMapping("/note/{id}")
