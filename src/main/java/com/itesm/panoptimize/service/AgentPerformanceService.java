@@ -13,6 +13,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.Instant;
+import java.time.ZoneId;
 
 @Service
 public class AgentPerformanceService {
@@ -90,8 +94,8 @@ public class AgentPerformanceService {
     }
 
     public AgentPerformanceDTO getAgentMetricsToday(Integer agentId){
-        Instant now=Instant.now();
-        String date=now.toString().substring(0,10);
-        return convertToDTO(agentPerformanceRepository.findAgentMetricsByAgentId(date,agentId));
+        LocalDate localDate = Instant.now().atZone(ZoneId.systemDefault()).toLocalDate();
+        Date today = Date.valueOf(localDate);
+        return convertToDTO(agentPerformanceRepository.findAgentMetricsByAgentId(today,agentId));
     }
 }

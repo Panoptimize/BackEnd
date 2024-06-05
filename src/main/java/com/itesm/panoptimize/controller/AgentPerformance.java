@@ -30,7 +30,7 @@ public class AgentPerformance {
     }
 
     @GetMapping("/details/{id}")
-    public ResponseEntity<AgentPerformanceDTO> getAgentMetricsToday(@PathVariable Integer agentId){
-        return ResponseEntity.ok(agentPerformanceService.getAgentMetricsToday(agentId));
+    public ResponseEntity<AgentPerformanceDTO> getAgentMetricsToday(@PathVariable Integer id){
+        return ResponseEntity.ok(agentPerformanceService.getAgentMetricsToday(id));
     }
 }
