@@ -24,6 +24,7 @@ public class User {
     @Column(name = "full_name", nullable = false)
     private String fullName;
 
+
     @Column(name = "can_switch", nullable = false)
     private Boolean canSwitch = true;
 
@@ -90,6 +91,8 @@ public class User {
     public void setFullName(String fullName) {
         this.fullName = fullName;
     }
+
+
 
     public RoutingProfile getRoutingProfile() {
         return routingProfile;
