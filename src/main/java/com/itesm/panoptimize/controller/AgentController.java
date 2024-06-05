@@ -149,7 +149,7 @@ public class AgentController {
     }
 
     /*
-    * Este enpoint regresa los datos tal cual de Connect, por lo que no requiere prueba.*/
+    * This enpoint gives a response directly from connect, without processing.*/
     @GetMapping("/list/{instanceId}")
     public ResponseEntity<DashboardFiltersDTO> getFilters(@PathVariable String instanceId) {
         DashboardFiltersDTO filters = agentListService.getAgentList(instanceId);
