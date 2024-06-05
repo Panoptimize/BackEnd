@@ -21,13 +21,14 @@ import software.amazon.awssdk.services.connect.endpoints.internal.Value;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+
 import java.time.LocalDate;
 import java.util.*;
 
 @Service
 public class DownloadService {
 
-    private final WebClient webClient;
     private final ObjectMapper objectMapper;
     private final DashboardService dashboardService;
     private final CalculateSatisfactionService satisfactionService;
@@ -40,23 +41,21 @@ public class DownloadService {
     private DashboardService metricService;
 
     @Autowired
-    public DownloadService(WebClient.Builder webClientBuilder, ObjectMapper objectMapper, DashboardService dashboardService, CalculateSatisfactionService satisfactionService) {
-        this.webClient = webClientBuilder.baseUrl("http://localhost:8000").build();
+    public DownloadService(ObjectMapper objectMapper, DashboardService dashboardService, CalculateSatisfactionService satisfactionService) {
         this.objectMapper = objectMapper;
         this.dashboardService = dashboardService;
         this.satisfactionService = satisfactionService;
     }
 
-    public XSSFWorkbook getFinalReport(String url, DownloadDTO downloadDTO) {
+    public XSSFWorkbook getFinalReport(OutputStream url, DownloadDTO downloadDTO) {
         XSSFWorkbook workbook = new XSSFWorkbook();
 
         getCalculatePerformance(workbook, downloadDTO);
         getRestOfData(workbook, downloadDTO);
         getActivities(workbook, downloadDTO);
 
-
-        try (FileOutputStream outputStream = new FileOutputStream(url)) {
-            workbook.write(outputStream);
+        try {
+            workbook.write(url);
             workbook.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -93,55 +92,61 @@ public class DownloadService {
             headerRow.createCell(colNum++).setCellValue("Agent name");
             headerRow.createCell(colNum++).setCellValue("Performances");
 
+            if(!jsonArray.isEmpty()) {
+                for (JsonNode json : jsonArray) {
+                    if (json.has("agentID") && json.has("performances")) {
+                        String agentID = json.get("agentID").asText();
+                        JsonNode performances = json.get("performances");
 
-            for (JsonNode json : jsonArray) {
-                if (json.has("agentID") && json.has("performances")) {
-                    String agentID = json.get("agentID").asText();
-                    JsonNode performances = json.get("performances");
-
-                    if (performances.isArray()) {
-                        for (JsonNode performance : performances) {
-                            Row row = sheet.createRow(rowNum++);
-                            colNum = 0;
-                            row.createCell(colNum++).setCellValue(agentID);
-                            row.createCell(colNum++).setCellValue(performance.asDouble());
+                        if (performances.isArray()) {
+                            for (JsonNode performance : performances) {
+                                Row row = sheet.createRow(rowNum++);
+                                colNum = 0;
+                                row.createCell(colNum++).setCellValue(agentID);
+                                row.createCell(colNum++).setCellValue(performance.asDouble());
+                            }
                         }
                     }
                 }
+
+                for (int i = 0; i < headerRow.getLastCellNum(); i++) {
+                    sheet.autoSizeColumn(i);
+                }
+
+
+                XSSFDrawing drawing = sheet.createDrawingPatriarch();
+                XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 4, 2, 16, 20);
+
+                XSSFChart chart = drawing.createChart(anchor);
+                chart.setTitleText("Performance per Agent");
+                chart.setTitleOverlay(false);
+
+                XDDFChartLegend legend = chart.getOrAddLegend();
+                legend.setPosition(LegendPosition.TOP_RIGHT);
+
+                XDDFCategoryAxis bottomAxis = chart.createCategoryAxis(AxisPosition.BOTTOM);
+                bottomAxis.setTitle("Agent");
+
+                XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.LEFT);
+                leftAxis.setTitle("Performance");
+                leftAxis.setCrossBetween(AxisCrossBetween.BETWEEN);
+
+                XDDFDataSource<String> agentIDs = XDDFDataSourcesFactory.fromStringCellRange(sheet, new CellRangeAddress(1, rowNum - 1, 0, 0));
+                XDDFNumericalDataSource<Double> performances = XDDFDataSourcesFactory.fromNumericCellRange(sheet, new CellRangeAddress(1, rowNum - 1, 1, 1));
+
+                XDDFBarChartData data = (XDDFBarChartData) chart.createData(ChartTypes.BAR, bottomAxis, leftAxis);
+                XDDFBarChartData.Series series = (XDDFBarChartData.Series) data.addSeries(agentIDs, performances);
+                series.setTitle("Performance", null);
+                data.setBarDirection(BarDirection.COL);
+
+                chart.plot(data);
+
+
+            }else{
+                Row row = sheet.createRow(rowNum++);
+                colNum = 0;
+                row.createCell(colNum++).setCellValue("No data available");
             }
-
-            for (int i = 0; i < headerRow.getLastCellNum(); i++) {
-                sheet.autoSizeColumn(i);
-            }
-
-
-            XSSFDrawing drawing = sheet.createDrawingPatriarch();
-            XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 4, 2, 16, 20);
-
-            XSSFChart chart = drawing.createChart(anchor);
-            chart.setTitleText("Performance per Agent");
-            chart.setTitleOverlay(false);
-
-            XDDFChartLegend legend = chart.getOrAddLegend();
-            legend.setPosition(LegendPosition.TOP_RIGHT);
-
-            XDDFCategoryAxis bottomAxis = chart.createCategoryAxis(AxisPosition.BOTTOM);
-            bottomAxis.setTitle("Agent");
-
-            XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.LEFT);
-            leftAxis.setTitle("Performance");
-            leftAxis.setCrossBetween(AxisCrossBetween.BETWEEN);
-
-            XDDFDataSource<String> agentIDs = XDDFDataSourcesFactory.fromStringCellRange(sheet, new CellRangeAddress(1, rowNum - 1, 0, 0));
-            XDDFNumericalDataSource<Double> performances = XDDFDataSourcesFactory.fromNumericCellRange(sheet, new CellRangeAddress(1, rowNum - 1, 1, 1));
-
-            XDDFBarChartData data = (XDDFBarChartData) chart.createData(ChartTypes.BAR, bottomAxis, leftAxis);
-            XDDFBarChartData.Series series = (XDDFBarChartData.Series) data.addSeries(agentIDs, performances);
-            series.setTitle("Performance", null);
-            data.setBarDirection(BarDirection.COL);
-
-            chart.plot(data);
-
 
 
             return workbook;
@@ -225,6 +230,9 @@ public class DownloadService {
             row = sheet.createRow(rowNum++);
             row.createCell(0).setCellValue(keys.get(i));
             row.createCell(1).setCellValue(values.get(i).toString());
+            if(row.getCell(1).getStringCellValue().equals("null")){
+                row.getCell(1).setCellValue("0.0");
+            }
         }
 
         rowNum = 1;
@@ -277,70 +285,83 @@ public class DownloadService {
         List<Object> values = new ArrayList<>();
 
         Iterator<Map.Entry<String, JsonNode>> fieldValues = json.fields();
-        while (fieldValues.hasNext()) {
-            Map.Entry<String, JsonNode> entry = fieldValues.next();
-            if(entry.getKey().equals("activities") ){
-                keys.add(entry.getKey());
-                values.add(entry.getValue());
+        Map.Entry<String, JsonNode> firstEntry = fieldValues.next();
+
+
+        if(!firstEntry.getValue().isEmpty()) {
+            if(fieldValues.hasNext()) {
+                while (fieldValues.hasNext()) {
+                    Map.Entry<String, JsonNode> entry = fieldValues.next();
+
+                    if (entry.getKey().equals("activities")) {
+                        keys.add(entry.getKey());
+                        values.add(entry.getValue());
+                    }
+
+                }
+            }else {
+                keys.add(firstEntry.getKey());
+                values.add(firstEntry.getValue());
             }
 
-        }
+            Row headerRow = sheet.createRow(0);
+            int colNum = 0;
+            int rowNum = 1;
 
-        Row headerRow = sheet.createRow(0);
-        int colNum = 0;
-        int rowNum = 1;
+            headerRow.createCell(colNum++).setCellValue("Total Agent Activities");
+            headerRow.createCell(colNum++).setCellValue("Date");
 
-        headerRow.createCell(colNum++).setCellValue("Total Agent Activities");
-        headerRow.createCell(colNum++).setCellValue("Date");
+            for (int i = 0; i < keys.size(); i++) {
+                JsonNode activities = (JsonNode) values.get(i);
+                if (activities.isArray()) {
+                    for (JsonNode activity : activities) {
+                        if (activity.has("value") && activity.has("startTime")) {
 
-        for (int i = 0; i < keys.size(); i++) {
-            JsonNode activities = (JsonNode) values.get(i);
-            if (activities.isArray()) {
-                for (JsonNode activity : activities) {
-                    if (activity.has("value") && activity.has("startTime")) {
+                            int value = activity.get("value").asInt();
+                            String startTime = activity.get("startTime").asText();
+                            Row row = sheet.createRow(rowNum++);
+                            colNum = 0;
 
-                        int value = activity.get("value").asInt();
-                        String startTime = activity.get("startTime").asText();
-                        Row row = sheet.createRow(rowNum++);
-                        colNum = 0;
-
-                        row.createCell(colNum++).setCellValue(value);
-                        row.createCell(colNum++).setCellValue(startTime);
+                            row.createCell(colNum++).setCellValue(value);
+                            row.createCell(colNum++).setCellValue(startTime);
+                        }
                     }
                 }
             }
+            for (int i = 0; i < headerRow.getLastCellNum(); i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            XSSFDrawing drawing = sheet.createDrawingPatriarch();
+            XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 4, 1, 16, 20);
+
+            XSSFChart chart = drawing.createChart(anchor);
+            chart.setTitleText("Total Agent Activities");
+            chart.setTitleOverlay(false);
+
+            XDDFChartLegend legend = chart.getOrAddLegend();
+            legend.setPosition(LegendPosition.TOP_RIGHT);
+
+            XDDFCategoryAxis bottomAxis = chart.createCategoryAxis(AxisPosition.BOTTOM);
+            bottomAxis.setTitle("Date");
+
+            XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.LEFT);
+            leftAxis.setTitle("Activity");
+            leftAxis.setCrossBetween(AxisCrossBetween.BETWEEN);
+
+            XDDFDataSource<String> Dates = XDDFDataSourcesFactory.fromStringCellRange(sheet, new CellRangeAddress(1, rowNum - 1, 1, 1));
+            XDDFNumericalDataSource<Double> Activities = XDDFDataSourcesFactory.fromNumericCellRange(sheet, new CellRangeAddress(1, rowNum - 1, 0, 0));
+
+            XDDFLineChartData data = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
+            XDDFLineChartData.Series series = (XDDFLineChartData.Series) data.addSeries(Dates, Activities);
+
+            series.setTitle("Activities", null);
+
+            chart.plot(data);
+        }else {
+            Row row = sheet.createRow(0);
+            row.createCell(0).setCellValue("No data available");
         }
-
-        for (int i = 0; i < headerRow.getLastCellNum(); i++) {
-            sheet.autoSizeColumn(i);
-        }
-
-        XSSFDrawing drawing = sheet.createDrawingPatriarch();
-        XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 4, 1, 16, 20);
-
-        XSSFChart chart = drawing.createChart(anchor);
-        chart.setTitleText("Total Agent Activities");
-        chart.setTitleOverlay(false);
-
-        XDDFChartLegend legend = chart.getOrAddLegend();
-        legend.setPosition(LegendPosition.TOP_RIGHT);
-
-        XDDFCategoryAxis bottomAxis = chart.createCategoryAxis(AxisPosition.BOTTOM);
-        bottomAxis.setTitle("Date");
-
-        XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.LEFT);
-        leftAxis.setTitle("Activity");
-        leftAxis.setCrossBetween(AxisCrossBetween.BETWEEN);
-
-        XDDFDataSource<String> Dates = XDDFDataSourcesFactory.fromStringCellRange(sheet, new CellRangeAddress(1, rowNum - 1, 1, 1));
-        XDDFNumericalDataSource<Double> Activities = XDDFDataSourcesFactory.fromNumericCellRange(sheet, new CellRangeAddress(1, rowNum - 1, 0, 0));
-
-        XDDFLineChartData data = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
-        XDDFLineChartData.Series series = (XDDFLineChartData.Series) data.addSeries(Dates, Activities);
-
-        series.setTitle("Activities", null);
-
-        chart.plot(data);
 
         return workbook;
 
