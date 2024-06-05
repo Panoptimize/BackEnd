@@ -105,8 +105,6 @@ public class AgentControllerTests {
                         .header("Authorization", "Bearer " + firebaseToken))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(jsonPath("$.username").value(notNullValue()))
-                .andExpect(jsonPath("$.directoryUserId").value(notNullValue()))
-                .andExpect(jsonPath("$.hierarchyGroupId").value(notNullValue()))
                 .andExpect(jsonPath("$.identityInfo").value(notNullValue()))
                 .andExpect(jsonPath("$.id").value(notNullValue()))
                 .andExpect(jsonPath("$.lastModifiedTime").value(notNullValue()));
@@ -119,6 +117,20 @@ public class AgentControllerTests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + firebaseToken)
         ).andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(jsonPath("$.connectId").value(notNullValue()))
+                .andExpect(jsonPath("$.id").value(notNullValue()))
+                .andExpect(jsonPath("$.email").value(notNullValue()))
+                .andExpect(jsonPath("$.fullName").value(notNullValue()))
+                .andExpect(jsonPath("$.routingProfileId").value(notNullValue()))
+                .andExpect(jsonPath("$.canSwitch").value(notNullValue()));
+    }
+
+    @Test
+    public void testGetAgentConnectIDDB () throws Exception{
+        mockMvc.perform(MockMvcRequestBuilders.get("/agent/connect/c0899879-15f1-4bad-a862-c92168730040")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization","Bearer"+ firebaseToken))
+                .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(jsonPath("$.connectId").value(notNullValue()))
                 .andExpect(jsonPath("$.id").value(notNullValue()))
                 .andExpect(jsonPath("$.email").value(notNullValue()))

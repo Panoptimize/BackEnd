@@ -75,11 +75,13 @@ public class AgentController {
                     content = @Content),
     })
 
+    /*GetIdAgent -- Fully Tested - Only finish Invalid Input*/
     @GetMapping("/{id}")
     public ResponseEntity<AgentUserDTO> getAgentById(@PathVariable Integer id) {
         return ResponseEntity.ok(userService.getAgent(id));
     }
 
+    /*GetIdAgentConnectId -- Fully Tested -- Finish Invalid*/
     @GetMapping("/connect/{id}")
     public ResponseEntity<AgentUserDTO> getAgentByConnectId(@PathVariable String id) {
         return ResponseEntity.ok(userService.getAgentWithConnectId(id));

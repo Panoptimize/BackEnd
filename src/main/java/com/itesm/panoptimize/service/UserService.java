@@ -77,7 +77,7 @@ public class UserService {
 
     public AgentUserDTO getAgentWithConnectId(String connectId) {
         return convertToAgentDTO(userRepository.connectId(connectId).orElseThrow(
-                () -> new IllegalArgumentException("Invalid supervisor ID")
+                () -> new IllegalArgumentException("Invalid ConnectUser ID")
         ));
     }
 
