@@ -24,9 +24,6 @@ public class User {
     @Column(name = "full_name", nullable = false)
     private String fullName;
 
-    @Column(name = "image_path")
-    private String imagePath;
-
     @Column(name = "can_switch", nullable = false)
     private Boolean canSwitch = true;
 
@@ -92,14 +89,6 @@ public class User {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
-    }
-
-    public String getImagePath() {
-        return imagePath;
-    }
-
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
     }
 
     public RoutingProfile getRoutingProfile() {

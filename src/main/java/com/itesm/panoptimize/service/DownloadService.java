@@ -17,10 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import software.amazon.awssdk.services.connect.endpoints.internal.Value;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+
 import java.time.LocalDate;
 import java.util.*;
 
@@ -64,13 +66,13 @@ public class DownloadService {
     }
 
     public XSSFWorkbook getCalculatePerformance(XSSFWorkbook workbook, DownloadDTO downloadDTO) {
-
+        List<String> routingProfiles = new ArrayList<>(Arrays.asList(downloadDTO.getRoutingProfiles()));
         PerformanceDTO performanceDTO = new PerformanceDTO();
         performanceDTO.setInstanceId(downloadDTO.getInstanceId());
         performanceDTO.setStartDate(downloadDTO.getStartDate());
         performanceDTO.setEndDate(downloadDTO.getEndDate());
-        performanceDTO.setRoutingProfiles(downloadDTO.getRoutingProfiles());
-        performanceDTO.setQueues(downloadDTO.getQueues());
+        performanceDTO.setRoutingProfileIds(routingProfiles);
+
 
         List<AgentPerformanceDTO> performanceData = getPerformance( performanceDTO);
         try{
@@ -365,9 +367,8 @@ public class DownloadService {
 
     }
 
-    private List<AgentPerformanceDTO> getPerformance(PerformanceDTO performanceDTO){
-        List<AgentPerformanceDTO> performanceData = calculatePerformanceService.getMetricsData(performanceDTO);
-        return performanceData;
+    private List<AgentPerformanceDTO> getPerformance(PerformanceDTO performanceDTO) {
+        return calculatePerformanceService.getPerformances(performanceDTO.getStartDate(), performanceDTO.getEndDate(), performanceDTO.getInstanceId(), performanceDTO.getRoutingProfileIds());
     }
 
 

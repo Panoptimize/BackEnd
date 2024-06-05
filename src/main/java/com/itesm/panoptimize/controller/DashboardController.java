@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.*;
 
 import java.util.List;
@@ -138,10 +139,12 @@ public class DashboardController {
                     description = "Data not found or calculated incorrectly.",
                     content = @Content),
     })
+
+
     @PostMapping("/performance")
-    public ResponseEntity<List<AgentPerformanceDTO>> getPerformance(@RequestBody PerformanceDTO performanceDTO) {
-        List<AgentPerformanceDTO> performanceData = calculatePerformanceService.getMetricsData(performanceDTO);
-        return ResponseEntity.ok(performanceData);
+    public List<AgentPerformanceDTO> getPerformance(@RequestBody PerformanceDTO performanceDTO) {
+        return calculatePerformanceService.getPerformances(performanceDTO.getStartDate(), performanceDTO.getEndDate(), performanceDTO.getInstanceId(), performanceDTO.getRoutingProfileIds());
     }
+
 
 }

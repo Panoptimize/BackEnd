@@ -16,8 +16,11 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -77,7 +80,7 @@ public class UserService {
 
     public AgentUserDTO getAgentWithConnectId(String connectId) {
         return convertToAgentDTO(userRepository.connectId(connectId).orElseThrow(
-                () -> new IllegalArgumentException("Invalid supervisor ID")
+                () -> new IllegalArgumentException("Invalid ConnectUser ID")
         ));
     }
 
@@ -99,10 +102,6 @@ public class UserService {
 
         if(agentUserDTO.getFullName() != null) {
             agentToUpdate.setFullName(agentUserDTO.getFullName());
-        }
-
-        if(agentUserDTO.getImagePath() != null) {
-            agentToUpdate.setImagePath(agentUserDTO.getImagePath());
         }
 
         if(agentUserDTO.getRoutingProfileId() != null) {
@@ -136,7 +135,7 @@ public class UserService {
         if (agentPerformanceToUpdate != null) {
             agentPerformanceToUpdate.setAgent(agentPerformance.getAgent());
             agentPerformanceToUpdate.setCreatedAt(agentPerformance.getCreatedAt());
-            agentPerformanceToUpdate.setAvgAfterCallWorkTime(agentPerformance.getAvgAfterCallWorkTime());
+            agentPerformanceToUpdate.setAvgAfterContactWorkTime(agentPerformance.getAvgAfterContactWorkTime());
             agentPerformanceToUpdate.setAvgAbandonTime(agentPerformance.getAvgAbandonTime());
             agentPerformanceToUpdate.setAvgHandleTime(agentPerformance.getAvgHandleTime());
             agentPerformanceToUpdate.setAvgHoldTime(agentPerformance.getAvgHoldTime());
@@ -181,10 +180,6 @@ public class UserService {
             supervisorToUpdate.setFullName(supervisorUserDTO.getFullName());
         }
 
-        if(supervisorUserDTO.getImagePath() != null) {
-            supervisorToUpdate.setImagePath(supervisorUserDTO.getImagePath());
-        }
-
         if(supervisorUserDTO.getRoutingProfileId() != null) {
             RoutingProfile routingProfile = new RoutingProfile();
             routingProfile.setRoutingProfileId(supervisorUserDTO.getRoutingProfileId());
@@ -207,5 +202,25 @@ public class UserService {
         );
         supervisor.getAgents().add(agent);
         userRepository.save(supervisor);
+    }
+
+    public SupervisorUserDTO getSupervisorWithFirebaseId(String firebaseId) {
+        Optional<User> userOptional = userRepository.firebaseId(firebaseId);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            SupervisorUserDTO supervisorUserDTO = new SupervisorUserDTO();
+
+            supervisorUserDTO.setFullName(user.getFullName());
+            supervisorUserDTO.setFirebaseId(user.getFirebaseId());
+            supervisorUserDTO.setEmail(user.getEmail());
+            supervisorUserDTO.setConnectId(user.getConnectId());
+            supervisorUserDTO.setId(user.getId());
+            supervisorUserDTO.setCanSwitch(user.isCanSwitch());
+            supervisorUserDTO.setRoutingProfileId(user.getRoutingProfile().getRoutingProfileId());
+
+            return supervisorUserDTO;
+        } else {
+            throw new UsernameNotFoundException("User not found by firebase id: " + firebaseId);
+        }
     }
 }

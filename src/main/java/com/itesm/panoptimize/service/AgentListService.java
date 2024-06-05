@@ -136,7 +136,7 @@ public class AgentListService {
 
 
 
-        AgentListDTO agent = new AgentListDTO(user.id(), user.username(),getAgentCurrentState(instanceId, user.routingProfileId()),getWorkspaceInfo(instanceId, user.routingProfileId()), instanceId);
+        AgentListDTO agent = new AgentListDTO(user.id(), user.username(),getAgentCurrentState(instanceId, user.routingProfileId()),getWorkspaceInfo(instanceId, user.routingProfileId()), instanceId, user.identityInfo().email());
 
         return agent;
     }
