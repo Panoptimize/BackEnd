@@ -90,7 +90,6 @@ public class AgentListService {
 
         DashboardFiltersDTO dashboardFiltersDTO = new DashboardFiltersDTO();
         dashboardFiltersDTO.setWorkspaces(routingProfilesDTO);
-        dashboardFiltersDTO.setAgents(agentsDTO);
 
         return dashboardFiltersDTO;
     }
@@ -100,13 +99,7 @@ public class AgentListService {
         DescribeUserResponse describeUserResponse = connectClient.describeUser(DescribeUserRequest.builder()
                 .instanceId(instanceId)
                 .userId(agentId).build());
-        /**
-         * AgentDetailConstructionForDelivery
-         * */
-
-        AgentDetailsDTO agentDetailsDTO = mapToAgentDTO(describeUserResponse.user());
-        System.out.println(agentDetailsDTO);
-        return agentDetailsDTO;
+        return mapToAgentDTO(describeUserResponse.user());
     }
 
 
@@ -118,11 +111,6 @@ public class AgentListService {
 
         try {
             ListUsersResponse response = connectClient.listUsers(request);
-
-
-            System.out.println("List of Users:");
-            response.userSummaryList().forEach(userSummary -> System.out.println(userSummary.toString()));
-
             List<AgentListDTO> agents = response.userSummaryList().stream()
                     .map(userSummary -> getAgentListDetails(instanceId, userSummary.id()))
                     .collect(Collectors.toList());
@@ -148,7 +136,7 @@ public class AgentListService {
 
 
 
-        AgentListDTO agent = new AgentListDTO(user.id(), user.username(),getAgentCurrentState(instanceId, user.routingProfileId()),getWorkspaceInfo(instanceId, user.routingProfileId()), instanceId);
+        AgentListDTO agent = new AgentListDTO(user.id(), user.username(),getAgentCurrentState(instanceId, user.routingProfileId()),getWorkspaceInfo(instanceId, user.routingProfileId()), instanceId, user.identityInfo().email());
 
         return agent;
     }

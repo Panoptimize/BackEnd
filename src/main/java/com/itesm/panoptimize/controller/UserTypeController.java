@@ -1,8 +1,8 @@
 package com.itesm.panoptimize.controller;
 
-import com.itesm.panoptimize.dto.user_type.UserTypeCreateDTO;
-import com.itesm.panoptimize.dto.user_type.UserTypeDTO;
-import com.itesm.panoptimize.dto.user_type.UserTypeUpdateDTO;
+import com.itesm.panoptimize.dto.usertype.UserTypeCreateDTO;
+import com.itesm.panoptimize.dto.usertype.UserTypeDTO;
+import com.itesm.panoptimize.dto.usertype.UserTypeUpdateDTO;
 import com.itesm.panoptimize.service.UserTypeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

@@ -1,9 +1,9 @@
 package com.itesm.panoptimize.controller;
 
 
-import com.itesm.panoptimize.dto.routing_profile.CreateRoutingProfileDTO;
-import com.itesm.panoptimize.dto.routing_profile.RoutingProfileDTO;
-import com.itesm.panoptimize.dto.routing_profile.UpdateRoutingProfileDTO;
+import com.itesm.panoptimize.dto.routingprofile.CreateRoutingProfileDTO;
+import com.itesm.panoptimize.dto.routingprofile.RoutingProfileDTO;
+import com.itesm.panoptimize.dto.routingprofile.UpdateRoutingProfileDTO;
 import com.itesm.panoptimize.service.RoutingProfileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

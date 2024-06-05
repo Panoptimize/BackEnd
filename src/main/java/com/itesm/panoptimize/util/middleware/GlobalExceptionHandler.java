@@ -7,9 +7,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.net.ConnectException;
+import java.util.Arrays;
+import java.util.logging.Logger;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger LOGGER = Logger.getLogger(GlobalExceptionHandler.class.getName());
 
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ErrorResponse> handleResponseStatusException(ResponseStatusException ex) {
@@ -17,13 +21,13 @@ public class GlobalExceptionHandler {
                 ex.getReason(),
                 ex.getMessage()
         );
-
+        LOGGER.severe(ex.getMessage());
         return new ResponseEntity<>(errorResponse, ex.getStatusCode());
     }
 
     @ExceptionHandler(ConnectException.class)
     public ResponseEntity<ConnectException> handleConnectException(ConnectException ex) {
-
+        LOGGER.severe(ex.getMessage());
         return new ResponseEntity<>(ex, HttpStatus.SERVICE_UNAVAILABLE);
     }
 
@@ -33,6 +37,7 @@ public class GlobalExceptionHandler {
                 ex.getClass().getSimpleName(),
                 ex.getMessage()
         );
+        LOGGER.severe(ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
@@ -42,6 +47,7 @@ public class GlobalExceptionHandler {
                 ex.getClass().getSimpleName(),
                 ex.getMessage()
         );
+        LOGGER.severe(Arrays.toString(ex.getStackTrace()));
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

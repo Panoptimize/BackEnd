@@ -1,8 +1,8 @@
 package com.itesm.panoptimize.controller;
 
-import com.itesm.panoptimize.dto.case_template.CaseTemplateDTO;
-import com.itesm.panoptimize.dto.case_template.CreateCaseTemplateDTO;
-import com.itesm.panoptimize.dto.case_template.UpdateCaseTemplateDTO;
+import com.itesm.panoptimize.dto.casetemplate.CaseTemplateDTO;
+import com.itesm.panoptimize.dto.casetemplate.CreateCaseTemplateDTO;
+import com.itesm.panoptimize.dto.casetemplate.UpdateCaseTemplateDTO;
 import com.itesm.panoptimize.service.CaseTemplateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

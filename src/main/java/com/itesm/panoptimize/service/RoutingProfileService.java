@@ -1,8 +1,8 @@
 package com.itesm.panoptimize.service;
 
-import com.itesm.panoptimize.dto.routing_profile.CreateRoutingProfileDTO;
-import com.itesm.panoptimize.dto.routing_profile.RoutingProfileDTO;
-import com.itesm.panoptimize.dto.routing_profile.UpdateRoutingProfileDTO;
+import com.itesm.panoptimize.dto.routingprofile.CreateRoutingProfileDTO;
+import com.itesm.panoptimize.dto.routingprofile.RoutingProfileDTO;
+import com.itesm.panoptimize.dto.routingprofile.UpdateRoutingProfileDTO;
 import com.itesm.panoptimize.model.Company;
 import com.itesm.panoptimize.model.Queue;
 import com.itesm.panoptimize.model.RoutingProfile;
