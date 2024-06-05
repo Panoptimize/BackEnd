@@ -1,8 +1,6 @@
 package com.itesm.panoptimize.service;
 
-import com.itesm.panoptimize.dto.agent_performance.AgentPerformanceDTO;
-import com.itesm.panoptimize.dto.agent_performance.CreateAgentPerformanceDTO;
-import com.itesm.panoptimize.dto.agent_performance.UpdateAgentPerformanceDTO;
+import com.itesm.panoptimize.dto.agent_performance.*;
 import com.itesm.panoptimize.model.AgentPerformance;
 import com.itesm.panoptimize.model.User;
 import com.itesm.panoptimize.repository.AgentPerformanceRepository;
@@ -32,6 +30,10 @@ public class AgentPerformanceService {
 
     private AgentPerformanceDTO convertToDTO(AgentPerformance agentPerformance) {
         return modelMapper.map(agentPerformance, AgentPerformanceDTO.class);
+    }
+
+    private AgentPerformanceMetricsDTO convertToDTO(AgentPerformanceQueryDTO agentPerformance) {
+        return modelMapper.map(agentPerformance, AgentPerformanceMetricsDTO.class);
     }
 
     private AgentPerformance convertDTOToEntity(CreateAgentPerformanceDTO createAgentPerformanceDTO) {
@@ -93,9 +95,9 @@ public class AgentPerformanceService {
         return convertToDTO(agentPerformanceRepository.findAgentPerformanceByNoteId(id));
     }
 
-    public AgentPerformanceDTO getAgentMetricsToday(Integer agentId){
-        LocalDate localDate = Instant.now().atZone(ZoneId.systemDefault()).toLocalDate();
-        Date today = Date.valueOf(localDate);
-        return convertToDTO(agentPerformanceRepository.findAgentMetricsByAgentId(today,agentId));
+    public AgentPerformanceMetricsDTO getAgentMetricsToday(Integer agentId){
+        AgentPerformanceQueryDTO agentPerformance = agentPerformanceRepository.findAgentMetricsByAgentId(agentId);
+
+        return convertToDTO(agentPerformance);
     }
 }

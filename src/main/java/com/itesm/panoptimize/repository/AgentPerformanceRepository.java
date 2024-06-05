@@ -1,5 +1,6 @@
 package com.itesm.panoptimize.repository;
 
+import com.itesm.panoptimize.dto.agent_performance.AgentPerformanceQueryDTO;
 import com.itesm.panoptimize.model.AgentPerformance;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,8 +17,13 @@ public interface AgentPerformanceRepository extends JpaRepository<AgentPerforman
     @Query(value = "SELECT ap FROM AgentPerformance ap JOIN Note n ON ap.id = n.agentPerformance.id WHERE n.id = :noteId")
     AgentPerformance findAgentPerformanceByNoteId(@Param("noteId") Integer noteId);
 
-    // Idealmente con info de este query: AVG(ap.avgAfterContactWorkTime) as avgAfterContactWorkTime, AVG(ap.avgHandleTime) as avgHandleTime,  AVG(ap.avgAbandonTime) as avgAbandonTime, AVG(ap.avgHoldTime) as avgHoldTime
-    //ap.id, ap.createdAt,  AVG(ap.avgAfterContactWorkTime) as avgAfterContactWorkTime, AVG(ap.avgHandleTime) as avgHandleTime,   AVG(ap.avgAbandonTime) as avgAbandonTime, AVG(ap.avgHoldTime) as avgHoldTime, ap.agent.id
-    @Query("SELECT ap FROM AgentPerformance ap WHERE DATE(ap.createdAt) = :dateToday AND ap.agent.id =:agentId and ap.avgHoldTime = 3")
-    AgentPerformance findAgentMetricsByAgentId(@Param("dateToday") Date dateToday, @Param("agentId") Integer agentId);
+    /* Idealmente con info de este query: AVG(ap.avgAfterContactWorkTime) as avgAfterContactWorkTime, AVG(ap.avgHandleTime) as avgHandleTime,  AVG(ap.avgAbandonTime) as avgAbandonTime, AVG(ap.avgHoldTime) as avgHoldTime
+    ap.id, ap.createdAt,  AVG(ap.avgAfterContactWorkTime) as avgAfterContactWorkTime, AVG(ap.avgHandleTime) as avgHandleTime,   AVG(ap.avgAbandonTime) as avgAbandonTime, AVG(ap.avgHoldTime) as avgHoldTime, ap.agent.id*/
+    @Query("SELECT AVG(ap.avgAfterContactWorkTime) avgAfterContactWorkTime, \n" +
+            "\tAVG(ap.avgHandleTime) avgHandleTime, \n" +
+            "    AVG(ap.avgAbandonTime) avgAbandonTime, \n" +
+            "    AVG(ap.avgHoldTime) avgHoldTime  " +
+            "FROM AgentPerformance ap WHERE DATE(ap.createdAt) = DATE(NOW()) " +
+            "AND ap.agent.id =:agentId")
+    AgentPerformanceQueryDTO findAgentMetricsByAgentId(@Param("agentId") Integer agentId);
 }
