@@ -154,12 +154,13 @@ public class DownloadService {
     }
 
     public XSSFWorkbook getRestOfData(XSSFWorkbook workbook, DownloadDTO downloadDTO) {
+        List<String> routingProfiles = new ArrayList<>(Arrays.asList(downloadDTO.getRoutingProfiles()));
 
         DashboardDTO dashboardDTO = new DashboardDTO();
         dashboardDTO.setInstanceId(downloadDTO.getInstanceId());
         dashboardDTO.setStartDate(downloadDTO.getStartDate());
         dashboardDTO.setEndDate(downloadDTO.getEndDate());
-        dashboardDTO.setRoutingProfiles(downloadDTO.getRoutingProfiles());
+        dashboardDTO.setRoutingProfiles(routingProfiles);
 
         Map<String, Object> combinedMetrics = new HashMap<>();
 
@@ -259,12 +260,13 @@ public class DownloadService {
     }
 
     public XSSFWorkbook getActivities(XSSFWorkbook workbook, DownloadDTO downloadDTO){
+        List<String> routingProfiles = new ArrayList<>(Arrays.asList(downloadDTO.getRoutingProfiles()));
 
         DashboardDTO dashboardDTO = new DashboardDTO();
         dashboardDTO.setInstanceId(downloadDTO.getInstanceId());
         dashboardDTO.setStartDate(downloadDTO.getStartDate());
         dashboardDTO.setEndDate(downloadDTO.getEndDate());
-        dashboardDTO.setRoutingProfiles(downloadDTO.getRoutingProfiles());
+        dashboardDTO.setRoutingProfiles(routingProfiles);
 
         ActivityResponseDTO actData = getActivitiesData(dashboardDTO);
 
