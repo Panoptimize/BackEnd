@@ -9,7 +9,7 @@ public class AgentCreateDTO {
     private String email;
     @NotNull(message = "FullName is required")
     private String fullName;
-    private String imagePath;
+
     @NotNull(message = "RoutingProfileId is required")
     private String routingProfileId;
     private boolean canSwitch = true;
@@ -45,13 +45,7 @@ public class AgentCreateDTO {
         this.fullName = fullName;
     }
 
-    public String getImagePath() {
-        return imagePath;
-    }
 
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
-    }
 
     public String getRoutingProfileId() {
         return routingProfileId;
