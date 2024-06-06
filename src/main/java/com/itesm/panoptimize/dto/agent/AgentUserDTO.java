@@ -11,7 +11,6 @@ public class AgentUserDTO {
     private String email;
     @NotNull(message = "FullName is required")
     private String fullName;
-
     @NotNull(message = "RoutingProfileId is required")
     private String routingProfileId;
     private boolean canSwitch = true;
@@ -50,7 +49,6 @@ public class AgentUserDTO {
     public void setFullName(String fullName) {
         this.fullName = fullName;
     }
-
 
     public String getRoutingProfileId() {
         return routingProfileId;
