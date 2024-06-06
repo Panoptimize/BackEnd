@@ -121,10 +121,10 @@ public class DashboardController {
     }
 
 
-    @GetMapping("/filters")
+    @GetMapping("/filters/{instanceId}")
     public ResponseEntity<DashboardFiltersDTO> getFilters(@RequestAttribute String instanceId) {
+        System.out.println(instanceId);
         DashboardFiltersDTO filters = dashboardService.getFilters(instanceId);
-
         return ResponseEntity.ok(filters);
     }
 
