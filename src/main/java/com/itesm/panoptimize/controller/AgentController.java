@@ -75,11 +75,13 @@ public class AgentController {
                     content = @Content),
     })
 
+    /*GetIdAgent -- Fully Tested - Only finish Invalid Input*/
     @GetMapping("/{id}")
     public ResponseEntity<AgentUserDTO> getAgentById(@PathVariable Integer id) {
         return ResponseEntity.ok(userService.getAgent(id));
     }
 
+    /*GetIdAgentConnectId -- Fully Tested -- Finish Invalid*/
     @GetMapping("/connect/{id}")
     public ResponseEntity<AgentUserDTO> getAgentByConnectId(@PathVariable String id) {
         return ResponseEntity.ok(userService.getAgentWithConnectId(id));
@@ -123,7 +125,7 @@ public class AgentController {
         return new ResponseEntity<>("Agent performance deleted", HttpStatus.OK);
     }
     @PutMapping("/agent/performance/update/{id}")
-    public ResponseEntity<AgentPerformance> updateNotification(@PathVariable int id, @RequestBody AgentPerformance agentPerformance) {
+    public ResponseEntity<AgentPerformance> updateNotification(@PathVariable Integer id, @RequestBody AgentPerformance agentPerformance) {
         return ResponseEntity.ok(userService.updateAgentPerformance(id, agentPerformance));
     }
     */
@@ -148,7 +150,16 @@ public class AgentController {
         return ResponseEntity.ok(feedbackService.updateFeedback(id, note));
     }
 
+    /*
+    * This enpoint gives a response directly from connect, without processing.*/
+    @GetMapping("/list/{instanceId}")
+    public ResponseEntity<DashboardFiltersDTO> getFilters(@PathVariable String instanceId) {
+        DashboardFiltersDTO filters = agentListService.getAgentList(instanceId);
 
+        System.out.println(instanceId);
+
+        return ResponseEntity.ok(filters);
+    }
 
     @GetMapping("/detail/{instanceId}/{agentId}")
     public ResponseEntity<AgentDetailsDTO> getAgentDetails(@PathVariable String agentId,@PathVariable String instanceId) {
@@ -164,7 +175,7 @@ public class AgentController {
     private final AgentListService agentsService;
 
 
-    @PostMapping("/agents-list")
+    @PostMapping("/agentslist")
     public Mono<AgentResponseDTO> getAllAgents(@RequestParam String instanceId) {
         return agentsService.getAllAgents(instanceId)
                 .map(AgentResponseDTO::new);

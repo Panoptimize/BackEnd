@@ -7,6 +7,7 @@ import com.itesm.panoptimize.dto.supervisor.SupervisorCreateDTO;
 import com.itesm.panoptimize.dto.supervisor.SupervisorUpdateDTO;
 import com.itesm.panoptimize.dto.supervisor.SupervisorUserDTO;
 import com.itesm.panoptimize.model.AgentPerformance;
+import com.itesm.panoptimize.model.Company;
 import com.itesm.panoptimize.model.RoutingProfile;
 import com.itesm.panoptimize.model.User;
 import com.itesm.panoptimize.repository.AgentPerformanceRepository;
@@ -16,8 +17,11 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -77,7 +81,7 @@ public class UserService {
 
     public AgentUserDTO getAgentWithConnectId(String connectId) {
         return convertToAgentDTO(userRepository.connectId(connectId).orElseThrow(
-                () -> new IllegalArgumentException("Invalid supervisor ID")
+                () -> new IllegalArgumentException("Invalid ConnectUser ID")
         ));
     }
 
@@ -130,11 +134,11 @@ public class UserService {
         AgentPerformance agentPerformanceToUpdate = agentPerformanceRepository.findById(id)
                 .orElse(null);
         if (agentPerformanceToUpdate != null) {
-            agentPerformanceToUpdate.setAvgAfterContactWorkTime(agentPerformance.getAvgAfterContactWorkTime());
-            agentPerformanceToUpdate.setAvgHandleTime(agentPerformance.getAvgHandleTime());
-            agentPerformanceToUpdate.setAvgAbandonTime(agentPerformance.getAvgAbandonTime());
             agentPerformanceToUpdate.setAgent(agentPerformance.getAgent());
             agentPerformanceToUpdate.setCreatedAt(agentPerformance.getCreatedAt());
+            agentPerformanceToUpdate.setAvgAfterContactWorkTime(agentPerformance.getAvgAfterContactWorkTime());
+            agentPerformanceToUpdate.setAvgAbandonTime(agentPerformance.getAvgAbandonTime());
+            agentPerformanceToUpdate.setAvgHandleTime(agentPerformance.getAvgHandleTime());
             agentPerformanceToUpdate.setAvgHoldTime(agentPerformance.getAvgHoldTime());
             agentPerformanceRepository.save(agentPerformanceToUpdate);
         }
@@ -199,5 +203,31 @@ public class UserService {
         );
         supervisor.getAgents().add(agent);
         userRepository.save(supervisor);
+    }
+
+    public SupervisorUserDTO getSupervisorWithFirebaseId(String firebaseId) {
+        Optional<User> userOptional = userRepository.firebaseId(firebaseId);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            SupervisorUserDTO supervisorUserDTO = new SupervisorUserDTO();
+
+            supervisorUserDTO.setFullName(user.getFullName());
+            supervisorUserDTO.setFirebaseId(user.getFirebaseId());
+            supervisorUserDTO.setEmail(user.getEmail());
+            supervisorUserDTO.setConnectId(user.getConnectId());
+            supervisorUserDTO.setId(user.getId());
+            supervisorUserDTO.setCanSwitch(user.isCanSwitch());
+            supervisorUserDTO.setRoutingProfileId(user.getRoutingProfile().getRoutingProfileId());
+
+            return supervisorUserDTO;
+        } else {
+            throw new UsernameNotFoundException("User not found by firebase id: " + firebaseId);
+        }
+    }
+
+    public String getInstanceIdFromFirebaseId(String firebaseId) {
+        return userRepository.firebaseId(firebaseId).map(
+                user -> user.getCompany().getInstance().getId()
+        ).orElseThrow(() -> new UsernameNotFoundException("User not found by firebase id: " + firebaseId));
     }
 }
