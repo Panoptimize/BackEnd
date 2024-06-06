@@ -18,8 +18,6 @@ public class SupervisorUpdateDTO {
 
     private String fullName;
 
-
-
     private String routingProfileId;
 
     private Boolean canSwitch;
@@ -67,8 +65,6 @@ public class SupervisorUpdateDTO {
     public void setFullName(String fullName) {
         this.fullName = fullName;
     }
-
-
 
     public String getRoutingProfileId() {
         return routingProfileId;

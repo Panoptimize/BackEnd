@@ -12,8 +12,6 @@ public class AgentUpdateDTO {
 
     private String fullName;
 
-    private String imagePath;
-
     private String routingProfileId;
 
     private Boolean canSwitch;
@@ -52,14 +50,6 @@ public class AgentUpdateDTO {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
-    }
-
-    public String getImagePath() {
-        return imagePath;
-    }
-
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
     }
 
     public String getRoutingProfileId() {
