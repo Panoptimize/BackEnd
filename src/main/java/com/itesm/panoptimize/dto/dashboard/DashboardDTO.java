@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.List;
 
 public class DashboardDTO {
-    private String instanceId;
     @NotNull(message = "Start date is required")
     private Date startDate;
     @NotNull(message = "End date is required")
@@ -42,11 +41,4 @@ public class DashboardDTO {
         this.routingProfiles = routingProfiles;
     }
 
-    public String getInstanceId() {
-        return instanceId;
-    }
-
-    public void setInstanceId(String instanceId) {
-        this.instanceId = instanceId;
-    }
 }

@@ -47,12 +47,12 @@ public class DownloadService {
         this.satisfactionService = satisfactionService;
     }
 
-    public XSSFWorkbook getFinalReport(OutputStream url, DownloadDTO downloadDTO) {
+    public XSSFWorkbook getFinalReport(OutputStream url, String instanceId, DownloadDTO downloadDTO) {
         XSSFWorkbook workbook = new XSSFWorkbook();
 
         getCalculatePerformance(workbook, downloadDTO);
-        getRestOfData(workbook, downloadDTO);
-        getActivities(workbook, downloadDTO);
+        getRestOfData(workbook, instanceId,downloadDTO);
+        getActivities(workbook, instanceId,downloadDTO);
 
         try {
             workbook.write(url);
@@ -158,18 +158,17 @@ public class DownloadService {
 
     }
 
-    public XSSFWorkbook getRestOfData(XSSFWorkbook workbook, DownloadDTO downloadDTO) {
+    public XSSFWorkbook getRestOfData(XSSFWorkbook workbook,String instanceId, DownloadDTO downloadDTO) {
         List<String> routingProfiles = new ArrayList<>(Arrays.asList(downloadDTO.getRoutingProfiles()));
 
         DashboardDTO dashboardDTO = new DashboardDTO();
-        dashboardDTO.setInstanceId(downloadDTO.getInstanceId());
         dashboardDTO.setStartDate(downloadDTO.getStartDate());
         dashboardDTO.setEndDate(downloadDTO.getEndDate());
         dashboardDTO.setRoutingProfiles(routingProfiles);
 
         Map<String, Object> combinedMetrics = new HashMap<>();
 
-        MetricResponseDTO allData = getAllData(dashboardDTO);
+        MetricResponseDTO allData = getAllData( instanceId,dashboardDTO);
 
         combinedMetrics.put("avgHoldTime", allData.getAvgHoldTime());
         combinedMetrics.put("firstContactResolution", allData.getFirstContactResolution());
@@ -178,7 +177,7 @@ public class DownloadService {
         combinedMetrics.put("agentScheduleAdherence", allData.getAgentScheduleAdherence());
         combinedMetrics.put("avgSpeedOfAnswer", allData.getAvgSpeedOfAnswer());
 
-        Mono<Map<String, Integer>> valuesMono = apiClient.getMetricResults(dashboardDTO).map(metricService::extractValues);
+        Mono<Map<String, Integer>> valuesMono = apiClient.getMetricResults(instanceId,dashboardDTO).map(metricService::extractValues);
         valuesMono.subscribe(values -> combinedMetrics.putAll(values));
 
         CustomerSatisfactionDTO customerSatisfactionData = getCustomerSatisfactionData(dashboardDTO);
@@ -267,16 +266,15 @@ public class DownloadService {
 
     }
 
-    public XSSFWorkbook getActivities(XSSFWorkbook workbook, DownloadDTO downloadDTO){
+    public XSSFWorkbook getActivities(XSSFWorkbook workbook, String instanceId, DownloadDTO downloadDTO){
         List<String> routingProfiles = new ArrayList<>(Arrays.asList(downloadDTO.getRoutingProfiles()));
 
         DashboardDTO dashboardDTO = new DashboardDTO();
-        dashboardDTO.setInstanceId(downloadDTO.getInstanceId());
         dashboardDTO.setStartDate(downloadDTO.getStartDate());
         dashboardDTO.setEndDate(downloadDTO.getEndDate());
         dashboardDTO.setRoutingProfiles(routingProfiles);
 
-        ActivityResponseDTO actData = getActivitiesData(dashboardDTO);
+        ActivityResponseDTO actData = getActivitiesData( instanceId,dashboardDTO);
 
         JsonNode json = objectMapper.valueToTree(actData);
 
@@ -374,13 +372,13 @@ public class DownloadService {
     }
 
 
-    private MetricResponseDTO getAllData(DashboardDTO dashboardDTO){
-        MetricResponseDTO metricsData = dashboardService.getMetricsData(dashboardDTO);
+    private MetricResponseDTO getAllData(String instanceId, DashboardDTO dashboardDTO){
+        MetricResponseDTO metricsData = dashboardService.getMetricsData(instanceId,dashboardDTO);
         return metricsData;
     }
 
-    private ActivityResponseDTO getActivitiesData(DashboardDTO dashboardDTO){
-        ActivityResponseDTO actData = dashboardService.getActivity(dashboardDTO);
+    private ActivityResponseDTO getActivitiesData(String instanceId, DashboardDTO dashboardDTO){
+        ActivityResponseDTO actData = dashboardService.getActivity(instanceId, dashboardDTO);
         return actData;
     }
 
