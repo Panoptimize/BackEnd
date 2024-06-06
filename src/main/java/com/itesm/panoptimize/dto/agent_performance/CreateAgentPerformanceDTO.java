@@ -12,7 +12,7 @@ public class CreateAgentPerformanceDTO {
     @NotNull
     private Double avgHoldTime;
     @NotNull
-    private Integer agentId;
+    private Integer id;
 
     public Double getAvgAfterContactWorkTime() {
         return avgAfterContactWorkTime;
@@ -46,11 +46,11 @@ public class CreateAgentPerformanceDTO {
         this.avgHoldTime = avgHoldTime;
     }
 
-    public Integer getAgentId() {
-        return agentId;
+    public Integer getId() {
+        return id;
     }
 
-    public void setAgentId(Integer agentId) {
-        this.agentId = agentId;
+    public void setId(Integer id) {
+        this.id = id;
     }
 }

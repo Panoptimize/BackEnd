@@ -5,23 +5,23 @@ import software.amazon.awssdk.annotations.NotNull;
 
 public class CreateAgentPerformanceWithNote {
     @NotNull
-    private CreateNoteDTO createNoteDTO;
+    private CreateNoteDTO createNote;
     @NotNull
-    private CreateAgentPerformanceDTO createAgentPerformanceDTO;
+    private CreateAgentPerformanceDTO createAgentPerformance;
 
-    public CreateNoteDTO getCreateNoteDTO() {
-        return createNoteDTO;
+    public CreateNoteDTO getCreateNote() {
+        return createNote;
     }
 
-    public void setCreateNoteDTO(CreateNoteDTO createNoteDTO) {
-        this.createNoteDTO = createNoteDTO;
+    public void setCreateNote(CreateNoteDTO createNote) {
+        this.createNote = createNote;
     }
 
-    public CreateAgentPerformanceDTO getCreateAgentPerformanceDTO() {
-        return createAgentPerformanceDTO;
+    public CreateAgentPerformanceDTO getCreateAgentPerformance() {
+        return createAgentPerformance;
     }
 
-    public void setCreateAgentPerformanceDTO(CreateAgentPerformanceDTO createAgentPerformanceDTO) {
-        this.createAgentPerformanceDTO = createAgentPerformanceDTO;
+    public void setCreateAgentPerformance(CreateAgentPerformanceDTO createAgentPerformance) {
+        this.createAgentPerformance = createAgentPerformance;
     }
 }

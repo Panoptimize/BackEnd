@@ -52,7 +52,7 @@ public class AgentPerformanceService {
         agentPerformanceToCreate.setAvgHandleTime(createAgentPerformanceDTO.getAvgAfterContactWorkTime());
         agentPerformanceToCreate.setAvgHoldTime(createAgentPerformanceDTO.getAvgAfterContactWorkTime());
 
-        User agent = userRepository.findById(createAgentPerformanceDTO.getAgentId()).orElse(null);
+        User agent = userRepository.findById(createAgentPerformanceDTO.getId()).orElse(null);
         if(agent == null) {throw new IllegalArgumentException("Agent not found");}
         agentPerformanceToCreate.setAgent(agent);
 

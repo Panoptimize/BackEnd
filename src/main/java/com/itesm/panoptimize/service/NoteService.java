@@ -13,14 +13,9 @@ import com.itesm.panoptimize.repository.NoteRepository;
 import com.itesm.panoptimize.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class NoteService {
@@ -94,12 +89,12 @@ public class NoteService {
 
     @Transactional
     public NoteDTO createNoteWithAgentPerformance(CreateAgentPerformanceWithNote createNoteWithAgentPerformanceDTO) {
-        CreateAgentPerformanceDTO createAgentPerformanceDTO = createNoteWithAgentPerformanceDTO.getCreateAgentPerformanceDTO();
+        CreateAgentPerformanceDTO createAgentPerformanceDTO = createNoteWithAgentPerformanceDTO.getCreateAgentPerformance();
         if (createAgentPerformanceDTO == null) {
             throw new IllegalArgumentException("AgentPerformance data is missing");
         }
 
-        CreateNoteDTO createNoteDTO = createNoteWithAgentPerformanceDTO.getCreateNoteDTO();
+        CreateNoteDTO createNoteDTO = createNoteWithAgentPerformanceDTO.getCreateNote();
         if (createNoteDTO == null) {
             throw new IllegalArgumentException("Note data is missing");
         }
