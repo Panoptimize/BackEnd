@@ -36,8 +36,8 @@ public class Note {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    @OneToOne
-    @JoinColumn(name = "agent_performance_id", foreignKey = @ForeignKey(name = "agent_performance_has_note"))
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "agent_performance_id", unique = true, foreignKey = @ForeignKey(name = "agent_performance_has_note"))
     private AgentPerformance agentPerformance;
 
     public Integer getId() {
