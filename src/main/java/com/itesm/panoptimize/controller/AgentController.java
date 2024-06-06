@@ -173,7 +173,7 @@ public class AgentController {
     private final AgentListService agentsService;
 
 
-    @PostMapping("/agentslist")
+    @PostMapping("/agents-list")
     public Mono<AgentResponseDTO> getAllAgents(@RequestParam String instanceId) {
         return agentsService.getAllAgents(instanceId)
                 .map(AgentResponseDTO::new);
