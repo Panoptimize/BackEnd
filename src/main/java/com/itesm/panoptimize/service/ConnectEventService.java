@@ -8,6 +8,10 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.connect.ConnectClient;
 import software.amazon.awssdk.services.connect.model.GetContactAttributesRequest;
 import software.amazon.awssdk.services.connect.model.GetContactAttributesResponse;
+import software.amazon.awssdk.services.connect.model.ListUsersRequest;
+import software.amazon.awssdk.services.connect.model.UserSummary;
+
+import java.util.List;
 
 @Service
 public class ConnectEventService {
@@ -49,5 +53,24 @@ public class ConnectEventService {
             return contactService.createContact(contactDTO);
         }
         return null;
+    }
+
+    private void syncUsers(String instanceId) {
+        List<UserSummary> userSummaries = connectClient.listUsers(
+                ListUsersRequest
+                        .builder()
+                        .instanceId(instanceId)
+                        .build()
+        ).userSummaryList();
+        
+
+    }
+
+    /**
+     * Sync the connect data and firebase data
+     * @param instanceId the instance id
+     */
+    public void syncConnectData(String instanceId) {
+        syncUsers(instanceId);
     }
 }

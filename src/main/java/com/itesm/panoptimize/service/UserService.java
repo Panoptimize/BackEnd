@@ -203,45 +203,6 @@ public class UserService {
         return convertToSupervisorDTO(userRepository.save(supervisorToUpdate));
     }
 
-    public void associateAgentWithSupervisor(Integer supervisorId, Integer agentId) {
-        User supervisor = userRepository.findById(supervisorId).orElseThrow(
-                () -> new IllegalArgumentException("Invalid supervisor ID")
-        );
-        User agent = userRepository.findById(agentId).orElseThrow(
-                () -> new IllegalArgumentException("Invalid agent ID")
-        );
-        supervisor.getAgents().add(agent);
-        userRepository.save(supervisor);
-    }
-
-    public List<SupervisorUserDTO> saveMany(String instanceId){
-        List<SupervisorUserDTO> supervisorDTOList = connectClient.listUsers(
-                ListUsersRequest
-                        .builder()
-                        .instanceId(instanceId)
-                        .build())
-                .userSummaryList().stream().map(userSummary -> {
-                    SupervisorUserDTO supervisorDTO = new SupervisorUserDTO();
-                    software.amazon.awssdk.services.connect.model.User
-                            describedUser = connectClient.describeUser(
-                            DescribeUserRequest
-                                    .builder()
-                                    .instanceId(instanceId)
-                                    .userId(userSummary.id())
-                                    .build()
-                    ).user();
-
-                    supervisorDTO.setConnectId(describedUser.id());
-                    supervisorDTO.setEmail(describedUser.identityInfo().email());
-                    supervisorDTO.setFullName(describedUser.identityInfo().firstName() + " " + describedUser.identityInfo().lastName());
-                    supervisorDTO.setRoutingProfileId(describedUser.routingProfileId());
-
-                    return supervisorDTO;
-                }).toList();
-
-        return supervisorDTOList;
-    }
-
     public SupervisorUserDTO getSupervisorWithFirebaseId(String firebaseId) {
         Optional<User> userOptional = userRepository.firebaseId(firebaseId);
         if (userOptional.isPresent()) {

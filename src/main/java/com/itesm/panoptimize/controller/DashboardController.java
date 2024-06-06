@@ -14,6 +14,7 @@ import com.itesm.panoptimize.service.CalculateSatisfactionService;
 import com.itesm.panoptimize.dto.performance.PerformanceDTO;
 import com.itesm.panoptimize.service.CalculatePerformanceService;
 
+import com.itesm.panoptimize.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.time.Instant;
 import java.util.*;
 
@@ -40,14 +42,17 @@ public class DashboardController {
     private final CalculateSatisfactionService satisfactionService;
     private final DashboardService dashboardService;
     private final CalculatePerformanceService calculatePerformanceService;
+    private final UserService userService;
 
     @Autowired
     public DashboardController(DashboardService dashboardService,
                                CalculateSatisfactionService satisfactionService,
-                               CalculatePerformanceService calculatePerformanceService) {
+                               CalculatePerformanceService calculatePerformanceService,
+                               UserService userService) {
         this.dashboardService = dashboardService;
         this.satisfactionService = satisfactionService;
         this.calculatePerformanceService = calculatePerformanceService;
+        this.userService = userService;
     }
     @Operation(summary = "Download the dashboard data", description = "Download the dashboard data by time frame, agent and workspace number")
     @ApiResponses(value = {
@@ -82,8 +87,9 @@ public class DashboardController {
                     content = @Content),
     })
     @PostMapping("/combined-metrics")
-    public ResponseEntity<Map<String, Object>> getCombinedMetrics(@Valid @RequestBody DashboardDTO dashboardDTO,
-                                                                  @RequestAttribute String instanceId) {
+    public ResponseEntity<Map<String, Object>> getCombinedMetrics(@Valid @RequestBody DashboardDTO dashboardDTO, Principal principal) {
+        String firebaseId = principal.getName();
+        String instanceId = userService.getInstanceIdFromFirebaseId(firebaseId);
         dashboardDTO.setInstanceId(instanceId);
         Map<String, Object> combinedMetrics;
         combinedMetrics = dashboardService.getDashboarData(dashboardDTO);
@@ -144,7 +150,9 @@ public class DashboardController {
 
 
     @PostMapping("/performance")
-    public List<AgentPerformanceDTO> getPerformance(@RequestBody PerformanceDTO performanceDTO, @RequestAttribute String instanceId) {
+    public List<AgentPerformanceDTO> getPerformance(@RequestBody PerformanceDTO performanceDTO, Principal principal) {
+        String firebaseId = principal.getName();
+        String instanceId = userService.getInstanceIdFromFirebaseId(firebaseId);
         performanceDTO.setInstanceId(instanceId);
         return calculatePerformanceService.getPerformances(performanceDTO.getStartDate(), performanceDTO.getEndDate(), performanceDTO.getInstanceId(), performanceDTO.getRoutingProfileIds());
     }
