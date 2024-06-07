@@ -43,19 +43,15 @@ jobs:
         env:
           ARTIFACT_REGISTRY_REGION: ${{ env.REGION }}
           GAR_LOCATION: ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GAR_NAME }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
         run: |
+          echo "$FIREBASE_SERVICE_ACCOUNT_PATH" > firebase-adminsdk.json
           gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
-          docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GAR_NAME }}/${{ vars.GAR_NAME }} .
+          docker build --build-arg FIREBASE_SERVICE_ACCOUNT=firebase-adminsdk.json -t ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GAR_NAME }}/${{ vars.GAR_NAME }} .
           docker tag ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GAR_NAME }}/${{ vars.GAR_NAME }} ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GAR_NAME }}/${{ vars.GAR_NAME }}:$GITHUB_SHA
           docker push ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GAR_NAME }}/${{ vars.GAR_NAME }}:$GITHUB_SHA
           docker push ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GAR_NAME }}/${{ vars.GAR_NAME }}:latest
-
-      - name: Save Firebase Service Account JSON
-        env:
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-        run: |
-          echo "$FIREBASE_SERVICE_ACCOUNT" > $HOME/firebase-adminsdk.json
-          export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-adminsdk.json"
 
       - name: Deploy to Cloud Run
         run: |
