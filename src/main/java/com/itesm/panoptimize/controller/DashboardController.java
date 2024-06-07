@@ -5,6 +5,8 @@ import com.itesm.panoptimize.model.Notification;
 import com.itesm.panoptimize.service.DashboardService;
 import com.itesm.panoptimize.service.CalculateSatisfactionService;
 import com.itesm.panoptimize.service.CalculatePerformanceService;
+
+import com.itesm.panoptimize.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,6 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+import java.time.Instant;
+import java.util.*;
+
 import java.util.List;
 
 @RestController
@@ -22,13 +28,18 @@ import java.util.List;
 public class DashboardController {
     private final CalculateSatisfactionService satisfactionService;
     private final DashboardService dashboardService;
+    private final CalculatePerformanceService calculatePerformanceService;
+    private final UserService userService;
 
     @Autowired
     public DashboardController(DashboardService dashboardService,
                                CalculateSatisfactionService satisfactionService,
-                               CalculatePerformanceService calculatePerformanceService) {
+                               CalculatePerformanceService calculatePerformanceService,
+                               UserService userService) {
         this.dashboardService = dashboardService;
         this.satisfactionService = satisfactionService;
+        this.calculatePerformanceService = calculatePerformanceService;
+        this.userService = userService;
     }
 
     @GetMapping("/customer-satisfaction")
@@ -50,8 +61,9 @@ public class DashboardController {
                     content = @Content),
     })
     @PostMapping("/combined-metrics")
-    public ResponseEntity<CombinedMetricsDTO> getCombinedMetrics(@Valid @RequestBody DashboardDTO dashboardDTO,
-                                                                 @RequestAttribute String instanceId) {
+    public ResponseEntity<CombinedMetricsDTO> getCombinedMetrics(@Valid @RequestBody DashboardDTO dashboardDTO, Principal principal) {
+        String firebaseId = principal.getName();
+        String instanceId = userService.getInstanceIdFromFirebaseId(firebaseId);
         CombinedMetricsDTO combinedMetrics = dashboardService.getDashboardData(instanceId, dashboardDTO);
         return ResponseEntity.ok(combinedMetrics);
     }

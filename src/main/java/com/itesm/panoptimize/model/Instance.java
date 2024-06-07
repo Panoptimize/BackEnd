@@ -3,8 +3,6 @@ package com.itesm.panoptimize.model;
 
 import jakarta.persistence.*;
 
-import java.util.UUID;
-
 @Entity
 @Table(name = "instance", indexes = {
         @Index(name = "instance_name_index", columnList = "name", unique = true)

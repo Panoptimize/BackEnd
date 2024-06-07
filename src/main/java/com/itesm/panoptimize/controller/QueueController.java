@@ -1,8 +1,8 @@
 package com.itesm.panoptimize.controller;
 
-import com.itesm.panoptimize.dto.queue.QueueCreateDTO;
+import com.itesm.panoptimize.dto.queue.CreateQueueDTO;
 import com.itesm.panoptimize.dto.queue.QueueDTO;
-import com.itesm.panoptimize.dto.queue.QueueUpdateDTO;
+import com.itesm.panoptimize.dto.queue.UpdateQueueDTO;
 import com.itesm.panoptimize.service.QueueService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -29,7 +29,13 @@ public class QueueController {
     })
     @GetMapping("/{id}")
     public ResponseEntity<QueueDTO> getQueue(@PathVariable String id){
-        return ResponseEntity.ok(queueService.getQueue(id));
+        QueueDTO queueDTO = queueService.getQueue(id);
+
+        if (queueDTO == null){
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(queueDTO);
     }
 
     @Operation(summary = "Get all queues")
@@ -48,8 +54,8 @@ public class QueueController {
             @ApiResponse(responseCode = "404", description = "Queue not created")
     })
     @PostMapping("/")
-    public ResponseEntity<QueueDTO> createQueue(@RequestBody QueueCreateDTO queueCreateDTO){
-        return ResponseEntity.ok(queueService.createQueue(queueCreateDTO));
+    public ResponseEntity<QueueDTO> createQueue(@RequestBody CreateQueueDTO createQueueDTO){
+        return ResponseEntity.ok(queueService.createQueue(createQueueDTO));
     }
 
     @Operation(summary = "Delete queue by id")
@@ -69,8 +75,8 @@ public class QueueController {
             @ApiResponse(responseCode = "404", description = "Queue not updated")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<QueueDTO> getQueue(@PathVariable String id, @RequestBody QueueUpdateDTO queueUpdateDTO){
-        return ResponseEntity.ok(queueService.updateQueue(id, queueUpdateDTO));
+    public ResponseEntity<QueueDTO> getQueue(@PathVariable String id, @RequestBody UpdateQueueDTO updateQueueDTO){
+        return ResponseEntity.ok(queueService.updateQueue(id, updateQueueDTO));
     }
 
 }

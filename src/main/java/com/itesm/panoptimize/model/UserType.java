@@ -15,7 +15,7 @@ public class UserType {
     @Column(name = "user_type_name", nullable = false, unique = true, length = 10)
     private String typeName;
 
-    @Column(name = "security_profile_id", nullable = false, length = 36)
+    @Column(name = "security_profile_id", nullable = false, length = 36, unique = true)
     private String securityProfileId;
 
     @OneToMany(mappedBy = "userType")

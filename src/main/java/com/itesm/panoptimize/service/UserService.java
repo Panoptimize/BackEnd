@@ -17,7 +17,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -31,7 +30,9 @@ public class UserService {
     private final ModelMapper modelMapper;
     private final AgentPerformanceRepository agentPerformanceRepository;
 
-    public UserService(UserRepository userRepository, ModelMapper modelMapper, AgentPerformanceRepository agentPerformanceRepository, UserTypeRepository userTypeRepository) {
+    public UserService(UserRepository userRepository, ModelMapper modelMapper,
+                       AgentPerformanceRepository agentPerformanceRepository,
+                       UserTypeRepository userTypeRepository) {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
         this.agentPerformanceRepository = agentPerformanceRepository;
@@ -69,10 +70,6 @@ public class UserService {
         return modelMapper.map(userRepository.save(agent), AgentUserDTO.class);
     }
 
-    public Page<AgentUserDTO> getallAgents(Pageable pageable) {
-        return userRepository.getUsersByType("agent", pageable).map(user -> modelMapper.map(user, AgentUserDTO.class));
-    }
-
     public AgentUserDTO getAgent(Integer id) {
         return convertToAgentDTO(userRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("Invalid supervisor ID")
@@ -80,9 +77,13 @@ public class UserService {
     }
 
     public AgentUserDTO getAgentWithConnectId(String connectId) {
-        return convertToAgentDTO(userRepository.connectId(connectId).orElseThrow(
-                () -> new IllegalArgumentException("Invalid ConnectUser ID")
-        ));
+        User agent = userRepository.connectId(connectId).orElse(null);
+
+        if (agent == null) {
+            return null;
+        }
+
+        return convertToAgentDTO(agent);
     }
 
     public void deleteAgent(Integer id) {
@@ -113,8 +114,11 @@ public class UserService {
 
         }
 
-        if(agentUserDTO.isCanSwitch() != null) {
-            agentToUpdate.setCanSwitch(agentUserDTO.isCanSwitch());
+        if(agentUserDTO.getCompanyId() != null) {
+            Company company = new Company();
+            company.setId(agentUserDTO.getCompanyId());
+
+            agentToUpdate.setCompany(company);
         }
         return convertToAgentDTO(userRepository.save(agentToUpdate));
     }
@@ -152,9 +156,13 @@ public class UserService {
     }
 
     public SupervisorUserDTO getSupervisorWithConnectId(String connectId) {
-        return convertToSupervisorDTO(userRepository.connectId(connectId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entity not found")
-        ));
+        User supervisor = userRepository.connectId(connectId).orElse(null);
+
+        if (supervisor == null) {
+            return null;
+        }
+
+        return convertToSupervisorDTO(supervisor);
     }
 
     public void deleteSupervisor(Integer id) {
@@ -188,21 +196,14 @@ public class UserService {
             supervisorToUpdate.setRoutingProfile(routingProfile);
         }
 
-        if(supervisorUserDTO.isCanSwitch() != null) {
-            supervisorToUpdate.setCanSwitch(supervisorUserDTO.isCanSwitch());
-        }
-        return convertToSupervisorDTO(userRepository.save(supervisorToUpdate));
-    }
+        if(supervisorUserDTO.getCompanyId() != null) {
+            Company company = new Company();
+            company.setId(supervisorUserDTO.getCompanyId());
 
-    public void associateAgentWithSupervisor(Integer supervisorId, Integer agentId) {
-        User supervisor = userRepository.findById(supervisorId).orElseThrow(
-                () -> new IllegalArgumentException("Invalid supervisor ID")
-        );
-        User agent = userRepository.findById(agentId).orElseThrow(
-                () -> new IllegalArgumentException("Invalid agent ID")
-        );
-        supervisor.getAgents().add(agent);
-        userRepository.save(supervisor);
+            supervisorToUpdate.setCompany(company);
+        }
+
+        return convertToSupervisorDTO(userRepository.save(supervisorToUpdate));
     }
 
     public SupervisorUserDTO getSupervisorWithFirebaseId(String firebaseId) {
@@ -216,18 +217,17 @@ public class UserService {
             supervisorUserDTO.setEmail(user.getEmail());
             supervisorUserDTO.setConnectId(user.getConnectId());
             supervisorUserDTO.setId(user.getId());
-            supervisorUserDTO.setCanSwitch(user.isCanSwitch());
             supervisorUserDTO.setRoutingProfileId(user.getRoutingProfile().getRoutingProfileId());
 
             return supervisorUserDTO;
         } else {
-            throw new UsernameNotFoundException("User not found by firebase id: " + firebaseId);
+            return null;
         }
     }
 
     public String getInstanceIdFromFirebaseId(String firebaseId) {
         return userRepository.firebaseId(firebaseId).map(
                 user -> user.getCompany().getInstance().getId()
-        ).orElseThrow(() -> new UsernameNotFoundException("User not found by firebase id: " + firebaseId));
+        ).orElse(null);
     }
 }
