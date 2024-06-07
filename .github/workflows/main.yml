@@ -42,7 +42,6 @@ jobs:
       - name: Build and push Docker image to Artifact Registry
         env:
           ARTIFACT_REGISTRY_REGION: ${{ env.REGION }}
-          REGION: "${{ env.REGION }}"
           GAR_LOCATION: ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GAR_NAME }}
         run: |
           gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
