@@ -7,6 +7,7 @@ import com.itesm.panoptimize.dto.dashboard.AWSObjDTO;
 import com.itesm.panoptimize.dto.dashboard.DashboardFiltersDTO;
 import com.itesm.panoptimize.dto.dashboard.MetricResponseDTO;
 
+import com.itesm.panoptimize.dto.performance.AgentPerformanceDTO;
 import com.itesm.panoptimize.model.Notification;
 import com.itesm.panoptimize.repository.NotificationRepository;
 import com.itesm.panoptimize.util.Constants;
@@ -14,6 +15,8 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,9 +37,12 @@ public class DashboardService {
     private final ConnectClient connectClient;
     private final NotificationRepository notificationRepository;
 
-    public DashboardService(ConnectClient connectClient, NotificationRepository notificationRepository){
+    private final CalculatePerformanceService calculatePerformanceService;
+
+    public DashboardService(ConnectClient connectClient, NotificationRepository notificationRepository, CalculatePerformanceService calculatePerformanceService){
         this.connectClient = connectClient;
         this.notificationRepository = notificationRepository;
+        this.calculatePerformanceService = calculatePerformanceService;
     }
 
     /**
@@ -49,11 +55,9 @@ public class DashboardService {
      * @param dashboardDTO is the DTO that contains the filters to get the KPIs
      * @return a list of KPIs
      */
-    private GetMetricDataV2Response getKPIs(@NotNull DashboardDTO dashboardDTO,
+    private GetMetricDataV2Response getKPIs(String instanceId, @NotNull DashboardDTO dashboardDTO,
                                             @NotNull List<MetricV2> metrics,
-                                            List<String> groupings,
                                             IntervalDetails intervalDetails) {
-        String instanceId = dashboardDTO.getInstanceId();
 
         Instant startTime = dashboardDTO.getStartDate().toInstant();
         Instant endTime = dashboardDTO.getEndDate().toInstant();
@@ -61,20 +65,12 @@ public class DashboardService {
         // Set up filters
         List<FilterV2> filters = new ArrayList<>();
 
-        if (dashboardDTO.getRoutingProfiles().length > 0) {
+        if (!dashboardDTO.getRoutingProfiles().isEmpty()) {
             FilterV2 routingProfileFilter = FilterV2.builder()
                     .filterKey("ROUTING_PROFILE")
-                    .filterValues(Arrays.asList(dashboardDTO.getRoutingProfiles()))
+                    .filterValues(dashboardDTO.getRoutingProfiles())
                     .build();
             filters.add(routingProfileFilter);
-        }
-
-        if (dashboardDTO.getAgents().length > 0) {
-            FilterV2 queueFilter = FilterV2.builder()
-                    .filterKey("AGENT")
-                    .filterValues(Arrays.asList(dashboardDTO.getAgents()))
-                    .build();
-            filters.add(queueFilter);
         }
 
 
@@ -84,11 +80,10 @@ public class DashboardService {
                 .resourceArn(Constants.BASE_ARN + ":instance/" + instanceId)
                 .filters(filters)
                 .metrics(metrics)
-                .groupings(groupings)
                 .interval(intervalDetails)
                 .build());
     }
-    public MetricResponseDTO getMetricsData(DashboardDTO dashboardDTO) {
+    public MetricResponseDTO getMetricsData(String instanceId, DashboardDTO dashboardDTO) {
         // Set up metrics
         List<MetricV2> metricList = new ArrayList<>();
 
@@ -148,7 +143,7 @@ public class DashboardService {
                 .build();
 
         metricList.add(firstContactResolution);
-        GetMetricDataV2Response response = getKPIs(dashboardDTO, metricList, null, null);
+        GetMetricDataV2Response response = getKPIs(instanceId, dashboardDTO, metricList, null);
 
         Map<String, Double> metricsData = new HashMap<>();
 
@@ -159,7 +154,12 @@ public class DashboardService {
             }
         }
 
-        double averageSpeedOfAnswer = metricsData.get("SUM_HANDLE_TIME") / metricsData.get("CONTACTS_HANDLED");
+        double averageSpeedOfAnswer;
+        if(metricsData.get("CONTACTS_HANDLED") == null) {
+            averageSpeedOfAnswer = 0.0;
+        } else {
+            averageSpeedOfAnswer = metricsData.get("SUM_HANDLE_TIME") / metricsData.get("CONTACTS_HANDLED");
+        }
         Double averageHoldTimeRounded = roundMetric(metricsData.get("AVG_HOLD_TIME"));
         Double percentageFirstContactResolution = roundMetric(metricsData.get("PERCENT_CASES_FIRST_CONTACT_RESOLVED"));
         Double abandonmentRateRounded = roundMetric(metricsData.get("ABANDONMENT_RATE"));
@@ -179,9 +179,8 @@ public class DashboardService {
     }
 
     // Get the current number of agents on each channel
-    public Mono<MetricResultsDTO> getMetricResults(@NotNull DashboardDTO dashboardDTO) {
-        String instanceId = dashboardDTO.getInstanceId();
-        String routingProfile = dashboardDTO.getRoutingProfiles()[0];
+    public Mono<MetricResultsDTO> getMetricResults(String instanceId, @NotNull DashboardDTO dashboardDTO) {
+        String routingProfile = dashboardDTO.getRoutingProfiles().get(0);
         List<Channel> channels = Arrays.asList(Channel.VOICE, Channel.CHAT);
         List<String> queueIds = getAllQueueIds(instanceId);
         Filters filters = Filters.builder()
@@ -200,13 +199,10 @@ public class DashboardService {
                         .build())
                 .groupings(Grouping.CHANNEL)
                 .build();
-        System.out.println("Request: " + request);
 
         try {
             GetCurrentMetricDataResponse response = connectClient.getCurrentMetricData(request);
             MetricResultsDTO result = convertToDTO(response);
-            System.out.println("Response: " + response);
-            System.out.println("Result: " + result);
             return Mono.just(result);
         } catch (ConnectException e) {
             return Mono.empty();
@@ -308,17 +304,16 @@ public class DashboardService {
     }
 
     public DashboardFiltersDTO getFilters(String instanceId) {
+        // Get instance creation date
+        Instant getCreationTime = connectClient.describeInstance(DescribeInstanceRequest.builder()
+                .instanceId(instanceId)
+                .build()).instance().createdTime();
+
         // Get routing profiles
         List<RoutingProfileSummary> routingProfiles = connectClient.listRoutingProfiles(ListRoutingProfilesRequest.builder()
                 .instanceId(instanceId)
                 .build())
                 .routingProfileSummaryList();
-
-        // Get agents
-        List<UserSummary> agents = connectClient.listUsers(ListUsersRequest.builder()
-                .instanceId(instanceId)
-                .build())
-                .userSummaryList();
 
         List<AWSObjDTO> routingProfilesDTO = new ArrayList<>();
         for (RoutingProfileSummary routingProfile : routingProfiles) {
@@ -328,22 +323,17 @@ public class DashboardService {
             routingProfilesDTO.add(routingProfileDTO);
         }
 
-        List<AWSObjDTO> agentsDTO = new ArrayList<>();
-        for (UserSummary agent : agents) {
-            AWSObjDTO agentDTO = new AWSObjDTO();
-            agentDTO.setId(agent.id());
-            agentDTO.setName(agent.username());
-            agentsDTO.add(agentDTO);
-        }
+        // Convert instant to LocalDate
+        LocalDate instanceCreationDate = getCreationTime.atZone(ZoneId.systemDefault()).toLocalDate();
 
         DashboardFiltersDTO dashboardFiltersDTO = new DashboardFiltersDTO();
         dashboardFiltersDTO.setWorkspaces(routingProfilesDTO);
-        dashboardFiltersDTO.setAgents(agentsDTO);
+        dashboardFiltersDTO.setInstanceCreationDate(instanceCreationDate);
 
         return dashboardFiltersDTO;
     }
 
-    public ActivityResponseDTO getActivity(DashboardDTO dashboardDTO) {
+    public ActivityResponseDTO getActivity(String instanceId, DashboardDTO dashboardDTO) {
         IntervalPeriod interval;
 
         if(ChronoUnit.DAYS.between(
@@ -360,9 +350,8 @@ public class DashboardService {
                 .build();
         metricList.add(totalContacts);
 
-        GetMetricDataV2Response response = getKPIs(dashboardDTO,
+        GetMetricDataV2Response response = getKPIs(instanceId, dashboardDTO,
                 metricList,
-                null,
                 IntervalDetails.builder().intervalPeriod(interval).build());
 
         ActivityResponseDTO activityResponseDTO = new ActivityResponseDTO();
@@ -382,26 +371,27 @@ public class DashboardService {
         return activityResponseDTO;
     }
 
-    public Map<String,Object> getDashboarData(DashboardDTO dashboardDTO) {
-        MetricResultsDTO metricResults = getMetricResults(dashboardDTO).block();
+    public CombinedMetricsDTO getDashboardData(String instanceId, DashboardDTO dashboardDTO) {
+        MetricResultsDTO metricResults = getMetricResults(instanceId, dashboardDTO).block();
         Map<String, Integer> values = extractValues(metricResults);
 
-        Map<String, Object> combinedMetrics = new HashMap<>();
-        combinedMetrics.put("voice", values.get("voice"));
-        combinedMetrics.put("chat", values.get("chat"));
+        CombinedMetricsDTO combinedMetrics = new CombinedMetricsDTO();
+        combinedMetrics.setVoice(values.get("voice"));
+        combinedMetrics.setChat(values.get("chat"));
 
-        // Call the second service method
-        MetricResponseDTO metricData = getMetricsData(dashboardDTO);
-        combinedMetrics.put("avgHoldTime", metricData.getAvgHoldTime());
-        combinedMetrics.put("firstContactResolution", metricData.getFirstContactResolution());
-        combinedMetrics.put("abandonmentRate", metricData.getAbandonmentRate());
-        combinedMetrics.put("serviceLevel", metricData.getServiceLevel());
-        combinedMetrics.put("agentScheduleAdherence", metricData.getAgentScheduleAdherence());
-        combinedMetrics.put("avgSpeedOfAnswer", metricData.getAvgSpeedOfAnswer());
+        MetricResponseDTO metricData = getMetricsData(instanceId, dashboardDTO);
+        combinedMetrics.setMetrics(metricData);
 
-        // Call the activity service
-        ActivityResponseDTO activity = getActivity(dashboardDTO);
-        combinedMetrics.put("activities", activity.getActivities());
+        ActivityResponseDTO activity = getActivity(instanceId, dashboardDTO);
+        combinedMetrics.setActivities(activity);
+
+        List<AgentPerformanceDTO> performanceData = calculatePerformanceService.getPerformances(
+                dashboardDTO.getStartDate(),
+                dashboardDTO.getEndDate(),
+                instanceId,
+                dashboardDTO.getRoutingProfiles()
+        );
+        combinedMetrics.setPerformanceData(performanceData);
 
         return combinedMetrics;
     }

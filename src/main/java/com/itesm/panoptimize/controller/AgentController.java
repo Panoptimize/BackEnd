@@ -75,11 +75,13 @@ public class AgentController {
                     content = @Content),
     })
 
+    /*GetIdAgent -- Fully Tested - Only finish Invalid Input*/
     @GetMapping("/{id}")
     public ResponseEntity<AgentUserDTO> getAgentById(@PathVariable Integer id) {
         return ResponseEntity.ok(userService.getAgent(id));
     }
 
+    /*GetIdAgentConnectId -- Fully Tested -- Finish Invalid*/
     @GetMapping("/connect/{id}")
     public ResponseEntity<AgentUserDTO> getAgentByConnectId(@PathVariable String id) {
         return ResponseEntity.ok(userService.getAgentWithConnectId(id));
@@ -148,6 +150,8 @@ public class AgentController {
         return ResponseEntity.ok(feedbackService.updateFeedback(id, note));
     }
 
+    /*
+    * This enpoint gives a response directly from connect, without processing.*/
     @GetMapping("/list/{instanceId}")
     public ResponseEntity<DashboardFiltersDTO> getFilters(@PathVariable String instanceId) {
         DashboardFiltersDTO filters = agentListService.getAgentList(instanceId);
@@ -171,7 +175,7 @@ public class AgentController {
     private final AgentListService agentsService;
 
 
-    @PostMapping("/agentslist")
+    @PostMapping("/agents-list")
     public Mono<AgentResponseDTO> getAllAgents(@RequestParam String instanceId) {
         return agentsService.getAllAgents(instanceId)
                 .map(AgentResponseDTO::new);

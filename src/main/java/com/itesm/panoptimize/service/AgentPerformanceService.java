@@ -57,10 +57,10 @@ public class AgentPerformanceService {
         agentPerformanceToCreate.setId(null);
         agentPerformanceToCreate.setAvgAfterContactWorkTime(createAgentPerformanceDTO.getAvgAfterContactWorkTime());
         agentPerformanceToCreate.setAvgAbandonTime(createAgentPerformanceDTO.getAvgAbandonTime());
-        agentPerformanceToCreate.setAvgHandleTime(createAgentPerformanceDTO.getAvgAfterContactWorkTime());
-        agentPerformanceToCreate.setAvgHoldTime(createAgentPerformanceDTO.getAvgAfterContactWorkTime());
+        agentPerformanceToCreate.setAvgHandleTime(createAgentPerformanceDTO.getAvgHandleTime());
+        agentPerformanceToCreate.setAvgHoldTime(createAgentPerformanceDTO.getAvgHoldTime());
 
-        User agent = userRepository.findById(createAgentPerformanceDTO.getAgentId()).orElse(null);
+        User agent = userRepository.findById(createAgentPerformanceDTO.getId()).orElse(null);
         if(agent == null) {throw new IllegalArgumentException("Agent not found");}
         agentPerformanceToCreate.setAgent(agent);
 

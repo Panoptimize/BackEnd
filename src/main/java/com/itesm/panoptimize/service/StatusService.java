@@ -5,6 +5,7 @@ import software.amazon.awssdk.services.connect.ConnectClient;
 import software.amazon.awssdk.services.connect.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.connect.paginators.ListUsersIterable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -61,9 +62,14 @@ public class StatusService {
                     .flatMap(result -> result.collections().stream())
                     .forEach(collection -> metricValues.put(collection.metric().nameAsString(), collection.value()));
 
-            return metricNames.stream()
-                    .map(metricName -> new StatusDTO(metricName.toString(), metricValues.get(metricName.toString())))
-                    .collect(Collectors.toList());
+            List<StatusDTO> result = new ArrayList<>();
+            double agents = getUserCount(instanceId);
+            result.add(new StatusDTO("AGENTS", agents));
+            result.add(new StatusDTO("AGENTS_ONLINE", metricValues.get(CurrentMetricName.AGENTS_ONLINE.toString())));
+            result.add(new StatusDTO("AGENTS_AVAILABLE", metricValues.get(CurrentMetricName.AGENTS_AVAILABLE.toString())));
+            result.add(new StatusDTO("AGENTS_OFFLINE", agents - metricValues.get(CurrentMetricName.AGENTS_ONLINE.toString())));
+
+            return result;
         } catch (ConnectException e) {
             // Log the exception and rethrow or handle it as needed
             throw new RuntimeException("Failed to retrieve agent metrics", e);
@@ -86,5 +92,26 @@ public class StatusService {
         return listQueuesResponse.queueSummaryList().stream()
                 .map(QueueSummary::id)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieves the count of users for the specified instance.
+     *
+     * @param instanceId the ID of the Amazon Connect instance
+     * @return the count of users
+     */
+    private int getUserCount(String instanceId) {
+        ListUsersRequest listUsersRequest = ListUsersRequest.builder()
+                .instanceId(instanceId)
+                .build();
+
+        ListUsersIterable listUsersIterable = connectClient.listUsersPaginator(listUsersRequest);
+
+        int userCount = 0;
+        for (ListUsersResponse response : listUsersIterable) {
+            userCount += response.userSummaryList().size();
+        }
+
+        return userCount;
     }
 }

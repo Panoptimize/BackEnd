@@ -1,13 +1,8 @@
 package com.itesm.panoptimize.controller;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.Date;
+import java.io.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
+import com.itesm.panoptimize.dto.download.DownloadDTO;
 import com.itesm.panoptimize.service.DownloadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -21,34 +16,29 @@ public class DownloadController {
 
     private final DownloadService downloadService;
 
-    private final ObjectMapper objectMapper;
-
     @Autowired
-    public DownloadController(DownloadService downloadService, ObjectMapper objectMapper) {
+    public DownloadController(DownloadService downloadService) {
         this.downloadService = downloadService;
-        this.objectMapper = objectMapper;
     }
 
     //Download data from the Dashboard
-    @GetMapping("/getDownload")
-    public ResponseEntity<InputStreamResource> getReport() throws IOException {
-        
-        String homedir = System.getProperty("user.home");
-        Date date = new Date();
-        String file = "DataReport_" + date.getTime() + ".xlsx";
-        String filePath = Paths.get(homedir, "Downloads", file).toString();
+    @PostMapping("/getDownload")
+    public ResponseEntity<InputStreamResource> getReport(String instanceId, @RequestBody DownloadDTO downloadDTO) throws IOException {
 
-        downloadService.getFinalReport(filePath);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-        File fileToDownload = new File(filePath);
-        InputStreamResource resource = new InputStreamResource(new FileInputStream(fileToDownload));
+        downloadService.getFinalReport(byteArrayOutputStream, instanceId,downloadDTO);
+
+        byte[] byteArray = byteArrayOutputStream.toByteArray();
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArray);
+        InputStreamResource resource = new InputStreamResource(byteArrayInputStream);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Disposition", String.format("attachment; filename=\"%s\"", fileToDownload.getName()));
+        headers.add("Content-Disposition", "attachment; filename=DataReport.xlsx");
 
         return ResponseEntity.ok()
                 .headers(headers)
-                .contentLength(fileToDownload.length())
+                .contentLength(byteArray.length)
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);
     }
