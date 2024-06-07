@@ -134,7 +134,6 @@ public class ConnectEventService {
                                 .setEmail(user.identityInfo().email())
                                 .setDisplayName(user.identityInfo().firstName() + " " + user.identityInfo().lastName())
                                 .setEmailVerified(false)
-                                .setPassword("ThePassword123")
                                 .setDisabled(false);
 
                         userRecord = firebaseAuth.createUser(request);
