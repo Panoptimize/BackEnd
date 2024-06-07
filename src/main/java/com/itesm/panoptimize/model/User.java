@@ -24,9 +24,6 @@ public class User {
     @Column(name = "full_name", nullable = false)
     private String fullName;
 
-    @Column(name = "can_switch", nullable = false)
-    private Boolean canSwitch = true;
-
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false, foreignKey = @ForeignKey(name = "company_has_users"))
     private Company company;
@@ -97,14 +94,6 @@ public class User {
 
     public void setRoutingProfile(RoutingProfile routingProfileId) {
         this.routingProfile = routingProfileId;
-    }
-
-    public boolean isCanSwitch() {
-        return canSwitch;
-    }
-
-    public void setCanSwitch(boolean canSwitch) {
-        this.canSwitch = canSwitch;
     }
 
     public Company getCompany() {

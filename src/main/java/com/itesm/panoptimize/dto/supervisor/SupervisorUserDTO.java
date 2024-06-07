@@ -17,7 +17,6 @@ public class SupervisorUserDTO {
 
     @NotNull(message = "RoutingProfileId is required")
     private String routingProfileId;
-    private Boolean canSwitch;
 
     @NotNull(message = "CompanyId is required")
     private Integer companyId;
@@ -69,13 +68,5 @@ public class SupervisorUserDTO {
 
     public void setRoutingProfileId(String routingProfileId) {
         this.routingProfileId = routingProfileId;
-    }
-
-    public Boolean isCanSwitch() {
-        return canSwitch;
-    }
-
-    public void setCanSwitch(Boolean canSwitch) {
-        this.canSwitch = canSwitch;
     }
 }

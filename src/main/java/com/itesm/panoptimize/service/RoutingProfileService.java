@@ -36,7 +36,13 @@ public class RoutingProfileService {
     }
 
     public RoutingProfileDTO getRoutingProfile(String id){
-        return convertToDTO(routingProfileRepository.findById(id).orElse(null));
+        RoutingProfile routingProfile = routingProfileRepository.findById(id).orElse(null);
+
+        if (routingProfile == null){
+            return null;
+        }
+
+        return convertToDTO(routingProfile);
     }
 
     public Page<RoutingProfileDTO> getRoutingProfiles(Pageable pageable){

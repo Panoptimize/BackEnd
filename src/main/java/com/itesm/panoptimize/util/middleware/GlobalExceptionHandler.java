@@ -10,7 +10,7 @@ import java.net.ConnectException;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
-@ControllerAdvice
+//@ControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final Logger LOGGER = Logger.getLogger(GlobalExceptionHandler.class.getName());

@@ -12,7 +12,6 @@ public class AgentCreateDTO {
 
     @NotNull(message = "RoutingProfileId is required")
     private String routingProfileId;
-    private boolean canSwitch = true;
 
     @NotNull(message = "CompanyId is required")
     private Integer companyId;
@@ -53,14 +52,6 @@ public class AgentCreateDTO {
 
     public void setRoutingProfileId(String routingProfileId) {
         this.routingProfileId = routingProfileId;
-    }
-
-    public boolean isCanSwitch() {
-        return canSwitch;
-    }
-
-    public void setCanSwitch(boolean canSwitch) {
-        this.canSwitch = canSwitch;
     }
 
     public Integer getCompanyId() {

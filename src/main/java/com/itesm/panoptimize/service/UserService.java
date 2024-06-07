@@ -4,7 +4,6 @@ import com.itesm.panoptimize.dto.agent.AgentCreateDTO;
 import com.itesm.panoptimize.dto.agent.AgentUpdateDTO;
 import com.itesm.panoptimize.dto.agent.AgentUserDTO;
 import com.itesm.panoptimize.dto.supervisor.SupervisorCreateDTO;
-import com.itesm.panoptimize.dto.supervisor.SupervisorDTO;
 import com.itesm.panoptimize.dto.supervisor.SupervisorUpdateDTO;
 import com.itesm.panoptimize.dto.supervisor.SupervisorUserDTO;
 import com.itesm.panoptimize.model.AgentPerformance;
@@ -14,20 +13,12 @@ import com.itesm.panoptimize.model.User;
 import com.itesm.panoptimize.repository.AgentPerformanceRepository;
 import com.itesm.panoptimize.repository.UserRepository;
 import com.itesm.panoptimize.repository.UserTypeRepository;
-import jakarta.validation.constraints.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import software.amazon.awssdk.services.connect.ConnectClient;
-import software.amazon.awssdk.services.connect.model.DescribeUserRequest;
-import software.amazon.awssdk.services.connect.model.ListUsersRequest;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import java.util.Optional;
 
@@ -38,17 +29,14 @@ public class UserService {
     private final UserTypeRepository userTypeRepository;
     private final ModelMapper modelMapper;
     private final AgentPerformanceRepository agentPerformanceRepository;
-    private final ConnectClient connectClient;
 
     public UserService(UserRepository userRepository, ModelMapper modelMapper,
                        AgentPerformanceRepository agentPerformanceRepository,
-                       UserTypeRepository userTypeRepository,
-                       ConnectClient connectClient) {
+                       UserTypeRepository userTypeRepository) {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
         this.agentPerformanceRepository = agentPerformanceRepository;
         this.userTypeRepository = userTypeRepository;
-        this.connectClient = connectClient;
     }
 
     private AgentUserDTO convertToAgentDTO(User agent) {
@@ -89,9 +77,13 @@ public class UserService {
     }
 
     public AgentUserDTO getAgentWithConnectId(String connectId) {
-        return convertToAgentDTO(userRepository.connectId(connectId).orElseThrow(
-                () -> new IllegalArgumentException("Invalid ConnectUser ID")
-        ));
+        User agent = userRepository.connectId(connectId).orElse(null);
+
+        if (agent == null) {
+            return null;
+        }
+
+        return convertToAgentDTO(agent);
     }
 
     public void deleteAgent(Integer id) {
@@ -122,8 +114,11 @@ public class UserService {
 
         }
 
-        if(agentUserDTO.isCanSwitch() != null) {
-            agentToUpdate.setCanSwitch(agentUserDTO.isCanSwitch());
+        if(agentUserDTO.getCompanyId() != null) {
+            Company company = new Company();
+            company.setId(agentUserDTO.getCompanyId());
+
+            agentToUpdate.setCompany(company);
         }
         return convertToAgentDTO(userRepository.save(agentToUpdate));
     }
@@ -161,9 +156,13 @@ public class UserService {
     }
 
     public SupervisorUserDTO getSupervisorWithConnectId(String connectId) {
-        return convertToSupervisorDTO(userRepository.connectId(connectId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entity not found")
-        ));
+        User supervisor = userRepository.connectId(connectId).orElse(null);
+
+        if (supervisor == null) {
+            return null;
+        }
+
+        return convertToSupervisorDTO(supervisor);
     }
 
     public void deleteSupervisor(Integer id) {
@@ -197,9 +196,13 @@ public class UserService {
             supervisorToUpdate.setRoutingProfile(routingProfile);
         }
 
-        if(supervisorUserDTO.isCanSwitch() != null) {
-            supervisorToUpdate.setCanSwitch(supervisorUserDTO.isCanSwitch());
+        if(supervisorUserDTO.getCompanyId() != null) {
+            Company company = new Company();
+            company.setId(supervisorUserDTO.getCompanyId());
+
+            supervisorToUpdate.setCompany(company);
         }
+
         return convertToSupervisorDTO(userRepository.save(supervisorToUpdate));
     }
 
@@ -214,18 +217,17 @@ public class UserService {
             supervisorUserDTO.setEmail(user.getEmail());
             supervisorUserDTO.setConnectId(user.getConnectId());
             supervisorUserDTO.setId(user.getId());
-            supervisorUserDTO.setCanSwitch(user.isCanSwitch());
             supervisorUserDTO.setRoutingProfileId(user.getRoutingProfile().getRoutingProfileId());
 
             return supervisorUserDTO;
         } else {
-            throw new UsernameNotFoundException("User not found by firebase id: " + firebaseId);
+            return null;
         }
     }
 
     public String getInstanceIdFromFirebaseId(String firebaseId) {
         return userRepository.firebaseId(firebaseId).map(
                 user -> user.getCompany().getInstance().getId()
-        ).orElseThrow(() -> new UsernameNotFoundException("User not found by firebase id: " + firebaseId));
+        ).orElse(null);
     }
 }
