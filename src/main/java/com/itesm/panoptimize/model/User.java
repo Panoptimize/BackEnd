@@ -32,17 +32,6 @@ public class User {
     @JoinColumn(name = "user_type_id", nullable = false, foreignKey = @ForeignKey(name = "user_has_user_type"))
     private UserType userType;
 
-    @ManyToMany
-    @JoinTable(
-            name = "agents_have_supervisors",
-            joinColumns = @JoinColumn(name = "agent_id", foreignKey = @ForeignKey(name = "agents_have_supervisors")),
-            inverseJoinColumns = @JoinColumn(name = "supervisor_id", foreignKey = @ForeignKey(name = "supervisors_have_agents"))
-    )
-    private Set<User> supervisors;
-
-    @ManyToMany(mappedBy = "supervisors")
-    private Set<User> agents;
-
     @ManyToOne
     @JoinColumn(name = "routing_profile_id", nullable = false, foreignKey = @ForeignKey(name = "user_has_routing_profile"))
     private RoutingProfile routingProfile;
@@ -110,21 +99,5 @@ public class User {
 
     public void setUserType(UserType userType) {
         this.userType = userType;
-    }
-
-    public Set<User> getSupervisors() {
-        return supervisors;
-    }
-
-    public void setSupervisors(Set<User> supervisors) {
-        this.supervisors = supervisors;
-    }
-
-    public Set<User> getAgents() {
-        return agents;
-    }
-
-    public void setAgents(Set<User> agents) {
-        this.agents = agents;
     }
 }
