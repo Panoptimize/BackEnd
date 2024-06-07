@@ -23,11 +23,11 @@ public class DownloadController {
 
     //Download data from the Dashboard
     @PostMapping("/getDownload")
-    public ResponseEntity<InputStreamResource> getReport(@RequestBody DownloadDTO downloadDTO){
+    public ResponseEntity<InputStreamResource> getReport(@RequestBody DownloadDTO downloadDTO, @RequestParam String instanceID){
         try{
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-            downloadService.getFinalReport(byteArrayOutputStream, downloadDTO);
+            downloadService.getFinalReport(byteArrayOutputStream, instanceID, downloadDTO);
 
             byte[] byteArray = byteArrayOutputStream.toByteArray();
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArray);
