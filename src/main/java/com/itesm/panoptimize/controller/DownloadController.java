@@ -23,24 +23,29 @@ public class DownloadController {
 
     //Download data from the Dashboard
     @PostMapping("/getDownload")
-    public ResponseEntity<InputStreamResource> getReport(String instanceId, @RequestBody DownloadDTO downloadDTO) throws IOException {
+    public ResponseEntity<InputStreamResource> getReport(@RequestBody DownloadDTO downloadDTO, @RequestParam String instanceID){
+        try{
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            downloadService.getFinalReport(byteArrayOutputStream, instanceID, downloadDTO);
 
-        downloadService.getFinalReport(byteArrayOutputStream, instanceId,downloadDTO);
+            byte[] byteArray = byteArrayOutputStream.toByteArray();
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArray);
+            InputStreamResource resource = new InputStreamResource(byteArrayInputStream);
 
-        byte[] byteArray = byteArrayOutputStream.toByteArray();
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArray);
-        InputStreamResource resource = new InputStreamResource(byteArrayInputStream);
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Content-Disposition", "attachment; filename=DataReport.xlsx");
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Disposition", "attachment; filename=DataReport.xlsx");
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .contentLength(byteArray.length)
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(resource);
+        }catch (Exception e) {
+            System.out.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
 
-        return ResponseEntity.ok()
-                .headers(headers)
-                .contentLength(byteArray.length)
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(resource);
     }
 
 

@@ -101,8 +101,10 @@ public class DashboardController {
         return ResponseEntity.ok(dashboardService.updateNotification(id, notification));
     }
 
+
     @GetMapping("/filters")
     public ResponseEntity<DashboardFiltersDTO> getFilters(@RequestAttribute String instanceId) {
+        System.out.println(instanceId);
         DashboardFiltersDTO filters = dashboardService.getFilters(instanceId);
         return ResponseEntity.ok(filters);
     }

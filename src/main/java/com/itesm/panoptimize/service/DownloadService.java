@@ -94,8 +94,10 @@ public class DownloadService {
 
             if(!jsonArray.isEmpty()) {
                 for (JsonNode json : jsonArray) {
-                    if (json.has("agentID") && json.has("performances")) {
-                        String agentID = json.get("agentID").asText();
+
+                    if (json.has("agentName") && json.has("performances")) {
+
+                        String agentID = json.get("agentName").asText();
                         JsonNode performances = json.get("performances");
 
                         if (performances.isArray()) {
