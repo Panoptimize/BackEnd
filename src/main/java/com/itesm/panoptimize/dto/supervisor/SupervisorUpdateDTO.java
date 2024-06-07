@@ -55,8 +55,6 @@ public class SupervisorUpdateDTO {
         this.fullName = fullName;
     }
 
-
-
     public String getRoutingProfileId() {
         return routingProfileId;
     }

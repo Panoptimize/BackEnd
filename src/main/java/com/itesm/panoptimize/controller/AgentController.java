@@ -115,6 +115,7 @@ public class AgentController {
     public ResponseEntity<String> postFeedback(@RequestBody PostFeedbackDTO feedbackDTO) {
         return ResponseEntity.ok("Feedback enviado exitosamente \nFecha: " + feedbackDTO.getDate());
     }
+    /*
     @GetMapping("/agent/performance/{id}")
     public ResponseEntity<AgentPerformance> getAgentPerformance(@PathVariable("id") Integer id){
         AgentPerformance agentPerformance = userService.getAgentPerformance(id);
@@ -135,6 +136,7 @@ public class AgentController {
     public ResponseEntity<AgentPerformance> updateNotification(@PathVariable Integer id, @RequestBody AgentPerformance agentPerformance) {
         return ResponseEntity.ok(userService.updateAgentPerformance(id, agentPerformance));
     }
+    */
     @GetMapping("/agent/feedback/{id}")
     public ResponseEntity<Note> getFeedback(@PathVariable("id") Integer id){
         Note note = feedbackService.getFeedbackById(id);
@@ -181,7 +183,7 @@ public class AgentController {
     private final AgentListService agentsService;
 
 
-    @PostMapping("/agentslist")
+    @PostMapping("/agents-list")
     public Mono<AgentResponseDTO> getAllAgents(@RequestParam String instanceId) {
         return agentsService.getAllAgents(instanceId)
                 .map(AgentResponseDTO::new);
