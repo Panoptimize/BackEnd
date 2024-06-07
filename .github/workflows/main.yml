@@ -43,7 +43,7 @@ jobs:
         env:
           ARTIFACT_REGISTRY_REGION: ${{ env.REGION }}
           GAR_LOCATION: ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GAR_NAME }}
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          FIREBASE_SERVICE_ACCOUNT_PATH: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
         run: |
           echo "$FIREBASE_SERVICE_ACCOUNT_PATH" > firebase-adminsdk.json
