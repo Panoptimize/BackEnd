@@ -103,8 +103,9 @@ public class DashboardController {
 
 
     @GetMapping("/filters")
-    public ResponseEntity<DashboardFiltersDTO> getFilters(@RequestAttribute String instanceId) {
-        System.out.println(instanceId);
+    public ResponseEntity<DashboardFiltersDTO> getFilters(Principal principal) {
+        String firebaseId = principal.getName();
+        String instanceId = userService.getInstanceIdFromFirebaseId(firebaseId);
         DashboardFiltersDTO filters = dashboardService.getFilters(instanceId);
         return ResponseEntity.ok(filters);
     }

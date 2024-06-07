@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import java.lang.String;
+import java.security.Principal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -164,18 +165,12 @@ public class AgentController {
     public ResponseEntity<DashboardFiltersDTO> getFilters(@PathVariable String instanceId) {
         DashboardFiltersDTO filters = agentListService.getAgentList(instanceId);
 
-        System.out.println(instanceId);
-
         return ResponseEntity.ok(filters);
     }
 
     @GetMapping("/detail/{instanceId}/{agentId}")
     public ResponseEntity<AgentDetailsDTO> getAgentDetails(@PathVariable String agentId,@PathVariable String instanceId) {
-        System.out.println(agentId);
-        System.out.println(instanceId);
         AgentDetailsDTO agent = agentListService.getAgentDetails(agentId, instanceId);
-
-        System.out.println(agentId);
 
         return ResponseEntity.ok(agent);
     }
@@ -183,8 +178,10 @@ public class AgentController {
     private final AgentListService agentsService;
 
 
-    @PostMapping("/agents-list")
-    public Mono<AgentResponseDTO> getAllAgents(@RequestParam String instanceId) {
+    @GetMapping("/agents-list")
+    public Mono<AgentResponseDTO> getAllAgents(Principal principal) {
+        String firebaseId = principal.getName();
+        String instanceId = userService.getInstanceIdFromFirebaseId(firebaseId);
         return agentsService.getAllAgents(instanceId)
                 .map(AgentResponseDTO::new);
     }
