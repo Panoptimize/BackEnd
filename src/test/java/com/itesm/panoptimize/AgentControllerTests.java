@@ -24,9 +24,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -137,6 +136,23 @@ public class AgentControllerTests {
                 .andExpect(jsonPath("$.fullName").value(notNullValue()))
                 .andExpect(jsonPath("$.routingProfileId").value(notNullValue()))
                 .andExpect(jsonPath("$.canSwitch").value(notNullValue()));
+    }
+
+    @Test
+    public void testGetAgentList() throws Exception {
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/agent/agents-list")
+                        .param("instanceId", "7c78bd60-4a9f-40e5-b461-b7a0dfaad848")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + firebaseToken))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+
+        String responseString = result.getResponse().getContentAsString();
+        System.out.println("Response: " + responseString);
+
+        mockMvc.perform(asyncDispatch(result))
+                .andExpect(jsonPath("$.agents").isArray())
+                .andExpect(jsonPath("$.agents").isNotEmpty());
     }
 
 
