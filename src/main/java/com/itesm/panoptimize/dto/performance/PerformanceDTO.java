@@ -51,13 +51,4 @@ public class PerformanceDTO {
         this.routingProfiles = routingProfiles;
     }
 
-    @Override
-    public String toString() {
-        return "PerformanceDTO{" +
-                "startDate=" + startDate +
-                ", endDate=" + endDate +
-                ", instanceId='" + instanceId + '\'' +
-                ", routingProfiles=" + routingProfiles +
-                '}';
-    }
 }

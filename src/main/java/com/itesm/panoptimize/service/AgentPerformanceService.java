@@ -1,8 +1,6 @@
 package com.itesm.panoptimize.service;
 
-import com.itesm.panoptimize.dto.agent_performance.AgentPerformanceDTO;
-import com.itesm.panoptimize.dto.agent_performance.CreateAgentPerformanceDTO;
-import com.itesm.panoptimize.dto.agent_performance.UpdateAgentPerformanceDTO;
+import com.itesm.panoptimize.dto.agent_performance.*;
 import com.itesm.panoptimize.model.AgentPerformance;
 import com.itesm.panoptimize.model.User;
 import com.itesm.panoptimize.repository.AgentPerformanceRepository;
@@ -11,6 +9,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.Instant;
+import java.time.ZoneId;
 
 @Service
 public class AgentPerformanceService {
@@ -26,6 +30,10 @@ public class AgentPerformanceService {
 
     private AgentPerformanceDTO convertToDTO(AgentPerformance agentPerformance) {
         return modelMapper.map(agentPerformance, AgentPerformanceDTO.class);
+    }
+
+    private AgentPerformanceMetricsDTO convertToDTO(AgentPerformanceQueryDTO agentPerformance) {
+        return modelMapper.map(agentPerformance, AgentPerformanceMetricsDTO.class);
     }
 
     private AgentPerformance convertDTOToEntity(CreateAgentPerformanceDTO createAgentPerformanceDTO) {
@@ -85,5 +93,11 @@ public class AgentPerformanceService {
 
     public AgentPerformanceDTO getAgentPerformanceByNote(Integer id){
         return convertToDTO(agentPerformanceRepository.findAgentPerformanceByNoteId(id));
+    }
+
+    public AgentPerformanceMetricsDTO getAgentMetricsToday(Integer agentId){
+        AgentPerformanceQueryDTO agentPerformance = agentPerformanceRepository.findAgentMetricsByAgentId(agentId);
+
+        return convertToDTO(agentPerformance);
     }
 }

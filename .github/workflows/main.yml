@@ -1,4 +1,5 @@
 name: Continuous Deployment Pipeline
+
 on:
   push:
     branches:
@@ -21,6 +22,7 @@ jobs:
           registry: gcr.io
           username: _json_key
           password: ${{ secrets.GCR_SERVICE_ACCOUNT_KEY }}
+
       - name: Checkout repository
         uses: actions/checkout@v2
 
@@ -49,14 +51,19 @@ jobs:
           docker push ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GAR_NAME }}/${{ vars.GAR_NAME }}:$GITHUB_SHA
           docker push ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GAR_NAME }}/${{ vars.GAR_NAME }}:latest
 
-
+      - name: Save Firebase Service Account JSON
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          echo "$FIREBASE_SERVICE_ACCOUNT" > $HOME/firebase-adminsdk.json
+          export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-adminsdk.json"
 
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ vars.GAR_NAME }} \
             --image=${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GAR_NAME }}/${{ vars.GAR_NAME }} \
-            --set-env-vars MYSQL_HOST=${{ secrets.MYSQL_HOST }},MYSQL_USER=${{ secrets.MYSQL_USER }},MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }},AWS_REGION=${{ vars.AWS_REGION }},AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},FIREBASE_ID=${{ secrets.FIREBASE_ID }},API_KEY=${{ secrets.API_KEY }} \
+            --set-env-vars MYSQL_HOST=${{ secrets.MYSQL_HOST }},MYSQL_USER=${{ secrets.MYSQL_USER }},MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }},AWS_REGION=${{ vars.AWS_REGION }},AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},FIREBASE_ID=${{ secrets.FIREBASE_ID }},API_KEY=${{ secrets.API_KEY }},GOOGLE_APPLICATION_CREDENTIALS=$HOME/firebase-adminsdk.json \
             --platform=managed \
             --port=${{ env.PORT }} \
             --region=${{ env.REGION }} \
-            --allow-unauthenticated \
+            --allow-unauthenticated
