@@ -63,7 +63,7 @@ public class NoteTests {
     @Test
     public void testGetAgentNotesListNoNotes() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/note/agent/99999") // Assuming 99999 is an agent with no notes
+                        .get("/note/agent/99999")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + firebaseToken))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -251,21 +251,51 @@ public class NoteTests {
     }
 
     @Test
-    public void getAgentPerformanceByNoteId() throws Exception {
+    public void testGetAgentPerformanceByNoteId() throws Exception {
+
+        String createRequestBody = """
+        {
+          "createNote": {
+            "name": "Test Create AP",
+            "description": "The note will be created and the Agent Performance will be extracted.",
+            "priority": "HIGH",
+            "solved": false
+          },
+          "createAgentPerformance": {
+            "avgAfterContactWorkTime": 10,
+            "avgHandleTime": 5,
+            "avgAbandonTime": 15,
+            "avgHoldTime": 20,
+            "id": 1
+          }
+        }
+        """;
+
+        String createdNote = mockMvc.perform(MockMvcRequestBuilders
+                        .post("/note/")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + firebaseToken)
+                        .content(createRequestBody))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        int createdNoteId = JsonPath.parse(createdNote).read("$.id");
+
         mockMvc.perform(MockMvcRequestBuilders
-                    .get("/agent-performance/note/19")
+                    .get("/agent-performance/note/" + createdNoteId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + firebaseToken))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.avgAfterContactWorkTime").isNotEmpty())
-                .andExpect(jsonPath("$.avgHandleTime").isNotEmpty())
-                .andExpect(jsonPath("$.avgAbandonTime").isNotEmpty())
-                .andExpect(jsonPath("$.avgHoldTime").isNotEmpty());
+                .andExpect(jsonPath("$.avgAfterContactWorkTime").value(10))
+                .andExpect(jsonPath("$.avgHandleTime").value(5))
+                .andExpect(jsonPath("$.avgAbandonTime").value(15))
+                .andExpect(jsonPath("$.avgHoldTime").value(20));
     }
 
     @Test
-    public void getAgentPerformanceByNonexistentId() throws Exception {
+    public void testGetAgentPerformanceByNonexistentId() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/agent-performance/note/999999")
                         .contentType(MediaType.APPLICATION_JSON)
