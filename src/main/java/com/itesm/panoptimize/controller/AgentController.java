@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,6 +23,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import java.lang.String;
+import java.security.Principal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -51,7 +54,7 @@ public class AgentController {
                     description = "Agentes encontrados.",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = AgentDTO.class))
+                                    schema = @Schema(implementation = AgentUserDTO.class))
                     }),
             @ApiResponse(responseCode = "404",
                     description = "Agentes no encontrados.",
@@ -59,7 +62,7 @@ public class AgentController {
     })
     @GetMapping("/")
     public ResponseEntity<Page<AgentUserDTO>> getAllAgents(Pageable pageable) {
-        return ResponseEntity.ok(userService.getallAgents(pageable));
+        return ResponseEntity.ok(userService.getAllAgents(pageable));
     }
 
     @Operation(summary = "Obtener info  de agente", description = "Obtener la info de agente mediante el id" )
@@ -68,7 +71,7 @@ public class AgentController {
                     description = "Agente encontrado.",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = AgentDTO.class))
+                                    schema = @Schema(implementation = AgentUserDTO.class))
                     }),
             @ApiResponse(responseCode = "404",
                     description = "Agente no encontrado.",
@@ -84,11 +87,17 @@ public class AgentController {
     /*GetIdAgentConnectId -- Fully Tested -- Finish Invalid*/
     @GetMapping("/connect/{id}")
     public ResponseEntity<AgentUserDTO> getAgentByConnectId(@PathVariable String id) {
-        return ResponseEntity.ok(userService.getAgentWithConnectId(id));
+        AgentUserDTO agentUserDTO = userService.getAgentWithConnectId(id);
+
+        if (agentUserDTO == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(agentUserDTO);
     }
 
     @PostMapping("/")
-    public ResponseEntity<AgentUserDTO> createAgent(@RequestBody AgentCreateDTO agentUserDTO) {
+    public ResponseEntity<AgentUserDTO> createAgent(@Valid @RequestBody AgentCreateDTO agentUserDTO) {
         return ResponseEntity.ok(userService.createAgent(agentUserDTO));
     }
     
@@ -156,18 +165,12 @@ public class AgentController {
     public ResponseEntity<DashboardFiltersDTO> getFilters(@PathVariable String instanceId) {
         DashboardFiltersDTO filters = agentListService.getAgentList(instanceId);
 
-        System.out.println(instanceId);
-
         return ResponseEntity.ok(filters);
     }
 
     @GetMapping("/detail/{instanceId}/{agentId}")
     public ResponseEntity<AgentDetailsDTO> getAgentDetails(@PathVariable String agentId,@PathVariable String instanceId) {
-        System.out.println(agentId);
-        System.out.println(instanceId);
         AgentDetailsDTO agent = agentListService.getAgentDetails(agentId, instanceId);
-
-        System.out.println(agentId);
 
         return ResponseEntity.ok(agent);
     }
@@ -175,8 +178,10 @@ public class AgentController {
     private final AgentListService agentsService;
 
 
-    @PostMapping("/agents-list")
-    public Mono<AgentResponseDTO> getAllAgents(@RequestParam String instanceId) {
+    @GetMapping("/agents-list")
+    public Mono<AgentResponseDTO> getAllAgents(Principal principal) {
+        String firebaseId = principal.getName();
+        String instanceId = userService.getInstanceIdFromFirebaseId(firebaseId);
         return agentsService.getAllAgents(instanceId)
                 .map(AgentResponseDTO::new);
     }

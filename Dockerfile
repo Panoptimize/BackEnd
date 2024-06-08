@@ -8,6 +8,10 @@ RUN mvn dependency:go-offline -B
 
 COPY src ./src
 
+# Accept the service account JSON file as a build argument
+ARG FIREBASE_SERVICE_ACCOUNT
+COPY ${FIREBASE_SERVICE_ACCOUNT} /app/firebase-adminsdk.json
+
 # Compilar el proyecto y generar el archivo jar
 RUN mvn package -DskipTests
 
@@ -16,17 +20,6 @@ FROM openjdk:17
 
 # Copiar el archivo jar generado en la etapa de build a la carpeta /app
 COPY --from=build /app/target/panoptimize-0.0.1-SNAPSHOT.jar /app/app.jar
-
-# Agregar variables de entorno desde actions
-ARG MYSQL_HOST
-ARG MYSQL_USER
-ARG MYSQL_PASSWORD
-ARG SIMULATION_URL
-
-ENV MYSQL_HOST=$MYSQL_HOST
-ENV MYSQL_USER=$MYSQL_USER
-ENV MYSQL_PASSWORD=$MYSQL_PASSWORD
-ENV SIMULATION_URL=$SIMULATION_URL
 
 # Exponer el puerto 8080 para que se pueda acceder a la aplicación
 EXPOSE 8080

@@ -2,7 +2,7 @@ package com.itesm.panoptimize.dto.queue;
 
 import jakarta.validation.constraints.NotNull;
 
-public class QueueCreateDTO {
+public class CreateQueueDTO {
     @NotNull(message = "The id cannot be null")
     private String id;
     @NotNull(message = "The name cannot be null")
