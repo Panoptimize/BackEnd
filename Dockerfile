@@ -8,6 +8,10 @@ RUN mvn dependency:go-offline -B
 
 COPY src ./src
 
+# Accept the service account JSON file as a build argument
+ARG FIREBASE_SERVICE_ACCOUNT
+COPY ${FIREBASE_SERVICE_ACCOUNT} /app/firebase-adminsdk.json
+
 # Compilar el proyecto y generar el archivo jar
 RUN mvn package -DskipTests
 
