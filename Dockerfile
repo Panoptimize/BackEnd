@@ -17,10 +17,6 @@ FROM openjdk:17
 # Copiar el archivo jar generado en la etapa de build a la carpeta /app
 COPY --from=build /app/target/panoptimize-0.0.1-SNAPSHOT.jar /app/app.jar
 
-# Agregar el archivo de firebase-admin-sdk.json a la carpeta /app
-ARG FIREBASE_SERVICE_ACCOUNT
-COPY ${FIREBASE_SERVICE_ACCOUNT} /app/firebase-admin-sdk.json
-
 # Exponer el puerto 8080 para que se pueda acceder a la aplicación
 EXPOSE 8080
 

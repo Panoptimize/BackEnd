@@ -43,12 +43,9 @@ jobs:
         env:
           ARTIFACT_REGISTRY_REGION: ${{ env.REGION }}
           GAR_LOCATION: ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GAR_NAME }}
-          FIREBASE_SERVICE_ACCOUNT_PATH: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-
         run: |
-          echo "$FIREBASE_SERVICE_ACCOUNT_PATH" > firebase-adminsdk.json
           gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
-          docker build --build-arg FIREBASE_SERVICE_ACCOUNT=firebase-adminsdk.json -t ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GAR_NAME }}/${{ vars.GAR_NAME }} .
+          docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GAR_NAME }}/${{ vars.GAR_NAME }} .
           docker tag ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GAR_NAME }}/${{ vars.GAR_NAME }} ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GAR_NAME }}/${{ vars.GAR_NAME }}:$GITHUB_SHA
           docker push ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GAR_NAME }}/${{ vars.GAR_NAME }}:$GITHUB_SHA
           docker push ${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GAR_NAME }}/${{ vars.GAR_NAME }}:latest
@@ -57,7 +54,7 @@ jobs:
         run: |
           gcloud run deploy ${{ vars.GAR_NAME }} \
             --image=${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ vars.GAR_NAME }}/${{ vars.GAR_NAME }} \
-            --set-env-vars MYSQL_HOST=${{ secrets.MYSQL_HOST }},MYSQL_USER=${{ secrets.MYSQL_USER }},MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }},AWS_REGION=${{ vars.AWS_REGION }},AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},FIREBASE_ID=${{ secrets.FIREBASE_ID }},API_KEY=${{ secrets.API_KEY }},GOOGLE_APPLICATION_CREDENTIALS=$HOME/firebase-adminsdk.json \
+            --set-env-vars MYSQL_HOST=${{ secrets.MYSQL_HOST }},MYSQL_USER=${{ secrets.MYSQL_USER }},MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }},AWS_REGION=${{ vars.AWS_REGION }},AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},FIREBASE_ID=${{ secrets.FIREBASE_ID }},API_KEY=${{ secrets.API_KEY }} \
             --platform=managed \
             --port=${{ env.PORT }} \
             --region=${{ env.REGION }} \
