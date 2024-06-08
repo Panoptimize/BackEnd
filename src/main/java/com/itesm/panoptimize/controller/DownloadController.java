@@ -42,7 +42,6 @@ public class DownloadController {
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .body(resource);
         }catch (Exception e) {
-            System.out.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 
