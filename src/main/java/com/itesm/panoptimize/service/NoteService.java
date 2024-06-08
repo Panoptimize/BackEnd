@@ -43,7 +43,11 @@ public class NoteService {
     }
 
     public NoteDTO getNote(Integer id) {
-        return convertToNoteDTO(noteRepository.findById(id).orElse(null));
+        Note note = noteRepository.findById(id).orElse(null);
+        if (note == null) {
+            return null;
+        }
+        return convertToNoteDTO(note);
     }
 
     public Page<NoteDTO> getNotes(Pageable pageable) {
