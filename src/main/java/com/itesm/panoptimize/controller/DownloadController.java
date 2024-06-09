@@ -1,9 +1,11 @@
 package com.itesm.panoptimize.controller;
 
 import java.io.*;
+import java.security.Principal;
 
 import com.itesm.panoptimize.dto.download.DownloadDTO;
 import com.itesm.panoptimize.service.DownloadService;
+import com.itesm.panoptimize.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,10 +22,12 @@ import org.springframework.web.bind.annotation.*;
 public class DownloadController {
 
     private final DownloadService downloadService;
+    private final UserService userService;
 
     @Autowired
-    public DownloadController(DownloadService downloadService) {
+    public DownloadController(DownloadService downloadService, UserService userService) {
         this.downloadService = downloadService;
+        this.userService = userService;
     }
 
     //Download data from the Dashboard
@@ -40,11 +44,12 @@ public class DownloadController {
                     content = @Content),
     })
     @PostMapping("/getDownload")
-    public ResponseEntity<InputStreamResource> getReport(@RequestBody DownloadDTO downloadDTO){
+    public ResponseEntity<InputStreamResource> getReport(@RequestBody DownloadDTO downloadDTO, Principal principal){
         try{
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-            String instanceID = downloadDTO.getInstanceId();
+            String firebaseId = principal.getName();
+            String instanceID = userService.getInstanceIdFromFirebaseId(firebaseId);
 
             downloadService.getFinalReport(byteArrayOutputStream, instanceID, downloadDTO);
 

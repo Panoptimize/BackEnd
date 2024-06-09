@@ -48,8 +48,6 @@ class DownloadControllerTests {
         firebaseToken = firebaseTestSetup.getFirebaseToken();
     }
 
-    String instanceId = System.getenv("INSTANCE_ID");
-
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -61,9 +59,7 @@ class DownloadControllerTests {
     @Test
     public void testGetDownload() throws Exception {
 
-        String jsonContent = String.format(
-                "{\"instanceId\":\"%s\",\"startDate\":\"2024-05-01\",\"endDate\":\"2024-05-31\",\"routingProfiles\":[\"4896ae34-a93e-41bc-8231-bf189e7628b1\"],\"queues\":[],\"agents\":[]}",
-                instanceId);
+        String jsonContent = "{\"startDate\":\"2024-05-01\",\"endDate\":\"2024-05-31\",\"routingProfiles\":[\"4896ae34-a93e-41bc-8231-bf189e7628b1\"],\"queues\":[],\"agents\":[]}";
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/download/getDownload")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -75,9 +71,7 @@ class DownloadControllerTests {
 
     @Test
     public void testGetDownloadInternalServerError() throws Exception{
-        String jsonContent = String.format(
-                "{\"instanceId\":\"%s\",\"startDate\":\"\",\"endDate\":\"2024-05-31\",\"routingProfiles\":[],\"queues\":[],\"agents\":[]}",
-                instanceId);
+        String jsonContent = "{\"startDate\":\"\",\"endDate\":\"2024-05-31\",\"routingProfiles\":[],\"queues\":[],\"agents\":[]}";
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/download/getDownload")
                         .contentType(MediaType.APPLICATION_JSON)
