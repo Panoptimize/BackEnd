@@ -113,9 +113,9 @@ public class AgentControllerTests {
     @Test
     public void testGetAgentByIdDB() throws Exception{
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/agent/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + firebaseToken)
+                    .get("/agent/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "Bearer " + firebaseToken)
                 ).andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(jsonPath("$.connectId").value(notNullValue()))
                 .andExpect(jsonPath("$.id").value(notNullValue()))
@@ -128,8 +128,8 @@ public class AgentControllerTests {
     @Test
     public void testGetAgentConnectIDDB () throws Exception{
         mockMvc.perform(MockMvcRequestBuilders.get("/agent/connect/c0899879-15f1-4bad-a862-c92168730040")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization","Bearer"+ firebaseToken))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization","Bearer"+ firebaseToken))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(jsonPath("$.connectId").value(notNullValue()))
                 .andExpect(jsonPath("$.id").value(notNullValue()))
