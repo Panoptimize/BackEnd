@@ -36,7 +36,6 @@ import java.util.List;
 @SpringBootTest
 @AutoConfigureMockMvc
 class DownloadControllerTests {
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -49,6 +48,9 @@ class DownloadControllerTests {
 
     @Value("${api.key}")
     private String apiKey;
+
+    @Value("${instance.id}")
+    private String instanceId;
 
     private String getFirebaseToken() throws IOException {
         String username = "A01656828@tec.mx";
@@ -90,22 +92,28 @@ class DownloadControllerTests {
 
     @Test
     public void testGetDownload() throws Exception {
+        String jsonContent = String.format(
+                "{\"instanceId\":\"%s\",\"startDate\":\"2024-05-01\",\"endDate\":\"2024-05-31\",\"routingProfiles\":[\"4896ae34-a93e-41bc-8231-bf189e7628b1\"],\"queues\":[],\"agents\":[]}",
+                instanceId);
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/download/getDownload")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + firebaseToken)
-                        .content("{\"instanceId\":\"7c78bd60-4a9f-40e5-b461-b7a0dfaad848\",\"startDate\":\"2024-05-01\",\"endDate\":\"2024-05-31\",\"routingProfiles\":[\"4896ae34-a93e-41bc-8231-bf189e7628b1\"],\"queues\":[],\"agents\":[]}"))
+                        .content(jsonContent))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_OCTET_STREAM));
     }
 
     @Test
     public void testGetDownloadInternalServerError() throws Exception{
+        String jsonContent = String.format(
+                "{\"instanceId\":\"%s\",\"startDate\":\"\",\"endDate\":\"2024-05-31\",\"routingProfiles\":[],\"queues\":[],\"agents\":[]}",
+                instanceId);
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/download/getDownload")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + firebaseToken)
-                        .content("{\"instanceId\":\"7c78bd60-4a9f-40e5-b461-b7a0dfaad848\",\"startDate\":\"\",\"endDate\":\"2024-05-31\",\"routingProfiles\":[],\"queues\":[],\"agents\":[]}"))
+                        .content(jsonContent))
                 .andExpect(MockMvcResultMatchers.status().isInternalServerError());
     }
 
