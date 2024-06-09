@@ -36,7 +36,13 @@ public class RoutingProfileService {
     }
 
     public RoutingProfileDTO getRoutingProfile(String id){
-        return convertToDTO(routingProfileRepository.findById(id).orElse(null));
+        RoutingProfile routingProfile = routingProfileRepository.findById(id).orElse(null);
+
+        if (routingProfile == null){
+            return null;
+        }
+
+        return convertToDTO(routingProfile);
     }
 
     public Page<RoutingProfileDTO> getRoutingProfiles(Pageable pageable){
@@ -44,6 +50,10 @@ public class RoutingProfileService {
     }
 
     public RoutingProfileDTO createRoutingProfile(CreateRoutingProfileDTO routingProfileDTO){
+        if(routingProfileRepository.existsById(routingProfileDTO.getId())) {
+            throw new IllegalArgumentException("Routing Profile already exists");
+        }
+
         RoutingProfile routingProfileToCreate = new RoutingProfile();
         routingProfileToCreate.setName(routingProfileDTO.getName());
         routingProfileToCreate.setRoutingProfileId(routingProfileDTO.getId());

@@ -16,9 +16,9 @@ import java.io.IOException;
 public class FirebaseTestSetup {
 
     public String getFirebaseToken() throws IOException {
-        String apiKey = "AIzaSyA2efAQdi2Vgtzl7aI080kouPzIiC8C2MA";
-        String username = "test@example.com";
-        String password = "password123";
+        String apiKey = System.getenv("API_KEY_FIREBASE_TEST");
+        String username = System.getenv("USERNAME_FIREBASE_TEST");
+        String password = System.getenv("PASSWORD_FIREBASE_TEST");
 
         String url = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + apiKey;
 

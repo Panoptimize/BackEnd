@@ -3,7 +3,6 @@ package com.itesm.panoptimize.dto.agent;
 import jakarta.validation.constraints.NotNull;
 
 public class AgentCreateDTO {
-    private final Integer id = null;
     @NotNull(message = "ConnectId is required")
     private String connectId;
     @NotNull(message = "Email is required")
@@ -12,7 +11,6 @@ public class AgentCreateDTO {
     private String fullName;
     @NotNull(message = "RoutingProfileId is required")
     private String routingProfileId;
-    private boolean canSwitch = true;
 
     @NotNull(message = "CompanyId is required")
     private Integer companyId;
@@ -51,14 +49,6 @@ public class AgentCreateDTO {
 
     public void setRoutingProfileId(String routingProfileId) {
         this.routingProfileId = routingProfileId;
-    }
-
-    public boolean isCanSwitch() {
-        return canSwitch;
-    }
-
-    public void setCanSwitch(boolean canSwitch) {
-        this.canSwitch = canSwitch;
     }
 
     public Integer getCompanyId() {
