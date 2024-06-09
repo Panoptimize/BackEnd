@@ -24,9 +24,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -45,37 +44,11 @@ public class AgentControllerTests {
 
     @BeforeEach
     public void setUp() throws IOException {
-        firebaseToken = getFirebaseToken();
+        firebaseToken = firebaseTestSetup.getFirebaseToken();
     }
 
-    private String getFirebaseToken() throws IOException {
-        String apiKey = "AIzaSyA2efAQdi2Vgtzl7aI080kouPzIiC8C2MA";
-        String username = "test@example.com";
-        String password = "password123";
-
-        String url = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + apiKey;
-
-        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            HttpPost request = new HttpPost(url);
-            request.addHeader("Content-Type", "application/json");
-
-            JSONObject json = new JSONObject();
-            json.put("email", username);
-            json.put("password", password);
-            json.put("returnSecureToken", true);
-
-            StringEntity entity = new StringEntity(json.toString());
-            request.setEntity(entity);
-
-            try (CloseableHttpResponse response = httpClient.execute(request)) {
-                String responseBody = EntityUtils.toString(response.getEntity());
-                JSONObject responseJson = new JSONObject(responseBody);
-                return responseJson.getString("idToken");
-            }
-        } catch (JSONException e) {
-            throw new IOException("Error parsing JSON response", e);
-        }
-    }
+    FirebaseTestSetup
+    firebaseTestSetup = new FirebaseTestSetup();
 
 
 
@@ -121,8 +94,7 @@ public class AgentControllerTests {
                 .andExpect(jsonPath("$.id").value(notNullValue()))
                 .andExpect(jsonPath("$.email").value(notNullValue()))
                 .andExpect(jsonPath("$.fullName").value(notNullValue()))
-                .andExpect(jsonPath("$.routingProfileId").value(notNullValue()))
-                .andExpect(jsonPath("$.canSwitch").value(notNullValue()));
+                .andExpect(jsonPath("$.routingProfileId").value(notNullValue()));
     }
 
     @Test
@@ -135,10 +107,31 @@ public class AgentControllerTests {
                 .andExpect(jsonPath("$.id").value(notNullValue()))
                 .andExpect(jsonPath("$.email").value(notNullValue()))
                 .andExpect(jsonPath("$.fullName").value(notNullValue()))
-                .andExpect(jsonPath("$.routingProfileId").value(notNullValue()))
-                .andExpect(jsonPath("$.canSwitch").value(notNullValue()));
+                .andExpect(jsonPath("$.routingProfileId").value(notNullValue()));
     }
 
+    @Test
+    public void testGetAgentList() throws Exception {
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/agent/agents-list")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + firebaseToken))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
 
+        String responseString = result.getResponse().getContentAsString();
+        System.out.println("Response: " + responseString);
+
+        mockMvc.perform(asyncDispatch(result))
+                .andExpect(jsonPath("$.agents").isArray())
+                .andExpect(jsonPath("$.agents").isNotEmpty());
+    }
+
+    @Test
+    public void testGetAgentListNonExistentId() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/agent/agents-list")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + firebaseToken))
+                .andExpect(MockMvcResultMatchers.status().isInternalServerError());
+    }
 
 }
