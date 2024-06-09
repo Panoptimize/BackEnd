@@ -1,6 +1,6 @@
 package com.itesm.panoptimize.controller;
+import com.itesm.panoptimize.dto.note.NoteDTO;
 import com.itesm.panoptimize.dto.supervisor.SupervisorCreateDTO;
-import com.itesm.panoptimize.dto.supervisor.SupervisorDTO;
 import com.itesm.panoptimize.dto.supervisor.SupervisorUpdateDTO;
 import com.itesm.panoptimize.dto.supervisor.SupervisorUserDTO;
 import com.itesm.panoptimize.service.UserService;
@@ -27,16 +27,16 @@ public class SupervisorController {
         this.userService = userService;
     }
 
-    @Operation(summary = "Obtener todos los supervisores", description = "Obtener todos los supervisores registrados en el sistema" )
+    @Operation(summary = "Get all supervisors", description = "Get all supervisors from the system." )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
-                    description = "Supervisores encontrados.",
+                    description = "Supervisors found.",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = SupervisorDTO.class))
+                                    schema = @Schema(implementation = SupervisorUserDTO.class))
                     }),
             @ApiResponse(responseCode = "404",
-                    description = "Supervisores no encontrados.",
+                    description = "Supervisors not found.",
                     content = @Content),
     })
     @GetMapping("/")
@@ -44,16 +44,16 @@ public class SupervisorController {
         return ResponseEntity.ok(supervisorService.getAllSupervisors(pageable));
     }
 
-    @Operation(summary = "Crear un supervisor", description = "Crear un supervisor en el sistema" )
+    @Operation(summary = "Create a new supervisor", description = "Create a new supervisor in the system" )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
-                    description = "Supervisor creado.",
+                    description = "Supervisor created.",
                     content = {
                             @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = SupervisorUserDTO.class))
                     }),
             @ApiResponse(responseCode = "404",
-                    description = "Supervisor no creado.",
+                    description = "Supervisor not created.",
                     content = @Content),
     })
     @PostMapping("/")
@@ -70,7 +70,7 @@ public class SupervisorController {
                                     schema = @Schema(implementation = SupervisorUserDTO.class))
                     }),
             @ApiResponse(responseCode = "404",
-                    description = "Supervisor no encontrado.",
+                    description = "Supervisor not found.",
                     content = @Content),
     })
     @GetMapping("/{id}")
@@ -78,33 +78,39 @@ public class SupervisorController {
         return ResponseEntity.ok(supervisorService.getSupervisor(id));
     }
 
-    @Operation(summary = "Obtener info de supervisor", description = "Obtener la info de supervisor mediante el id de connect" )
+    @Operation(summary = "Get a supervisor", description = "Get a supervisor by its id." )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
-                    description = "Supervisor encontrado.",
+                    description = "Supervisor Found.",
                     content = {
                             @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = SupervisorUserDTO.class))
                     }),
             @ApiResponse(responseCode = "404",
-                    description = "Supervisor no encontrado.",
+                    description = "Supervisor not found.",
                     content = @Content),
     })
     @GetMapping("/connect/{id}")
     public ResponseEntity<SupervisorUserDTO> getSupervisorByConnectId(@PathVariable String id) {
-        return ResponseEntity.ok(supervisorService.getSupervisorWithConnectId(id));
+        SupervisorUserDTO supervisor = userService.getSupervisorWithConnectId(id);
+
+        if (supervisor == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(supervisor);
     }
 
-    @Operation(summary = "Eliminar supervisor", description = "Eliminar supervisor mediante el id" )
+    @Operation(summary = "Delete supervisor", description = "Delete supervisor by its id" )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
-                    description = "Supervisor eliminado.",
+                    description = "Supervisor deleted.",
                     content = {
                             @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = String.class))
                     }),
             @ApiResponse(responseCode = "400",
-                    description = "Supervisor no eliminado.",
+                    description = "Supervisor not deleted.",
                     content = @Content),
     })
     @DeleteMapping("/{id}")
@@ -113,12 +119,25 @@ public class SupervisorController {
         return ResponseEntity.ok("Supervisor deleted");
     }
 
+    @Operation(summary = "Update an existing Supervisor",
+            description = "This PUT request call updates an existing Supervisor.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Supervisor updated successfully.",
+                    content = {
+                            @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = SupervisorUserDTO.class))
+                    }),
+            @ApiResponse(responseCode = "404",
+                    description = "Supervisor not found.",
+                    content = @Content)
+    })
     @PutMapping("/{id}")
     public ResponseEntity<SupervisorUserDTO> updateSupervisor(@PathVariable Integer id, @RequestBody SupervisorUpdateDTO supervisorUserDTO) {
         return ResponseEntity.ok(supervisorService.updateSupervisor(id, supervisorUserDTO));
     }
 
-    @Operation(summary = "Obtener info extra de supervisor", description = "Obtener la info de supervisor mediante el id de firebase" )
+    @Operation(summary = "Get agent info", description = "Get extra information about the agent by its id" )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Supervisor encontrado.",
