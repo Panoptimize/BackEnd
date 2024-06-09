@@ -44,37 +44,11 @@ public class AgentControllerTests {
 
     @BeforeEach
     public void setUp() throws IOException {
-        firebaseToken = getFirebaseToken();
+        firebaseToken = firebaseTestSetup.getFirebaseToken();
     }
 
-    private String getFirebaseToken() throws IOException {
-        String apiKey = System.getenv("API_KEY_FIREBASE_TEST");
-        String username = "test@example.com";
-        String password = "password123";
-
-        String url = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + apiKey;
-
-        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            HttpPost request = new HttpPost(url);
-            request.addHeader("Content-Type", "application/json");
-
-            JSONObject json = new JSONObject();
-            json.put("email", username);
-            json.put("password", password);
-            json.put("returnSecureToken", true);
-
-            StringEntity entity = new StringEntity(json.toString());
-            request.setEntity(entity);
-
-            try (CloseableHttpResponse response = httpClient.execute(request)) {
-                String responseBody = EntityUtils.toString(response.getEntity());
-                JSONObject responseJson = new JSONObject(responseBody);
-                return responseJson.getString("idToken");
-            }
-        } catch (JSONException e) {
-            throw new IOException("Error parsing JSON response", e);
-        }
-    }
+    FirebaseTestSetup
+    firebaseTestSetup = new FirebaseTestSetup();
 
 
 
@@ -138,8 +112,7 @@ public class AgentControllerTests {
 
     @Test
     public void testGetAgentList() throws Exception {
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/agent/agents-list")
-                        .param("instanceId", "7c78bd60-4a9f-40e5-b461-b7a0dfaad848")
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/agent/agents-list")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + firebaseToken))
                 .andExpect(MockMvcResultMatchers.status().isOk())

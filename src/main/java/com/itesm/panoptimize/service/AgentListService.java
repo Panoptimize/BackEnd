@@ -114,7 +114,6 @@ public class AgentListService {
             List<AgentListDTO> agents = response.userSummaryList().stream()
                     .map(userSummary -> getAgentListDetails(instanceId, userSummary.id()))
                     .collect(Collectors.toList());
-
             return Mono.just(agents);
         } catch (Exception e) {
             return Mono.error(new RuntimeException("Failed to retrieve agents", e));
@@ -132,9 +131,7 @@ public class AgentListService {
 
 
 
-
         AgentListDTO agent = new AgentListDTO(user.id(), user.username(),getAgentCurrentState(instanceId, user.routingProfileId()),getWorkspaceInfo(instanceId, user.routingProfileId()), instanceId, user.identityInfo().email());
-
         return agent;
     }
 
