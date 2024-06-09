@@ -77,7 +77,7 @@ public class SupervisorControllerTest {
     @Test
     public void test_supervisorInfo_valid() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.
-                        get("/supervisor/info")
+                        get("/supervisor/info/")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + firebaseToken))
                 .andExpect(status().isOk())
