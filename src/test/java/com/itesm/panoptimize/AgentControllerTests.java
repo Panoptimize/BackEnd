@@ -4,25 +4,17 @@ import com.itesm.panoptimize.model.User;
 import com.itesm.panoptimize.repository.CompanyRepository;
 import com.itesm.panoptimize.repository.UserRepository;
 import com.itesm.panoptimize.repository.UserTypeRepository;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
-import org.assertj.core.util.VisibleForTesting;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.notNullValue;
@@ -34,7 +26,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 import java.io.IOException;
-import java.lang.reflect.Executable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -117,6 +108,8 @@ public class AgentControllerTests {
     }
 
     /* PostCreateNewAgent -- Only create and delete successfull*/
+    @Transactional
+    @Rollback
     @Test
     public void testPostCreateAgent() throws Exception{
         /*Creating the user for the agent data*/
@@ -143,7 +136,7 @@ public class AgentControllerTests {
                 .header("Authorization", "Bearer " + firebaseToken)
                 .content(combinedMetrics.toString()))
                 .andExpect(status().isOk());
-        userRepository.delete(user);
+
     }
 
 
