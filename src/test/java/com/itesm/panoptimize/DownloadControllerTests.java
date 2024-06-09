@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -46,8 +47,10 @@ class DownloadControllerTests {
         firebaseToken = getFirebaseToken();
     }
 
+    @Value("${api.key}")
+    private String apiKey;
+
     private String getFirebaseToken() throws IOException {
-        String apiKey = "AIzaSyA2efAQdi2Vgtzl7aI080kouPzIiC8C2MA";
         String username = "A01656828@tec.mx";
         String password = "ernesto-561";
 
