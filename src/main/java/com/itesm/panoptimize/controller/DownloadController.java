@@ -4,6 +4,11 @@ import java.io.*;
 
 import com.itesm.panoptimize.dto.download.DownloadDTO;
 import com.itesm.panoptimize.service.DownloadService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.*;
@@ -22,6 +27,18 @@ public class DownloadController {
     }
 
     //Download data from the Dashboard
+    @Operation(summary = "Download data from Dashboard", description = "This GET request call serves the purpose of downloading the kpis metrics from the dashboard." )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Download found.",
+                    content = {
+                            @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = DownloadDTO.class))
+                    }),
+            @ApiResponse(responseCode = "404",
+                    description = "Download not found.",
+                    content = @Content),
+    })
     @PostMapping("/getDownload")
     public ResponseEntity<InputStreamResource> getReport(@RequestBody DownloadDTO downloadDTO){
         try{
@@ -44,7 +61,6 @@ public class DownloadController {
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .body(resource);
         }catch (Exception e) {
-            System.out.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 
