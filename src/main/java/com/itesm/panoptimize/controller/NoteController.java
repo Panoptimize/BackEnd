@@ -1,6 +1,7 @@
 package com.itesm.panoptimize.controller;
 
-import com.itesm.panoptimize.dto.download.DownloadDTO;
+import com.itesm.panoptimize.dto.agent_performance.CreateAgentPerformanceDTO;
+import com.itesm.panoptimize.dto.agent_performance.CreateAgentPerformanceWithNote;
 import com.itesm.panoptimize.dto.note.CreateNoteDTO;
 import com.itesm.panoptimize.dto.note.NoteDTO;
 import com.itesm.panoptimize.dto.note.UpdateNoteDTO;
@@ -8,9 +9,10 @@ import com.itesm.panoptimize.service.NoteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class NoteController {
     private final NoteService noteService;
 
+    @Autowired
     public NoteController(NoteService noteService){
         this.noteService = noteService;
     }
@@ -77,8 +80,8 @@ public class NoteController {
                     content = @Content)
     })
     @PostMapping("/")
-    public ResponseEntity<NoteDTO> createNote(@RequestBody CreateNoteDTO noteDTO){
-        return ResponseEntity.ok(noteService.createNote(noteDTO));
+    public ResponseEntity<NoteDTO> createNote(@Valid @RequestBody CreateAgentPerformanceWithNote createAgentPerformanceWithNote){
+        return ResponseEntity.ok(noteService.createNoteWithAgentPerformance(createAgentPerformanceWithNote));
     }
 
     @Operation(summary = "Update an existing note",
@@ -116,5 +119,10 @@ public class NoteController {
     public ResponseEntity<?> deleteNote(@PathVariable Integer id) {
         noteService.deleteNote(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/agent/{id}")
+    public ResponseEntity<Page<NoteDTO>> getAgentNotes(@PathVariable Integer id, Pageable pageable){
+        return ResponseEntity.ok(noteService.getAgentNotes(pageable, id));
     }
 }

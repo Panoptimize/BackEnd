@@ -1,20 +1,13 @@
 package com.itesm.panoptimize.controller;
 
-
-
 import com.itesm.panoptimize.dto.dashboard.*;
 import com.itesm.panoptimize.dto.note.NoteDTO;
 import com.itesm.panoptimize.model.Notification;
-import com.itesm.panoptimize.dto.dashboard.DashboardDTO;
-import com.itesm.panoptimize.dto.performance.AgentPerformanceDTO;
-
 import com.itesm.panoptimize.service.DashboardService;
-
 import com.itesm.panoptimize.service.CalculateSatisfactionService;
-
-import com.itesm.panoptimize.dto.performance.PerformanceDTO;
 import com.itesm.panoptimize.service.CalculatePerformanceService;
 
+import com.itesm.panoptimize.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -22,14 +15,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.time.Instant;
 import java.util.*;
 
@@ -41,14 +30,17 @@ public class DashboardController {
     private final CalculateSatisfactionService satisfactionService;
     private final DashboardService dashboardService;
     private final CalculatePerformanceService calculatePerformanceService;
+    private final UserService userService;
 
     @Autowired
     public DashboardController(DashboardService dashboardService,
                                CalculateSatisfactionService satisfactionService,
-                               CalculatePerformanceService calculatePerformanceService) {
+                               CalculatePerformanceService calculatePerformanceService,
+                               UserService userService) {
         this.dashboardService = dashboardService;
         this.satisfactionService = satisfactionService;
         this.calculatePerformanceService = calculatePerformanceService;
+        this.userService = userService;
     }
     @Operation(summary = "View the customer satisfaction", description = "This endpoint returns the customer satisfaction levels.")
     @ApiResponses(value = {
@@ -81,9 +73,10 @@ public class DashboardController {
                     content = @Content),
     })
     @PostMapping("/combined-metrics")
-    public ResponseEntity<Map<String, Object>> getCombinedMetrics(@Valid @RequestBody DashboardDTO dashboardDTO) {
-        Map<String, Object> combinedMetrics;
-        combinedMetrics = dashboardService.getDashboarData(dashboardDTO);
+    public ResponseEntity<CombinedMetricsDTO> getCombinedMetrics(@Valid @RequestBody DashboardDTO dashboardDTO, Principal principal) {
+        String firebaseId = principal.getName();
+        String instanceId = userService.getInstanceIdFromFirebaseId(firebaseId);
+        CombinedMetricsDTO combinedMetrics = dashboardService.getDashboardData(instanceId, dashboardDTO);
         return ResponseEntity.ok(combinedMetrics);
     }
 
@@ -125,7 +118,6 @@ public class DashboardController {
         Notification notification = dashboardService.getNotificationById(id);
         return ResponseEntity.ok(notification);
     }
-
     @Operation(summary = "Create a new Notification",
             description = "This POST request call creates a new Notification.")
     @ApiResponses(value = {
@@ -191,30 +183,11 @@ public class DashboardController {
                     description = "Filters not found.",
                     content = @Content),
     })
-    @GetMapping("/filters/{instanceId}")
-    public ResponseEntity<DashboardFiltersDTO> getFilters(@PathVariable String instanceId) {
+    @GetMapping("/filters")
+    public ResponseEntity<DashboardFiltersDTO> getFilters(Principal principal) {
+        String firebaseId = principal.getName();
+        String instanceId = userService.getInstanceIdFromFirebaseId(firebaseId);
         DashboardFiltersDTO filters = dashboardService.getFilters(instanceId);
-
         return ResponseEntity.ok(filters);
     }
-
-    //Performance
-    @Operation(summary = "Download the dashboard data", description = "Download the dashboard data by time frame, agent and workspace number")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Calculated Performance data succesfully",
-                    content = {
-                            @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = PerformanceDTO.class))
-                    }),
-            @ApiResponse(responseCode = "404",
-                    description = "Data not found or calculated incorrectly.",
-                    content = @Content),
-    })
-    @PostMapping("/performance")
-    public List<AgentPerformanceDTO> getPerformance(@RequestBody PerformanceDTO performanceDTO) {
-        return calculatePerformanceService.getPerformances(performanceDTO.getStartDate(), performanceDTO.getEndDate(), performanceDTO.getInstanceId(), performanceDTO.getRoutingProfileIds());
-    }
-
-
 }

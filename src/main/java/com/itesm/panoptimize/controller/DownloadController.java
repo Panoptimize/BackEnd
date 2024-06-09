@@ -1,13 +1,7 @@
 package com.itesm.panoptimize.controller;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.Date;
+import java.io.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.itesm.panoptimize.dto.casetemplate.CaseTemplateDTO;
 import com.itesm.panoptimize.dto.download.DownloadDTO;
 import com.itesm.panoptimize.service.DownloadService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,27 +40,28 @@ public class DownloadController {
                     content = @Content),
     })
     @PostMapping("/getDownload")
-    public ResponseEntity<InputStreamResource> getReport(@RequestBody DownloadDTO downloadDTO) throws IOException {
+    public ResponseEntity<InputStreamResource> getReport(@RequestBody DownloadDTO downloadDTO, @RequestParam String instanceID){
+        try{
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-        String homedir = System.getProperty("user.home");
-        Date date = new Date();
+            downloadService.getFinalReport(byteArrayOutputStream, instanceID, downloadDTO);
 
-        String file = "DataReport_" + date.getTime() + ".xlsx";
-        String filePath = Paths.get(homedir, "Downloads", file).toString();
+            byte[] byteArray = byteArrayOutputStream.toByteArray();
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArray);
+            InputStreamResource resource = new InputStreamResource(byteArrayInputStream);
 
-        downloadService.getFinalReport(filePath, downloadDTO);
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Content-Disposition", "attachment; filename=DataReport.xlsx");
 
-        File fileToDownload = new File(file);
-        InputStreamResource resource = new InputStreamResource(new FileInputStream(fileToDownload));
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .contentLength(byteArray.length)
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(resource);
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Disposition", String.format("attachment; filename=\"%s\"", fileToDownload.getName()));
-
-        return ResponseEntity.ok()
-                .headers(headers)
-                .contentLength(fileToDownload.length())
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(resource);
     }
 
 

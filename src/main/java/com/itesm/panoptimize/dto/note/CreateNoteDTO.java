@@ -12,8 +12,8 @@ public class CreateNoteDTO {
     private String description;
     @NotNull(message = "The priority cannot be null")
     private Priority priority;
-    private Boolean solved = true;
-    private Integer agentPerformanceId;
+    @NotNull
+    private Boolean solved;
 
     public String getName() {
         return name;
@@ -45,13 +45,5 @@ public class CreateNoteDTO {
 
     public void setSolved(Boolean solved) {
         this.solved = solved;
-    }
-
-    public Integer getAgentPerformanceId() {
-        return agentPerformanceId;
-    }
-
-    public void setAgentPerformanceId(Integer agentPerformanceId) {
-        this.agentPerformanceId = agentPerformanceId;
     }
 }

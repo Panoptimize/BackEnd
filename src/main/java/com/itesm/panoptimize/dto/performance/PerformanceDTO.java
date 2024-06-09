@@ -13,7 +13,6 @@ public class PerformanceDTO {
     @NotNull(message = "End date is required")
     private Date endDate;
 
-    @NotNull(message = "Instance ID is required")
     private String instanceId;
 
     @NotNull(message = "Routing profiles IDs are required")
@@ -52,13 +51,4 @@ public class PerformanceDTO {
         this.routingProfiles = routingProfiles;
     }
 
-    @Override
-    public String toString() {
-        return "PerformanceDTO{" +
-                "startDate=" + startDate +
-                ", endDate=" + endDate +
-                ", instanceId='" + instanceId + '\'' +
-                ", routingProfiles=" + routingProfiles +
-                '}';
-    }
 }

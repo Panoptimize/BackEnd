@@ -1,7 +1,6 @@
 package com.itesm.panoptimize.controller;
 import com.itesm.panoptimize.dto.note.NoteDTO;
 import com.itesm.panoptimize.dto.supervisor.SupervisorCreateDTO;
-import com.itesm.panoptimize.dto.supervisor.SupervisorDTO;
 import com.itesm.panoptimize.dto.supervisor.SupervisorUpdateDTO;
 import com.itesm.panoptimize.dto.supervisor.SupervisorUserDTO;
 import com.itesm.panoptimize.service.UserService;
@@ -34,7 +33,7 @@ public class SupervisorController {
                     description = "Supervisors found.",
                     content = {
                             @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = SupervisorDTO.class))
+                                    schema = @Schema(implementation = SupervisorUserDTO.class))
                     }),
             @ApiResponse(responseCode = "404",
                     description = "Supervisors not found.",
@@ -93,7 +92,13 @@ public class SupervisorController {
     })
     @GetMapping("/connect/{id}")
     public ResponseEntity<SupervisorUserDTO> getSupervisorByConnectId(@PathVariable String id) {
-        return ResponseEntity.ok(supervisorService.getSupervisorWithConnectId(id));
+        SupervisorUserDTO supervisor = userService.getSupervisorWithConnectId(id);
+
+        if (supervisor == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(supervisor);
     }
 
     @Operation(summary = "Delete supervisor", description = "Delete supervisor by its id" )

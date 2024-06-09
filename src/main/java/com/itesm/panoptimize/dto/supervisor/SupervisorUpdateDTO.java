@@ -1,12 +1,5 @@
 package com.itesm.panoptimize.dto.supervisor;
 
-import com.itesm.panoptimize.model.Company;
-import com.itesm.panoptimize.model.UserType;
-import jakarta.persistence.*;
-
-import java.util.List;
-import java.util.Set;
-
 public class SupervisorUpdateDTO {
     private Integer id;
 
@@ -18,15 +11,9 @@ public class SupervisorUpdateDTO {
 
     private String fullName;
 
-
-
     private String routingProfileId;
 
-    private Boolean canSwitch;
-
-    private Company company;
-
-    private UserType userType;
+    private Integer companyId;
 
     public Integer getId() {
         return id;
@@ -68,8 +55,6 @@ public class SupervisorUpdateDTO {
         this.fullName = fullName;
     }
 
-
-
     public String getRoutingProfileId() {
         return routingProfileId;
     }
@@ -78,27 +63,11 @@ public class SupervisorUpdateDTO {
         this.routingProfileId = routingProfileId;
     }
 
-    public Boolean isCanSwitch() {
-        return canSwitch;
+    public Integer getCompanyId() {
+        return companyId;
     }
 
-    public void setCanSwitch(Boolean canSwitch) {
-        this.canSwitch = canSwitch;
-    }
-
-    public Company getCompany() {
-        return company;
-    }
-
-    public void setCompany(Company company) {
-        this.company = company;
-    }
-
-    public UserType getUserType() {
-        return userType;
-    }
-
-    public void setUserType(UserType userType) {
-        this.userType = userType;
+    public void setCompanyId(Integer companyId) {
+        this.companyId = companyId;
     }
 }

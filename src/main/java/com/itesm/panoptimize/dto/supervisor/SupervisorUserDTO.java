@@ -14,10 +14,8 @@ public class SupervisorUserDTO {
     private String email;
     @NotNull(message = "FullName is required")
     private String fullName;
-
     @NotNull(message = "RoutingProfileId is required")
     private String routingProfileId;
-    private Boolean canSwitch;
 
     @NotNull(message = "CompanyId is required")
     private Integer companyId;
@@ -62,20 +60,11 @@ public class SupervisorUserDTO {
         this.fullName = fullName;
     }
 
-
     public String getRoutingProfileId() {
         return routingProfileId;
     }
 
     public void setRoutingProfileId(String routingProfileId) {
         this.routingProfileId = routingProfileId;
-    }
-
-    public Boolean isCanSwitch() {
-        return canSwitch;
-    }
-
-    public void setCanSwitch(Boolean canSwitch) {
-        this.canSwitch = canSwitch;
     }
 }

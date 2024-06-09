@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,6 +25,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import java.lang.String;
+import java.security.Principal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -61,10 +64,8 @@ public class AgentController {
     })
     @GetMapping("/")
     public ResponseEntity<Page<AgentUserDTO>> getAllAgents(Pageable pageable) {
-        return ResponseEntity.ok(userService.getallAgents(pageable));
+        return ResponseEntity.ok(userService.getAllAgents(pageable));
     }
-
-
     /*GetIdAgent -- Fully Tested - Only finish Invalid Input*/
     @Operation(summary = "Get an agent", description = "This GET request call serves the purpose of returning an Agent by its id." )
     @ApiResponses(value = {
@@ -98,7 +99,13 @@ public class AgentController {
     })
     @GetMapping("/connect/{id}")
     public ResponseEntity<AgentUserDTO> getAgentByConnectId(@PathVariable String id) {
-        return ResponseEntity.ok(userService.getAgentWithConnectId(id));
+        AgentUserDTO agentUserDTO = userService.getAgentWithConnectId(id);
+
+        if (agentUserDTO == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(agentUserDTO);
     }
 
     @Operation(summary = "Create a new agent",
@@ -111,7 +118,7 @@ public class AgentController {
                     content = @Content)
     })
     @PostMapping("/")
-    public ResponseEntity<AgentUserDTO> createAgent(@RequestBody AgentCreateDTO agentUserDTO) {
+    public ResponseEntity<AgentUserDTO> createAgent(@Valid @RequestBody AgentCreateDTO agentUserDTO) {
         return ResponseEntity.ok(userService.createAgent(agentUserDTO));
     }
 
@@ -172,73 +179,6 @@ public class AgentController {
                     }),
             @ApiResponse(responseCode = "404",
                     description = "Agent not found.",
-                    content = @Content),
-    })
-    @GetMapping("/agent/performance/{id}")
-    public ResponseEntity<AgentPerformance> getAgentPerformance(@PathVariable("id") Integer id){
-        AgentPerformance agentPerformance = userService.getAgentPerformance(id);
-        return new ResponseEntity<>(agentPerformance, HttpStatus.OK);
-    }
-
-    @Operation(summary = "Create a new performance",
-            description = "This POST request call creates a new performance.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201",
-                    description = "Performance created successfully."),
-            @ApiResponse(responseCode = "400",
-                    description = "Bad request.",
-                    content = @Content)
-    })
-    @PostMapping("/agent/performance/new")
-    public ResponseEntity<String> addAgentPerformance(){
-        AgentPerformance agentPerformance = new AgentPerformance();
-        userService.addAgentPerformance(agentPerformance);
-        return new ResponseEntity<>("Agent performance added", HttpStatus.OK);
-    }
-
-    @Operation(summary = "Delete performance by ID",
-            description = "This DELETE request call deletes performance by its ID.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204",
-                    description = "Performance deleted successfully."),
-            @ApiResponse(responseCode = "404",
-                    description = "Performance not found.",
-                    content = @Content)
-    })
-    @DeleteMapping("/agent/performance/delete/{id}")
-    public ResponseEntity<String> deleteAgentPerformance(@PathVariable("id") Integer id){
-        userService.deleteAgentPerformance(id);
-        return new ResponseEntity<>("Agent performance deleted", HttpStatus.OK);
-    }
-
-    @Operation(summary = "Update an existing performance",
-            description = "This PUT request call updates an existing performance.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Performance updated successfully.",
-                    content = {
-                            @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = NoteDTO.class))
-                    }),
-            @ApiResponse(responseCode = "404",
-                    description = "Performance not found.",
-                    content = @Content)
-    })
-    @PutMapping("/agent/performance/update/{id}")
-    public ResponseEntity<AgentPerformance> updateNotification(@PathVariable Integer id, @RequestBody AgentPerformance agentPerformance) {
-        return ResponseEntity.ok(userService.updateAgentPerformance(id, agentPerformance));
-    }
-
-    @Operation(summary = "Get Feedback ", description = "This GET request call serves the purpose of returning feedback by id." )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Feedback found.",
-                    content = {
-                            @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = NoteDTO.class))
-                    }),
-            @ApiResponse(responseCode = "404",
-                    description = "Feedback not found.",
                     content = @Content),
     })
     @GetMapping("/agent/feedback/{id}")
@@ -314,8 +254,6 @@ public class AgentController {
     public ResponseEntity<DashboardFiltersDTO> getFilters(@PathVariable String instanceId) {
         DashboardFiltersDTO filters = agentListService.getAgentList(instanceId);
 
-        System.out.println(instanceId);
-
         return ResponseEntity.ok(filters);
     }
 
@@ -333,17 +271,12 @@ public class AgentController {
     })
     @GetMapping("/detail/{instanceId}/{agentId}")
     public ResponseEntity<AgentDetailsDTO> getAgentDetails(@PathVariable String agentId,@PathVariable String instanceId) {
-        System.out.println(agentId);
-        System.out.println(instanceId);
         AgentDetailsDTO agent = agentListService.getAgentDetails(agentId, instanceId);
-
-        System.out.println(agentId);
 
         return ResponseEntity.ok(agent);
     }
 
     private final AgentListService agentsService;
-
     @Operation(summary = "Get list of agents", description = "This endpoint returns a list of agents.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -356,8 +289,11 @@ public class AgentController {
                     description = "List not found.",
                     content = @Content),
     })
-    @PostMapping("/agentslist")
-    public Mono<AgentResponseDTO> getAllAgents(@RequestParam String instanceId) {
+
+    @GetMapping("/agents-list")
+    public Mono<AgentResponseDTO> getAllAgents(Principal principal) {
+        String firebaseId = principal.getName();
+        String instanceId = userService.getInstanceIdFromFirebaseId(firebaseId);
         return agentsService.getAllAgents(instanceId)
                 .map(AgentResponseDTO::new);
     }
