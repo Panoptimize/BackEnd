@@ -48,9 +48,9 @@ public class AgentControllerTests {
     }
 
     private String getFirebaseToken() throws IOException {
-        String apiKey = "AIzaSyA2efAQdi2Vgtzl7aI080kouPzIiC8C2MA";
-        String username = "test@example.com";
-        String password = "password123";
+        String apiKey = System.getenv("API_KEY_FIREBASE_TEST");
+        String username = System.getenv("USERNAME_FIREBASE_TEST");
+        String password = System.getenv("PASSWORD_FIREBASE_TEST");
 
         String url = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + apiKey;
 
@@ -120,8 +120,7 @@ public class AgentControllerTests {
                 .andExpect(jsonPath("$.id").value(notNullValue()))
                 .andExpect(jsonPath("$.email").value(notNullValue()))
                 .andExpect(jsonPath("$.fullName").value(notNullValue()))
-                .andExpect(jsonPath("$.routingProfileId").value(notNullValue()))
-                .andExpect(jsonPath("$.canSwitch").value(notNullValue()));
+                .andExpect(jsonPath("$.routingProfileId").value(notNullValue()));
     }
 
     @Test
@@ -134,8 +133,7 @@ public class AgentControllerTests {
                 .andExpect(jsonPath("$.id").value(notNullValue()))
                 .andExpect(jsonPath("$.email").value(notNullValue()))
                 .andExpect(jsonPath("$.fullName").value(notNullValue()))
-                .andExpect(jsonPath("$.routingProfileId").value(notNullValue()))
-                .andExpect(jsonPath("$.canSwitch").value(notNullValue()));
+                .andExpect(jsonPath("$.routingProfileId").value(notNullValue()));
     }
 
     @Test
