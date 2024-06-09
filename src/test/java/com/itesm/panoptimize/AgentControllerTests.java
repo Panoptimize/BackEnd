@@ -116,7 +116,7 @@ public class AgentControllerTests {
                 .get("/agent/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + firebaseToken)
-            ).andExpect(MockMvcResultMatchers.status().isOk())
+        ).andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(jsonPath("$.connectId").value(notNullValue()))
                 .andExpect(jsonPath("$.id").value(notNullValue()))
                 .andExpect(jsonPath("$.email").value(notNullValue()))
