@@ -1,8 +1,8 @@
 package com.itesm.panoptimize;
 
-import com.itesm.panoptimize.repository.CompanyRepository;
-import com.itesm.panoptimize.repository.UserRepository;
-import com.itesm.panoptimize.repository.UserTypeRepository;
+//import com.itesm.panoptimize.repository.CompanyRepository;
+//import com.itesm.panoptimize.repository.UserRepository;
+//import com.itesm.panoptimize.repository.UserTypeRepository;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -52,12 +52,12 @@ public class AgentControllerTests {
 
 
 
-    @Autowired
+   /* @Autowired
     private UserRepository userRepository;
     @Autowired
     private UserTypeRepository userTypeRepository;
     @Autowired
-    private CompanyRepository companyRepository;
+    private CompanyRepository companyRepository; */
 
     String expectedResponsePattern = "Feedback enviado exitosamente\\s*Fecha: .*";
     @Test
