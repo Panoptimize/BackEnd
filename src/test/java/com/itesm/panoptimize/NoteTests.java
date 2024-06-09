@@ -251,6 +251,8 @@ public class NoteTests {
     }
 
     @Test
+    @Transactional
+    @Rollback
     public void testGetAgentPerformanceByNoteId() throws Exception {
 
         String createRequestBody = """
