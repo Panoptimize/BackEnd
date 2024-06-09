@@ -155,6 +155,12 @@ public class AgentControllerTests {
                 .andExpect(jsonPath("$.agents").isNotEmpty());
     }
 
-
+    @Test
+    public void testGetAgentListNonExistentId() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/agent/agents-list")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + firebaseToken))
+                .andExpect(MockMvcResultMatchers.status().isInternalServerError());
+    }
 
 }
