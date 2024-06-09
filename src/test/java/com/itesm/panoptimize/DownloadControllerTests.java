@@ -41,46 +41,14 @@ class DownloadControllerTests {
 
     private String firebaseToken;
 
+    FirebaseTestSetup firebaseTestSetup = new FirebaseTestSetup();
+
     @BeforeEach
     public void setUp() throws IOException {
-        firebaseToken = getFirebaseToken();
+        firebaseToken = firebaseTestSetup.getFirebaseToken();
     }
 
-    @Value("${api.key}")
-    private String apiKey;
-
-    @Value("${instance.id}")
-    private String instanceId;
-
-    private String getFirebaseToken() throws IOException {
-        String username = "A01656828@tec.mx";
-        String password = "ernesto-561";
-
-        String url = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + apiKey;
-
-        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            HttpPost request = new HttpPost(url);
-            request.addHeader("Content-Type", "application/json");
-
-            JSONObject json = new JSONObject();
-            json.put("email", username);
-            json.put("password", password);
-            json.put("returnSecureToken", true);
-
-            StringEntity entity = new StringEntity(json.toString());
-            request.setEntity(entity);
-
-            try (CloseableHttpResponse response = httpClient.execute(request)) {
-                String responseBody = EntityUtils.toString(response.getEntity());
-                JSONObject responseJson = new JSONObject(responseBody);
-                return responseJson.getString("idToken");
-            }
-        } catch (JSONException e) {
-            throw new IOException("Error parsing JSON response", e);
-        }
-    }
-
-
+    String instanceId = System.getenv("INSTANCE_ID");
 
     @Autowired
     private UserRepository userRepository;
@@ -92,6 +60,7 @@ class DownloadControllerTests {
 
     @Test
     public void testGetDownload() throws Exception {
+
         String jsonContent = String.format(
                 "{\"instanceId\":\"%s\",\"startDate\":\"2024-05-01\",\"endDate\":\"2024-05-31\",\"routingProfiles\":[\"4896ae34-a93e-41bc-8231-bf189e7628b1\"],\"queues\":[],\"agents\":[]}",
                 instanceId);
