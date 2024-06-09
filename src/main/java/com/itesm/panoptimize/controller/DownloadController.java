@@ -22,10 +22,12 @@ public class DownloadController {
     }
 
     //Download data from the Dashboard
-    @PostMapping("/getDownload/{instanceID}")
-    public ResponseEntity<InputStreamResource> getReport(@RequestBody DownloadDTO downloadDTO, @PathVariable String instanceID){
+    @PostMapping("/getDownload")
+    public ResponseEntity<InputStreamResource> getReport(@RequestBody DownloadDTO downloadDTO){
         try{
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+            String instanceID = downloadDTO.getInstanceId();
 
             downloadService.getFinalReport(byteArrayOutputStream, instanceID, downloadDTO);
 

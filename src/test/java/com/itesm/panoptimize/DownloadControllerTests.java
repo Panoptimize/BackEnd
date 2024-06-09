@@ -86,12 +86,12 @@ class DownloadControllerTests {
 
 
     @Test
-    public void testGetDownload() throws Exception{
+    public void testGetDownload() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
-                        .post("/download/getDownload/7c78bd60-4a9f-40e5-b461-b7a0dfaad848")
+                        .post("/download/getDownload")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + firebaseToken)
-                        .content("{\"startDate\":\"2024-05-01\",\"endDate\":\"2024-05-31\",\"routingProfiles\":[\"4896ae34-a93e-41bc-8231-bf189e7628b1\"],\"queues\":[],\"agents\":[]}"))
+                        .content("{\"instanceId\":\"7c78bd60-4a9f-40e5-b461-b7a0dfaad848\",\"startDate\":\"2024-05-01\",\"endDate\":\"2024-05-31\",\"routingProfiles\":[\"4896ae34-a93e-41bc-8231-bf189e7628b1\"],\"queues\":[],\"agents\":[]}"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_OCTET_STREAM));
     }
@@ -99,10 +99,10 @@ class DownloadControllerTests {
     @Test
     public void testGetDownloadInternalServerError() throws Exception{
         mockMvc.perform(MockMvcRequestBuilders
-                        .post("/download/getDownload/7c78bd60-4a9f-40e5-b461-b7a0dfaad848")
+                        .post("/download/getDownload")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + firebaseToken)
-                        .content("{\"startDate\":\"\",\"endDate\":\"2024-05-31\",\"routingProfiles\":[],\"queues\":[],\"agents\":[]}"))
+                        .content("{\"instanceId\":\"7c78bd60-4a9f-40e5-b461-b7a0dfaad848\",\"startDate\":\"\",\"endDate\":\"2024-05-31\",\"routingProfiles\":[],\"queues\":[],\"agents\":[]}"))
                 .andExpect(MockMvcResultMatchers.status().isInternalServerError());
     }
 
