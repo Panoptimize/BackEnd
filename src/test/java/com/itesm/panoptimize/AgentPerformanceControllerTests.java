@@ -1,5 +1,6 @@
 package com.itesm.panoptimize;
 
+import com.itesm.panoptimize.repository.AgentPerformanceRepository;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -69,12 +70,14 @@ public class AgentPerformanceControllerTests {
         }
     }
 
+    @Autowired
+    private AgentPerformanceRepository agentPerformanceRepository;
 
 
     @Test
     public void testGetAgentMetricsToday()throws Exception{
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/agent/1")
+                        .get("/agent-performance/details/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + firebaseToken)
                 ).andExpect(MockMvcResultMatchers.status().isOk())
