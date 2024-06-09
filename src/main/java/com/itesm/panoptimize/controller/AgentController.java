@@ -87,6 +87,7 @@ public class AgentController {
         return ResponseEntity.ok(userService.getAgentWithConnectId(id));
     }
 
+    /*PostCreateAgent -- Fully Tested -- Finish Invalid*/
     @PostMapping("/")
     public ResponseEntity<AgentUserDTO> createAgent(@RequestBody AgentCreateDTO agentUserDTO) {
         return ResponseEntity.ok(userService.createAgent(agentUserDTO));
