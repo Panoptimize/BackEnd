@@ -28,10 +28,6 @@ public class UserTypeService {
         return modelMapper.map(userType, UserTypeDTO.class);
     }
 
-    private UserType convertToEntity(UserTypeUpdateDTO userTypeUpdateDTO) {
-        return modelMapper.map(userTypeUpdateDTO, UserType.class);
-    }
-
     private UserType convertToEntity(UserTypeCreateDTO userTypeCreateDTO) {
         return modelMapper.map(userTypeCreateDTO, UserType.class);
     }
@@ -71,6 +67,9 @@ public class UserTypeService {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User type not found", e);
         }
+    }
 
+    public UserTypeDTO getUserTypeBySecurityProfileId(String id) {
+        return userTypeRepository.securityProfileId(id).map(this::convertToDTO).orElse(null);
     }
 }

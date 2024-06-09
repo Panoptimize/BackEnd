@@ -9,10 +9,10 @@ import java.util.Set;
 public class RoutingProfile {
     @Id
     @Column(name = "routing_profile_id", length = 36)
-    private String routingProfileId;
+    private java.lang.String routingProfileId;
 
     @Column(name = "name", nullable = false, length = 50)
-    private String name;
+    private java.lang.String name;
 
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false, foreignKey = @ForeignKey(name = "company_has_routing_profiles"))
@@ -37,19 +37,19 @@ public class RoutingProfile {
         this.queues = queues;
     }
 
-    public String getRoutingProfileId() {
+    public java.lang.String getRoutingProfileId() {
         return routingProfileId;
     }
 
-    public void setRoutingProfileId(String routingProfileId) {
+    public void setRoutingProfileId(java.lang.String routingProfileId) {
         this.routingProfileId = routingProfileId;
     }
 
-    public String getName() {
+    public java.lang.String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(java.lang.String name) {
         this.name = name;
     }
 
@@ -57,8 +57,8 @@ public class RoutingProfile {
         return company;
     }
 
-    public void setCompany(Company company) {
-        this.company = company;
+    public void setCompany(Company string) {
+        this.company = string;
     }
 
     public Set<User> getUsers() {
