@@ -30,7 +30,7 @@ public class SupervisorControllerTest {
     }
 
     @Test
-    public void test_supervisorInfo() throws Exception {
+    public void testSupervisorInfoValid() throws Exception {
         mockMvc.perform(get("/supervisor/info")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + firebaseToken))
@@ -44,7 +44,7 @@ public class SupervisorControllerTest {
     }
 
     @Test
-    public void test_supervisorInfo_invalid() throws Exception {
+    public void testSupervisorInfoInvalid() throws Exception {
         String invalidToken = "Invalid Token";
 
         mockMvc.perform(get("/supervisor/info")
