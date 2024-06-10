@@ -184,17 +184,15 @@ public class DashboardService {
         List<Channel> channels = Arrays.asList(Channel.VOICE, Channel.CHAT);
         List<String> queueIds = getAllQueueIds(instanceId);
         Filters filters = Filters.builder()
-                //.routingProfiles(Collections.singletonList(routingProfile))
                 .queues(queueIds)
                 .channels(channels)
-                //.routingStepExpressions(Collections.emptyList())
                 .build();
 
         GetCurrentMetricDataRequest request = GetCurrentMetricDataRequest.builder()
                 .instanceId(instanceId)
                 .filters(filters)
                 .currentMetrics(CurrentMetric.builder()
-                        .name(CurrentMetricName.AGENTS_ON_CONTACT)
+                        .name(CurrentMetricName.AGENTS_ONLINE)
                         .unit(Unit.COUNT)
                         .build())
                 .groupings(Grouping.CHANNEL)
