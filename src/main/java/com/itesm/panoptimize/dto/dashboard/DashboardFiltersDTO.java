@@ -1,10 +1,11 @@
 package com.itesm.panoptimize.dto.dashboard;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 public class DashboardFiltersDTO {
-    private LocalDate instanceCreationDate;
+    private Date instanceCreationDate;
     private List<AWSObjDTO> workspaces;
 
     public List<AWSObjDTO> getWorkspaces() {
@@ -15,11 +16,11 @@ public class DashboardFiltersDTO {
         this.workspaces = workspaces;
     }
 
-    public LocalDate getInstanceCreationDate() {
+    public Date getInstanceCreationDate() {
         return instanceCreationDate;
     }
 
-    public void setInstanceCreationDate(LocalDate instanceCreationDate) {
+    public void setInstanceCreationDate(Date instanceCreationDate) {
         this.instanceCreationDate = instanceCreationDate;
     }
 }

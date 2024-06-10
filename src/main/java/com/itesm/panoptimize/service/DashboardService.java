@@ -303,7 +303,7 @@ public class DashboardService {
 
     public DashboardFiltersDTO getFilters(String instanceId) {
         // Get instance creation date
-        Instant getCreationTime = connectClient.describeInstance(DescribeInstanceRequest.builder()
+        Instant createdTime = connectClient.describeInstance(DescribeInstanceRequest.builder()
                 .instanceId(instanceId)
                 .build()).instance().createdTime();
 
@@ -321,8 +321,7 @@ public class DashboardService {
             routingProfilesDTO.add(routingProfileDTO);
         }
 
-        // Convert instant to LocalDate
-        LocalDate instanceCreationDate = getCreationTime.atZone(ZoneId.systemDefault()).toLocalDate();
+        Date instanceCreationDate = Date.from(createdTime);
 
         DashboardFiltersDTO dashboardFiltersDTO = new DashboardFiltersDTO();
         dashboardFiltersDTO.setWorkspaces(routingProfilesDTO);
