@@ -13,7 +13,7 @@ ARG FIREBASE_SERVICE_ACCOUNT
 COPY ${FIREBASE_SERVICE_ACCOUNT} /app/firebase-adminsdk.json
 
 # Compilar el proyecto y generar el archivo jar
-RUN mvn package -DskipTests
+RUN mvn package
 
 # Etapa de construcción de la imagen
 FROM openjdk:17
