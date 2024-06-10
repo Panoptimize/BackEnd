@@ -8,15 +8,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.io.IOException;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.IOException;
+
 @SpringBootTest
 @AutoConfigureMockMvc
-public class StatusTests {
+public class SupervisorControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -30,26 +30,27 @@ public class StatusTests {
     }
 
     @Test
-    public void test_status_valid() throws Exception {
-        mockMvc.perform(get("/status/")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + firebaseToken))
+    public void testSupervisorInfoValid() throws Exception {
+        mockMvc.perform(get("/supervisor/info")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "Bearer " + firebaseToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].metricName").value("AGENTS"))
-                .andExpect(jsonPath("$[1].metricName").value("AGENTS_ONLINE"))
-                .andExpect(jsonPath("$[2].metricName").value("AGENTS_AVAILABLE"))
-                .andExpect(jsonPath("$[3].metricName").value("AGENTS_OFFLINE"))
-        ;
+                .andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.connectId").isString())
+                .andExpect(jsonPath("$.firebaseId").isString())
+                .andExpect(jsonPath("$.email").isString())
+                .andExpect(jsonPath("$.fullName").isString())
+                .andExpect(jsonPath("$.routingProfileId").isString());
     }
 
     @Test
-    public void test_status_invalid() throws Exception {
-        mockMvc.perform(get("/status?instanceId=7c78bd60-b461-b7a0dfaad848")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + firebaseToken))
-                .andExpect(status().isInternalServerError()); // For 500 errors
-                //.andExpect(status().isBadRequest()); For 400 errors
+    public void testSupervisorInfoInvalid() throws Exception {
+        String invalidToken = "Invalid Token";
+
+        mockMvc.perform(get("/supervisor/info")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + invalidToken))
+                .andExpect(status().isUnauthorized());
     }
-
-
 }
+

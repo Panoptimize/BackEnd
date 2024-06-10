@@ -114,7 +114,6 @@ public class AgentListService {
             List<AgentListDTO> agents = response.userSummaryList().stream()
                     .map(userSummary -> getAgentListDetails(instanceId, userSummary.id()))
                     .collect(Collectors.toList());
-
             return Mono.just(agents);
         } catch (Exception e) {
             return Mono.error(new RuntimeException("Failed to retrieve agents", e));
@@ -130,14 +129,9 @@ public class AgentListService {
         DescribeUserResponse describeResponse = connectClient.describeUser(describeRequest);
         User user = describeResponse.user();
 
-        System.out.println("User Details:");
-        System.out.println(user.toString());
-
-
 
 
         AgentListDTO agent = new AgentListDTO(user.id(), user.username(),getAgentCurrentState(instanceId, user.routingProfileId()),getWorkspaceInfo(instanceId, user.routingProfileId()), instanceId, user.identityInfo().email());
-
         return agent;
     }
 
@@ -153,9 +147,6 @@ public class AgentListService {
 
         DescribeRoutingProfileResponse routingProfileResponse = connectClient.describeRoutingProfile(routingProfileRequest);
         if (routingProfileResponse.routingProfile() != null) {
-            System.out.println("Routing Profile Details:");
-            System.out.println(routingProfileResponse.routingProfile().toString());
-
             return routingProfileResponse.routingProfile().name();
         } else {
             return "Unknown routing profile";
@@ -185,13 +176,6 @@ public class AgentListService {
 
         try {
             GetCurrentMetricDataResponse metricDataResponse = connectClient.getCurrentMetricData(metricDataRequest);
-
-            // Imprime los detalles de las métricas actuales del agente
-            System.out.println("Metric Data Request:");
-            System.out.println(metricDataRequest);
-            System.out.println("Agent Metric Data:");
-            System.out.println(metricDataResponse);
-
 
 
             if (metricDataResponse.metricResults().isEmpty()) {
