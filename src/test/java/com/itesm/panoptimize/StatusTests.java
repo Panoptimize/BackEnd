@@ -31,7 +31,7 @@ public class StatusTests {
 
     @Test
     public void test_status_valid() throws Exception {
-        mockMvc.perform(get("/status?instanceId=7c78bd60-4a9f-40e5-b461-b7a0dfaad848")
+        mockMvc.perform(get("/status/")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + firebaseToken))
                 .andExpect(status().isOk())
