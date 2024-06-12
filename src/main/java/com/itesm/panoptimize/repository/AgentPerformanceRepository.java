@@ -26,10 +26,10 @@ public interface AgentPerformanceRepository extends JpaRepository<AgentPerforman
 
     /* Idealmente con info de este query: AVG(ap.avgAfterContactWorkTime) as avgAfterContactWorkTime, AVG(ap.avgHandleTime) as avgHandleTime,  AVG(ap.avgAbandonTime) as avgAbandonTime, AVG(ap.avgHoldTime) as avgHoldTime
     ap.id, ap.createdAt,  AVG(ap.avgAfterContactWorkTime) as avgAfterContactWorkTime, AVG(ap.avgHandleTime) as avgHandleTime,   AVG(ap.avgAbandonTime) as avgAbandonTime, AVG(ap.avgHoldTime) as avgHoldTime, ap.agent.id*/
-    @Query("SELECT AVG(ap.avgAfterContactWorkTime) avgAfterContactWorkTime, \n" +
-            "\tAVG(ap.avgHandleTime) avgHandleTime, \n" +
-            "    AVG(ap.avgAbandonTime) avgAbandonTime, \n" +
-            "    AVG(ap.avgHoldTime) avgHoldTime  " +
+    @Query("SELECT ROUND(AVG(ap.avgAfterContactWorkTime),2) avgAfterContactWorkTime, \n" +
+            "\tROUND(AVG(ap.avgHandleTime),2) avgHandleTime, \n" +
+            "    ROUND(AVG(ap.avgAbandonTime),2) avgAbandonTime, \n" +
+            "    ROUND(AVG(ap.avgHoldTime),2) avgHoldTime  " +
             "FROM AgentPerformance ap WHERE DATE(ap.createdAt) = DATE(NOW()) " +
             "AND ap.agent.id =:agentId")
     AgentPerformanceQueryDTO findAgentMetricsByAgentId(@Param("agentId") Integer agentId);
