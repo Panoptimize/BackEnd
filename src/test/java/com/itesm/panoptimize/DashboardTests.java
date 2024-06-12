@@ -47,7 +47,15 @@ public class DashboardTests {
                 .andExpect(jsonPath("$.performanceData").hasJsonPath())
                 .andExpect(jsonPath("$.voice").hasJsonPath())
                 .andExpect(jsonPath("$.chat").hasJsonPath());
+    }
 
-        ;
+    @Test
+    public void filtersTest () throws Exception {
+        mockMvc.perform(get("/dashboard/filters")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + firebaseToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.workspaces").hasJsonPath())
+                .andExpect(jsonPath("$.instanceCreationDate").hasJsonPath());
     }
 }
