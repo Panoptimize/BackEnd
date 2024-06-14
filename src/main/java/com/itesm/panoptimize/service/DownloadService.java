@@ -175,7 +175,7 @@ public class DownloadService {
         combinedMetrics.put("agentScheduleAdherence", allData.getAgentScheduleAdherence());
         combinedMetrics.put("avgSpeedOfAnswer", allData.getAvgSpeedOfAnswer());
 
-        Mono<Map<String, Integer>> valuesMono = apiClient.getChannelResults(instanceId).map(metricService::extractValues);
+        Mono<Map<String, Integer>> valuesMono = apiClient.getChannelResults(instanceId, dashboardDTO).map(metricService::extractValues);
         valuesMono.subscribe(combinedMetrics::putAll);
 
         CustomerSatisfactionDTO customerSatisfactionData = getCustomerSatisfactionData(dashboardDTO);

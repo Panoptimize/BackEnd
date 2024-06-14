@@ -177,26 +177,26 @@ public class DashboardService {
     }
 
     // Get the current number of agents on each channel
-    public Mono<MetricResultsDTO> getChannelResults(String instanceId) {
-        List<Channel> channels = Arrays.asList(Channel.VOICE, Channel.CHAT);
-        List<String> queueIds = getAllQueueIds(instanceId);
-        Filters filters = Filters.builder()
-                .queues(queueIds)
-                .channels(channels)
-                .build();
+    public Mono<MetricResultsDTO> getChannelResults(String instanceId, @NotNull DashboardDTO dashboardDTO) {
+        List<String> channels = Arrays.asList(Channel.VOICE.name(), Channel.CHAT.name());
 
-        GetCurrentMetricDataRequest request = GetCurrentMetricDataRequest.builder()
-                .instanceId(instanceId)
-                .filters(filters)
-                .currentMetrics(CurrentMetric.builder()
-                        .name(CurrentMetricName.AGENTS_ONLINE)
-                        .unit(Unit.COUNT)
+        // Use historic data
+        GetMetricDataV2Request request = GetMetricDataV2Request.builder()
+                .resourceArn(Constants.BASE_ARN + ":instance/" + instanceId)
+                .startTime(dashboardDTO.getStartDate().toInstant())
+                .endTime(dashboardDTO.getEndDate().toInstant())
+                .filters(FilterV2.builder()
+                        .filterKey("ROUTING_PROFILE")
+                        .filterValues(dashboardDTO.getRoutingProfiles())
                         .build())
-                .groupings(Grouping.CHANNEL)
+                .groupings("CHANNEL")
+                .metrics(MetricV2.builder()
+                        .name("CONTACTS_HANDLED")
+                        .build())
                 .build();
 
         try {
-            GetCurrentMetricDataResponse response = connectClient.getCurrentMetricData(request);
+            GetMetricDataV2Response response = connectClient.getMetricDataV2(request);
             MetricResultsDTO result = convertToDTO(response);
             return Mono.just(result);
         } catch (ConnectException e) {
@@ -205,7 +205,7 @@ public class DashboardService {
     }
 
     //Converts the raw channel response into the DTO
-    private MetricResultsDTO convertToDTO(GetCurrentMetricDataResponse response) {
+    private MetricResultsDTO convertToDTO(GetMetricDataV2Response response) {
         MetricResultsDTO dto = new MetricResultsDTO();
 
 
@@ -214,7 +214,7 @@ public class DashboardService {
 
 
             DimensionDTO dimensionDTO = new DimensionDTO();
-            dimensionDTO.setChannel(metricResult.dimensions().channel().toString());
+            dimensionDTO.setChannel(metricResult.dimensions().get("CHANNEL"));
             metricResultDTO.setDimensions(dimensionDTO);
 
 
@@ -223,8 +223,8 @@ public class DashboardService {
 
 
                 MetricDTO metricDTO = new MetricDTO();
-                metricDTO.setName(collection.metric().name().toString());
-                metricDTO.setUnit(collection.metric().unit().toString());
+                metricDTO.setName(collection.metric().name());
+                metricDTO.setUnit("0");
                 collectionDTO.setMetric(metricDTO);
 
 
@@ -258,18 +258,6 @@ public class DashboardService {
             }
         }
         return values;
-    }
-
-    private List<String> getAllQueueIds(String instanceId) {
-        ListQueuesRequest listQueuesRequest = ListQueuesRequest.builder()
-                .instanceId(instanceId)
-                .build();
-
-        ListQueuesResponse listQueuesResponse = connectClient.listQueues(listQueuesRequest);
-
-        return listQueuesResponse.queueSummaryList().stream()
-                .map(QueueSummary::id)
-                .collect(Collectors.toList());
     }
 
     public List<Notification> getNotifications() {
@@ -366,7 +354,7 @@ public class DashboardService {
     }
 
     public CombinedMetricsDTO getDashboardData(String instanceId, DashboardDTO dashboardDTO) {
-        MetricResultsDTO metricResults = getChannelResults(instanceId).block();
+        MetricResultsDTO metricResults = getChannelResults(instanceId, dashboardDTO).block();
         Map<String, Integer> values = extractValues(metricResults);
 
         CombinedMetricsDTO combinedMetrics = new CombinedMetricsDTO();
@@ -395,8 +383,4 @@ public class DashboardService {
 
         return combinedMetrics;
     }
-
-
-
-
 }
