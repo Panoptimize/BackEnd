@@ -15,8 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -179,8 +177,7 @@ public class DashboardService {
     }
 
     // Get the current number of agents on each channel
-    public Mono<MetricResultsDTO> getMetricResults(String instanceId, @NotNull DashboardDTO dashboardDTO) {
-        String routingProfile = dashboardDTO.getRoutingProfiles().get(0);
+    public Mono<MetricResultsDTO> getChannelResults(String instanceId) {
         List<Channel> channels = Arrays.asList(Channel.VOICE, Channel.CHAT);
         List<String> queueIds = getAllQueueIds(instanceId);
         Filters filters = Filters.builder()
@@ -369,12 +366,18 @@ public class DashboardService {
     }
 
     public CombinedMetricsDTO getDashboardData(String instanceId, DashboardDTO dashboardDTO) {
-        MetricResultsDTO metricResults = getMetricResults(instanceId, dashboardDTO).block();
+        MetricResultsDTO metricResults = getChannelResults(instanceId).block();
         Map<String, Integer> values = extractValues(metricResults);
 
         CombinedMetricsDTO combinedMetrics = new CombinedMetricsDTO();
-        combinedMetrics.setVoice(values.get("voice"));
-        combinedMetrics.setChat(values.get("chat"));
+
+        // Get the number of agents on each channel only if the values are not null
+        if (values.get("voice") != null) {
+            combinedMetrics.setVoice(values.get("voice"));
+        }
+        if (values.get("chat") != null) {
+            combinedMetrics.setChat(values.get("chat"));
+        }
 
         MetricResponseDTO metricData = getMetricsData(instanceId, dashboardDTO);
         combinedMetrics.setMetrics(metricData);

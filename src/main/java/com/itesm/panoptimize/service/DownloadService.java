@@ -15,15 +15,11 @@ import org.apache.poi.xddf.usermodel.chart.*;
 import org.apache.poi.xssf.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import software.amazon.awssdk.services.connect.endpoints.internal.Value;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -179,8 +175,8 @@ public class DownloadService {
         combinedMetrics.put("agentScheduleAdherence", allData.getAgentScheduleAdherence());
         combinedMetrics.put("avgSpeedOfAnswer", allData.getAvgSpeedOfAnswer());
 
-        Mono<Map<String, Integer>> valuesMono = apiClient.getMetricResults(instanceId,dashboardDTO).map(metricService::extractValues);
-        valuesMono.subscribe(values -> combinedMetrics.putAll(values));
+        Mono<Map<String, Integer>> valuesMono = apiClient.getChannelResults(instanceId).map(metricService::extractValues);
+        valuesMono.subscribe(combinedMetrics::putAll);
 
         CustomerSatisfactionDTO customerSatisfactionData = getCustomerSatisfactionData(dashboardDTO);
         combinedMetrics.put("customerSatisfaction", customerSatisfactionData.getSatisfaction_levels());

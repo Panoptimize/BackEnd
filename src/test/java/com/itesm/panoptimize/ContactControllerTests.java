@@ -33,14 +33,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
 public class ContactControllerTests {
     @Autowired
     private MockMvc mockMvc;
     @MockBean
     private ContactSearchService contactSearchService;
-    private SearchContactsDTO searchContactsDTO;
-    private SearchContactsResponseDTO searchContactsResponseDTO;
 
     private String firebaseToken;
     FirebaseTestSetup firebaseTestSetup = new FirebaseTestSetup();
@@ -48,7 +45,7 @@ public class ContactControllerTests {
     @BeforeEach
     void setUp() throws IOException {
         firebaseToken = firebaseTestSetup.getFirebaseToken();
-        searchContactsDTO = new SearchContactsDTO();
+        SearchContactsDTO searchContactsDTO = new SearchContactsDTO();
         searchContactsDTO.setInstanceId("7c78bd60-4a9f-40e5-b461-b7a0dfaad848");
         SearchContactsDTO.TimeRange timeRange = new SearchContactsDTO.TimeRange();
         timeRange.setStartTime("2024-05-01");
@@ -63,7 +60,7 @@ public class ContactControllerTests {
         contactSummaryDTO.setAgentId("agent-id");
         contactSummaryDTO.setSentiment("Neutral");
 
-        searchContactsResponseDTO = new SearchContactsResponseDTO();
+        SearchContactsResponseDTO searchContactsResponseDTO = new SearchContactsResponseDTO();
         searchContactsResponseDTO.setContacts(List.of(contactSummaryDTO));
         searchContactsResponseDTO.setNextToken("next-token");
         searchContactsResponseDTO.setTotalCount(1L);
