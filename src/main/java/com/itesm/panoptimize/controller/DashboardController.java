@@ -1,7 +1,10 @@
 package com.itesm.panoptimize.controller;
 
+import com.itesm.panoptimize.dto.connect.GetMetricResponseDTO;
 import com.itesm.panoptimize.dto.dashboard.*;
 import com.itesm.panoptimize.dto.note.NoteDTO;
+import com.itesm.panoptimize.dto.performance.AgentPerformanceDTO;
+import com.itesm.panoptimize.dto.performance.MapPerformanceDTO;
 import com.itesm.panoptimize.model.Notification;
 import com.itesm.panoptimize.service.DashboardService;
 import com.itesm.panoptimize.service.CalculateSatisfactionService;
@@ -189,5 +192,12 @@ public class DashboardController {
         String instanceId = userService.getInstanceIdFromFirebaseId(firebaseId);
         DashboardFiltersDTO filters = dashboardService.getFilters(instanceId);
         return ResponseEntity.ok(filters);
+    }
+
+    @PostMapping("/test")
+    public ResponseEntity<MapPerformanceDTO> test(@RequestBody @Valid DashboardDTO dashboardDTO, Principal principal) {
+        String firebaseId = principal.getName();
+        String instanceId = userService.getInstanceIdFromFirebaseId(firebaseId);
+        return ResponseEntity.ok(dashboardService.test(dashboardDTO, instanceId));
     }
 }

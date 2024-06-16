@@ -11,7 +11,6 @@ import java.util.List;
 
 public class Parser {
     public static GetMetricResponseDTO serializeMetricResponse(GetMetricDataV2Response metricDataV2Response) {
-        List<MetricResultDTO> metricResults = new ArrayList<>();
         GetMetricResponseDTO getMetricResponseDTO = new GetMetricResponseDTO();
 
         List<MetricResult> metricResultsDTO = new ArrayList<>();
@@ -48,8 +47,13 @@ public class Parser {
                 collections.add(collection);
             }
 
-            metricInterval.setInterval(metricData.metricInterval().interval());
-            metricInterval.setStartTime(metricData.metricInterval().startTime());
+            if (metricData.metricInterval() == null) {
+                metricInterval.setInterval(null);
+                metricInterval.setStartTime(null);
+            } else {
+                metricInterval.setInterval(metricData.metricInterval().interval());
+                metricInterval.setStartTime(metricData.metricInterval().startTime());
+            }
 
             metricResult.setDimensions(metricData.dimensions());
             metricResult.setMetricInterval(metricInterval);

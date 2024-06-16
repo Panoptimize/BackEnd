@@ -8,12 +8,15 @@ import com.itesm.panoptimize.dto.dashboard.DashboardFiltersDTO;
 import com.itesm.panoptimize.dto.dashboard.MetricResponseDTO;
 
 import com.itesm.panoptimize.dto.performance.AgentPerformanceDTO;
+import com.itesm.panoptimize.dto.performance.MapPerformanceDTO;
 import com.itesm.panoptimize.model.Notification;
 import com.itesm.panoptimize.repository.NotificationRepository;
 import com.itesm.panoptimize.util.Constants;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -382,5 +385,84 @@ public class DashboardService {
         combinedMetrics.setPerformanceData(performanceData);
 
         return combinedMetrics;
+    }
+
+    private double calculateAgentPerformanceScore(double avgHandleTime, double avgAfterContactWorkTime, double avgHoldTime, double avgAbandonTime) {
+        double normalizedHandleTime = avgHandleTime < 100 ? 1 : 100 / avgHandleTime;
+        double normalizedAfterContactWorkTime = avgAfterContactWorkTime < 10 ? 1 : 10 / avgAfterContactWorkTime;
+        double normalizedHoldTime = avgHoldTime == 0 ? 1 : 1 / avgHoldTime;
+        double normalizedAbandonTime = avgAbandonTime == 0 ? 1 : 1 / avgAbandonTime;
+
+        double score = (
+                0.25 * normalizedHandleTime +
+                        0.25 * normalizedAfterContactWorkTime +
+                        0.25 * normalizedHoldTime +
+                        0.25 * normalizedAbandonTime) * 100;
+
+        BigDecimal bd = new BigDecimal(score);
+        bd = bd.setScale(1, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
+
+    public MapPerformanceDTO test(DashboardDTO dashboardDTO, String instanceId) {
+        GetMetricDataV2Response response = connectClient.getMetricDataV2(
+                GetMetricDataV2Request
+                        .builder()
+                        .startTime(dashboardDTO.getStartDate().toInstant())
+                        .endTime(dashboardDTO.getEndDate().toInstant())
+                        .resourceArn(Constants.BASE_ARN + ":instance/" + instanceId)
+                        .metrics(Arrays.asList(
+                                MetricV2.builder()
+                                        .name("AVG_HANDLE_TIME")
+                                        .build(),
+                                MetricV2.builder()
+                                        .name("AVG_AFTER_CONTACT_WORK_TIME")
+                                        .build(),
+                                MetricV2.builder()
+                                        .name("AVG_HOLD_TIME")
+                                        .build(),
+                                MetricV2.builder()
+                                        .name("AVG_ABANDON_TIME")
+                                        .build()
+                        ))
+                        .filters(FilterV2.builder()
+                                .filterKey("ROUTING_PROFILE")
+                                .filterValues(dashboardDTO.getRoutingProfiles())
+                                .build())
+                        .interval(
+                                IntervalDetails.builder()
+                                        .intervalPeriod(IntervalPeriod.DAY)
+                                        .build()
+                        )
+                        .groupings("AGENT")
+                        .build());
+
+        ListUsersResponse users = connectClient.listUsers(ListUsersRequest.builder()
+                .instanceId(instanceId)
+                .build());
+
+        MapPerformanceDTO performances = new MapPerformanceDTO();
+        Map<String, String> agentNames = new HashMap<>();
+        for (UserSummary user : users.userSummaryList()) {
+            agentNames.put(user.id(), user.username());
+        }
+
+        for (MetricResultV2 metricResult : response.metricResults()) {
+            String agentId = metricResult.dimensions().get("AGENT");
+            String agentName = agentNames.get(agentId);
+
+            double [] values = new double[4];
+            int i = 0;
+            for (MetricDataV2 metric : metricResult.collections())
+                values[i++] = metric.value() == null ? 0 : metric.value();
+
+
+            double performanceScore = calculateAgentPerformanceScore(
+                    values[0], values[1], values[2], values[3]
+            );
+            performances.addAgentPerformance(agentName, performanceScore);
+        }
+
+        return performances;
     }
 }
